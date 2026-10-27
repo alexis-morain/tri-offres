@@ -1,0 +1,27 @@
+{% include "mail/_layout_top.html" with title="Votre tri du matin" %}
+{% if to_review or maybe or side_track %}
+{% if to_review %}<h2 style="margin:0 0 12px;font-size:18px;">À regarder</h2>
+{% for offer in to_review %}{% include "mail/_morning_card.html" %}{% endfor %}{% endif %}
+{% if maybe %}<h2 style="margin:0 0 12px;font-size:18px;">Peut-être</h2>
+{% for offer in maybe %}{% include "mail/_morning_card.html" %}{% endfor %}{% endif %}
+{% if side_track %}<h2 style="margin:0 0 12px;font-size:18px;">Une piste à côté</h2>
+{% with offer=side_track %}{% include "mail/_morning_card.html" %}{% endwith %}{% endif %}
+<p style="margin:0 0 24px;"><a href="{{ sort_url }}"
+  style="display:inline-block;padding:12px 20px;background-color:#1f3cc4;color:#ffffff;border-radius:2px;
+  text-decoration:none;font-weight:700;">Trier ces offres</a></p>
+<p style="margin:0 0 8px;font-size:14px;color:#465166;">Notes générées par IA, la décision vous appartient.</p>
+{% else %}
+<p style="margin:0 0 20px;font-size:18px;line-height:1.4;">
+{% if read_tonight == 1 %}J’ai lu 1 offre pour vous cette nuit, elle n’était pas assez proche.
+{% elif read_tonight %}J’ai lu {{ read_tonight }} offres pour vous cette nuit, aucune n’était assez proche.
+{% else %}Je n’ai rien trouvé d’assez proche cette nuit.{% endif %}
+Je cherche à nouveau demain.</p>
+<p style="margin:0 0 24px;font-size:14px;color:#465166;">Pour élargir ou changer vos critères, ouvrez
+<a href="{{ my_search_url }}" style="color:#1f3cc4;">Ma recherche</a>.</p>
+{% endif %}
+{% if trial_last %}<p style="margin:0 0 16px;font-size:14px;color:#465166;">C’est votre dernier mail du matin :
+votre essai se termine le {{ trial_end_day }}. Vos réponses et vos avis restent dans «&nbsp;Mes données&nbsp;»
+jusqu’à ce que vous supprimiez votre compte : <a href="{{ my_data_url }}" style="color:#1f3cc4;">Mes données</a>.</p>
+{% endif %}<p style="margin:0;font-size:14px;color:#465166;">Pour ne plus recevoir ces mails :
+<a href="{{ unsubscribe_url }}" style="color:#1f3cc4;">arrêter les mails</a>.</p>
+{% include "mail/_layout_bottom.html" %}

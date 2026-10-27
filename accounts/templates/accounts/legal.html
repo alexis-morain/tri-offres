@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Mentions légales, tri-offres{% endblock %}
+{% block content %}
+<div class="prose legal">
+  <h1>Mentions légales</h1>
+
+  <h2>Éditeur</h2>
+  <dl class="my-data__list">
+    <div class="my-data__row"><dt>Nom</dt><dd>{{ name }}</dd></div>
+    {% if address %}<div class="my-data__row"><dt>Adresse</dt><dd>{{ address }}</dd></div>{% endif %}
+    {% if siret %}<div class="my-data__row"><dt>SIRET</dt><dd>{{ siret }}</dd></div>{% endif %}
+    <div class="my-data__row"><dt>Mail</dt><dd><a href="mailto:{{ email }}">{{ email }}</a></dd></div>
+    <div class="my-data__row"><dt>Directeur de la publication</dt><dd>{{ name }}</dd></div>
+  </dl>
+
+  <h2>Hébergement</h2>
+  <p>Le site tourne sur le serveur personnel de l’éditeur, en France. Il est publié par Cloudflare, Inc.,
+    101 Townsend St, San Francisco, CA 94107, États-Unis.</p>
+
+  <h2>Code source</h2>
+  <p>Le code de tri-offres est publié sous licence AGPL-3.0.</p>
+
+  <p>Ce que le site fait de vos données : <a href="{% url 'accounts:privacy' %}">confidentialité</a>.</p>
+</div>
+{% endblock %}

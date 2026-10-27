@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block masthead_aside %}
+<form method="post" action="{% url 'accounts:logout' %}">
+  {% csrf_token %}<button class="button-reset" type="submit">Se déconnecter</button>
+</form>
+{% endblock %}
+{% block content %}
+<nav class="account-nav" aria-label="Votre compte">
+  <a href="{% url 'matching:sort' %}"{% if section == "sort" %} aria-current="page"{% endif %}>Mes offres</a>
+  <a href="{% url 'onboarding:my_search' %}"{% if section == "search" %} aria-current="page"{% endif %}>Ma recherche</a>
+  <a href="{% url 'onboarding:my_data' %}"{% if section == "data" %} aria-current="page"{% endif %}>Mes données</a>
+</nav>
+{% block page %}{% endblock %}
+{% endblock %}

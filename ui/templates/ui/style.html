@@ -1,0 +1,126 @@
+{% extends "base.html" %}{% load ui %}
+{% block title %}Page de style, tri-offres{% endblock %}
+{% block masthead_aside %}Page interne{% endblock %}
+{% block content %}
+<h1>Page de style</h1>
+<p class="muted">Chaque composant de l’interface, dans chacun de ses états. Réservée à l’équipe.</p>
+
+<section class="style-section">
+  <h2>Palette</h2>
+  <div class="swatches">{% for token, name in palette %}
+    <div class="swatch"><div class="swatch__chip swatch__chip--{{ token }}"></div><div class="swatch__name">{{ name }}<br><span class="typed">{{ token }}</span></div></div>{% endfor %}
+  </div>
+</section>
+
+<section class="style-section">
+  <h2>Texte</h2>
+  <div class="prose">
+    <h1>Quel poste cherchez-vous ?</h1>
+    <p class="lede">Chaque matin à 7 h, un mail court avec les offres du jour, déjà triées et notées.</p>
+    <p>Le texte courant est composé en Luciole, une police conçue pour la basse vision. Il ne postule jamais à votre place.</p>
+    <p class="muted small">Texte secondaire, pour dire pourquoi une question est posée.</p>
+    <p class="typed small">482 913 · 14 oct. 2026 · 23 offres</p>
+  </div>
+</section>
+
+<section class="style-section">
+  <h2>Écran de question</h2>
+  <nav class="progress" aria-label="Étapes">
+    <ol class="progress__blocks">
+      <li class="progress__block progress__block--done" data-tone="pink">{% icon "check" %}Ce que vous excluez</li>
+      <li class="progress__block" data-tone="blue" aria-current="step">Ce que vous préférez</li>
+      <li class="progress__block" data-tone="yellow">En vos mots</li>
+    </ol>
+    <p class="progress__time">Encore 2 minutes environ</p>
+  </nav>
+  <div class="question-layout">
+    <div class="question">
+      <h2 class="question__title">Ce qui compte le plus dans votre prochain poste</h2>
+      <p class="question__why">Règle le ton de la notation. Ne retire aucune offre.</p>
+      <div class="question__body">{{ question_form.values.as_field_group }}</div>
+      <div class="question__actions">
+        <button class="button" type="button">Continuer</button>
+        <a class="link-back" href="#">{% icon "back" %}Retour</a>
+      </div>
+    </div>
+    <details class="drawer" data-drawer open>
+      <summary class="drawer__summary">Votre fichier <span class="drawer__count">2 fiches</span>{% icon "next" %}</summary>
+      <div class="drawer__cards">
+        <article class="card card--pink">
+          <header class="card__head"><h3 class="card__title">Ce que vous excluez</h3><span class="card__meta">5 critères</span></header>
+          <dl class="card__rows">
+            <div><dt>Où</dt><dd>Lyon, 30 km, hybride</dd></div>
+            <div><dt>Contrats</dt><dd>CDI, CDD, CDD de projet</dd></div>
+            <div><dt>Rémunération</dt><dd>24 000 € brut par an au moins</dd></div>
+          </dl>
+          <p class="card__counter" aria-live="polite">Hier, <strong>23</strong> offres passaient ces filtres.</p>
+        </article>
+        <article class="card card--blue card--filed">
+          <header class="card__head"><h3 class="card__title">Ce que vous préférez</h3></header>
+          <dl class="card__rows"><div><dt>Ce qui compte</dt><dd>Le sens du travail, l’équipe</dd></div></dl>
+        </article>
+        <p class="drawer__note">Chaque bloc validé rejoint le fichier.</p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section class="style-section">
+  <h2>Boutons</h2>
+  <div class="style-row">
+    <button class="button" type="button">Recevoir mon code</button>
+    <button class="button button--secondary" type="button">Passer cette étape</button>
+    <button class="button" type="button" aria-busy="true">Envoi en cours</button>
+    <button class="button" type="button" disabled>Renvoyer le code (42 s)</button>
+    <a class="link-back" href="#">{% icon "back" %}Retour</a>
+    <button class="button-reset" type="button">Ce n’est pas la bonne adresse ?</button>
+  </div>
+  <div class="danger-zone">
+    <button class="button button--danger" type="button">Supprimer mon CV</button>
+  </div>
+</section>
+
+<section class="style-section">
+  <h2>Champs</h2>
+  <div class="style-grid">
+    <div class="question">{{ form }}
+      <div class="field"><label class="field-label" for="specimen-code">Code reçu</label>
+        <input class="input input--code" id="specimen-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" value="482913"></div>
+    </div>
+    <div class="question">
+      {% include "ui/_error_summary.html" with form=invalid_form %}
+      {{ invalid_form.email.as_field_group }}
+      {{ invalid_form.city.as_field_group }}
+      <p class="notice space-top">Un encart d’information neutre, pour une consigne qui n’est pas une erreur.</p>
+    </div>
+  </div>
+</section>
+
+<section class="style-section">
+  <h2>Fiches</h2>
+  <div class="style-grid">
+    <div class="drawer__cards">
+      <article class="card card--yellow">
+        <header class="card__head"><h3 class="card__title">En vos mots</h3></header>
+        <p class="card__empty">Pas encore rempli.</p>
+      </article>
+      <article class="card card--green">
+        <header class="card__head"><h3 class="card__title">Ce que j’ai compris</h3><span class="ai-label">Synthèse rédigée par IA</span></header>
+        <p>J’ai compris que vous cherchez un poste où vous parlez aux publics, à Lyon ou autour.</p>
+      </article>
+    </div>
+    <div>
+      <article class="card card--pink">
+        <header class="card__head"><h3 class="card__title">Ce que vous excluez</h3></header>
+        <dl class="answers">
+          <div class="answers__row"><dt>Où</dt><dd>Lyon, 30 km</dd><dd class="answers__edit"><a href="#">Modifier<span class="visually-hidden"> le lieu</span></a></dd></div>
+          <div class="answers__row"><dt>Expérience</dt><dd class="answers__missing">Non renseigné</dd><dd class="answers__edit"><a href="#">Modifier<span class="visually-hidden"> l’expérience</span></a></dd></div>
+        </dl>
+      </article>
+      <p class="space-top-l">Votre premier tri arrive</p>
+      <p class="space-top"><span class="stamp stamp--press">MAR. 14 OCT. 2026<span class="stamp__small">vers 7 h</span></span></p>
+      {% include "ui/_gauge.html" with score=score extra_class="space-top-l" %}
+    </div>
+  </div>
+</section>
+{% endblock %}

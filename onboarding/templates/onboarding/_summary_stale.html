@@ -1,0 +1,7 @@
+{# A summary whose answers changed: kept on screen, with the way to a new one (stale_query: where to come back). #}
+      <form class="summary__stale" method="post" action="{% url 'onboarding:summary_write' %}{{ stale_query }}">
+        {% csrf_token %}<p>Vos réponses ont changé depuis.</p>
+        {% if own_text %}<p class="summary__replaces">Votre texte modifié sera remplacé par une nouvelle synthèse.</p>
+        {% endif %}
+        <button class="button button--secondary" type="submit">Rédiger une nouvelle synthèse</button>
+      </form>

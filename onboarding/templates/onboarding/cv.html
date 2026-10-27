@@ -1,0 +1,101 @@
+{% extends "onboarding/layout.html" %}{% load ui %}
+{% block title %}{{ title }}, tri-offres{% endblock %}
+{% block question %}
+<div class="question">
+  <h1 class="question__title">{{ title|keep_inversions }}</h1>
+  <p class="question__why">{{ why }}</p>
+  {% include "ui/_error_summary.html" with form=upload_form %}
+  <form class="cv-upload" method="post" action="{% url 'onboarding:cv' %}{{ return_query }}"
+        enctype="multipart/form-data" novalidate data-cv-upload>
+    {% csrf_token %}<input type="hidden" name="action" value="upload">
+    <div class="cv-drop" data-cv-drop>
+      {% with field=upload_form.cv %}
+      {% comment %}The native control speaks the browser's language: it stays focusable but hidden, and a French
+      label opens it. The status line says which file is chosen; without the script it stays hidden.{% endcomment %}
+      <div class="field file-field{% if field.errors %} field--error{% endif %}" id="field-{{ field.html_name }}">
+        <label class="field-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        <p class="field-hint" id="{{ field.auto_id }}_helptext">{{ field.help_text }}</p>
+        {% if field.errors %}
+        <p class="field-error" id="{{ field.auto_id }}_error">{% icon "alert" %}{{ field.errors|join:" " }}</p>
+        {% endif %}
+        {{ field }}<label class="button button--secondary file-field__pick" for="{{ field.id_for_label }}"
+        >{% icon "file" %}Choisir un fichier</label>
+        <p class="file-field__status" id="{{ field.auto_id }}_status" aria-live="polite" data-file-status
+           hidden>Aucun fichier choisi</p>
+      </div>
+      {% endwith %}
+      <p class="cv-drop__hint" data-cv-drop-hint hidden>Vous pouvez aussi déposer le fichier ici.</p>
+    </div>
+    <div class="cv-upload__actions">
+      <button class="button{% if has_cv %} button--secondary{% endif %}" type="submit" aria-describedby="cv-promise"
+              data-cv-send>Envoyer mon CV</button>
+      {% if not has_cv %}
+      <button class="button button--secondary" type="submit" form="cv-continue">Passer cette étape</button>
+      {% endif %}
+    </div>
+    <p class="cv-upload__promise" id="cv-promise">
+      Le fichier est supprimé dès la lecture, en général sous une minute.
+      Nous gardons seulement le résumé ci-dessous, que vous pouvez modifier.
+    </p>
+    <p class="cv-upload__busy" role="status" data-cv-busy data-text="Je lis votre CV…"></p>
+  </form>
+  {% if list_form %}
+  <section class="cv-list" aria-labelledby="cv-list-title">
+    <header class="cv-list__head">
+      <h2 id="cv-list-title">Ce que j’ai lu dans votre CV</h2>
+      <p class="ai-label">Liste extraite par IA, à vérifier</p>
+    </header>
+    <p class="cv-list__why">Corrigez une ligne, ou cochez « Supprimer » pour l’enlever.
+      Rien d’autre n’est gardé du fichier.</p>
+    <form method="post" action="{% url 'onboarding:cv_list' %}{{ return_query }}" novalidate>
+      {% include "ui/_error_summary.html" with form=list_form title="Une ligne est à revoir" %}
+      {% csrf_token %}
+      {% for group in list_form.groups %}
+      <fieldset class="cv-list__group">
+        <legend class="field-label">{{ group.legend }}</legend>
+        {% for row in group.rows %}
+        <div class="cv-row{% if row.position %} cv-row--position{% endif %}">
+          <div class="cv-row__fields">{% for item in row.fields %}
+            <div class="cv-row__field{% if item.field.errors %} field--error{% endif %}">
+              <label class="cv-row__label{% if not item.visible %} visually-hidden{% endif %}"
+                     for="{{ item.field.id_for_label }}"
+              >{{ item.visible }}<span class="visually-hidden"> {{ item.hidden }}</span></label>
+              {% if item.field.errors %}
+              <p class="field-error" id="{{ item.field.auto_id }}_error"
+              >{% icon "alert" %}{{ item.field.errors|join:" " }}</p>
+              {% endif %}
+              {{ item.field }}
+            </div>{% endfor %}
+          </div>
+          <div class="cv-row__delete">{{ row.delete }}<label for="{{ row.delete.id_for_label }}"
+          >Supprimer<span class="visually-hidden"> {{ row.delete_hidden }}</span></label></div>
+        </div>
+        {% endfor %}
+      </fieldset>
+      {% endfor %}
+      <div class="cv-list__save">
+        <button class="button button--secondary" type="submit">Enregistrer la liste</button>
+      </div>
+    </form>
+  </section>
+  {% endif %}
+  <form id="cv-continue" method="post" action="{% url 'onboarding:cv' %}{{ return_query }}">
+    {% csrf_token %}<input type="hidden" name="action" value="continue">
+    <div class="question__actions">
+      {% if has_cv %}<button class="button" type="submit">Continuer</button>{% endif %}
+      {% if back %}
+      <a class="link-back" href="{{ back }}">{% icon "back" %}{{ back_label }}</a>
+      {% elif previous %}
+      <a class="link-back" href="{% url 'onboarding:step' previous.slug %}">{% icon "back" %}Retour</a>
+      {% endif %}
+    </div>
+  </form>
+  {% if has_cv %}
+  <div class="danger-zone">
+    <form method="post" action="{% url 'onboarding:cv_delete' %}{{ return_query }}">
+      {% csrf_token %}<button class="button button--danger" type="submit">Supprimer le résumé de mon CV</button>
+    </form>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

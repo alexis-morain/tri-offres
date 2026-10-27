@@ -1,0 +1,8 @@
+# Test values are marked « fictive » on purpose (config/test_deploy.py, supervision/test_*.py).
+[extend]
+useDefault = true
+
+[allowlist]
+description = "fictive test values"
+regexTarget = "line"
+regexes = ['''fictive''', '''Qm9uam91ciBOb3JhLCBjZWNpIGVzdCB1biBqZXRvbg''']

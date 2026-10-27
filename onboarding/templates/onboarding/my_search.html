@@ -1,0 +1,35 @@
+{% extends "onboarding/account.html" %}{% load ui %}
+{% block title %}Ma recherche, tri-offres{% endblock %}
+{% block page %}
+<div class="my-search">
+  {% if saved %}
+  <p class="notice my-search__saved" role="status">{% icon "check" %}Modifications enregistrées.</p>{% endif %}
+  <h1 class="my-search__title">Ma recherche</h1>
+  <p class="question__why">Ce que le tri lit chaque nuit. Modifiez une réponse, ou tout un bloc sur une page.</p>
+  {% if no_poste %}
+  <p class="notice my-search__poste">{% icon "alert" %}<span>Précisez le poste que vous cherchez :
+    le tri lira les offres de ce poste.
+    <a href="{% url 'onboarding:step' 'recherche' %}?retour=ma-recherche">Écrire mon poste</a></span></p>
+  {% endif %}
+  {# The file kept open: the same cards as the summary screen, denser, each block with its own page. #}
+  <div class="summary__cards my-search__cards">
+    {% include "onboarding/_answer_cards.html" with block_links=True %}
+    <article class="card card--green summary__card summary__card--understood">
+      <header class="card__head">
+        <h2 class="card__title">Ce que j’ai compris</h2><span class="ai-label">Synthèse rédigée par IA</span>
+      </header>
+      {% if pending %}
+      <p class="summary__pending">Je rédige cette synthèse cette nuit.
+        Vos filtres s’appliquent dès le prochain tri.</p>
+      {% else %}
+      {% if error %}<p class="summary__error" role="alert">{% icon "alert" %}{{ error }}</p>{% endif %}
+      {% if stale %}
+      {% include "onboarding/_summary_stale.html" with stale_query="?retour=ma-recherche" %}
+      {% endif %}
+      {% include "onboarding/_summary_text.html" %}
+      <p class="my-search__correct"><a href="{% url 'onboarding:summary' %}">Corriger la synthèse</a></p>
+      {% endif %}
+    </article>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,1 @@
+{% load ui %}<label class="chip"{% if widget.attrs.id %} for="{{ widget.attrs.id }}"{% endif %}>{% include "django/forms/widgets/input.html" %}{% icon "check" "chip__mark" %}<span>{{ widget.label }}</span></label>

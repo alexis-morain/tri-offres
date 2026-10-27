@@ -1,0 +1,16 @@
+{% extends "onboarding/account.html" %}{% load ui %}
+{% block title %}Corriger ce que j’ai appris, tri-offres{% endblock %}
+{% block page %}
+<form class="question learned" method="post" action="{% url 'matching:learned' %}" novalidate>
+  <h1 class="question__title">Ce que j’ai appris de vos choix</h1>
+  <p class="question__why">Écrivez-le comme vous voulez : votre texte remplace le mien, et le tri de la nuit le lira.
+    Effacez-le pour repartir de zéro.</p>
+  {% include "ui/_error_summary.html" %}
+  {% csrf_token %}
+  {{ form.text.as_field_group }}
+  <div class="question__actions">
+    <button class="button" type="submit">Enregistrer</button>
+    <a class="link-back" href="{% url 'matching:sort' %}">{% icon "back" %}Retour à mes offres</a>
+  </div>
+</form>
+{% endblock %}

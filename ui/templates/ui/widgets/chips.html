@@ -1,0 +1,9 @@
+<div class="chips" data-tone="{{ widget.tone }}"{% if widget.attrs.id %} id="{{ widget.attrs.id }}"{% endif %}{% if widget.max_choices %} data-max-choices="{{ widget.max_choices }}"{% endif %}{% if widget.grouped %} data-grouped{% endif %}>{% for group, options, index in widget.optgroups %}{% if group %}
+  <div class="chips__group" role="group" aria-labelledby="{{ widget.attrs.id }}_group_{{ index }}">
+    <p class="chips__legend" id="{{ widget.attrs.id }}_group_{{ index }}">{{ group }}</p>
+    <div class="chips__list">{% for option in options %}
+      {% include option.template_name with widget=option %}{% endfor %}
+    </div>
+  </div>{% else %}{% for option in options %}
+  {% include option.template_name with widget=option %}{% endfor %}{% endif %}{% endfor %}
+</div>

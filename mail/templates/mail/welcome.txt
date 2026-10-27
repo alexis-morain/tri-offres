@@ -1,0 +1,16 @@
+{% autoescape off %}Bienvenue sur tri-offres.
+
+{% if first_sort %}Votre premier tri arrive {{ day }}, vers 7 h, depuis {{ sender }}.
+
+{% if trial_end_day %}Votre essai dure {{ trial_days }} jours : le mail du matin s’arrête le {{ trial_end_day }}.
+
+{% endif %}Pour qu’il arrive dans votre boîte principale :
+{% for provider, tip in tips %}- {{ provider }} : {{ tip }}
+{% endfor %}
+Une question, si vous avez trente secondes : qu’est-ce qui vous ferait dire que ce premier mail était réussi ? Répondez simplement à ce message.
+
+{% endif %}Pour modifier vos filtres ou vos préférences, ouvrez « Ma recherche » :
+{{ my_search_url }}
+
+tri-offres
+{% endautoescape %}

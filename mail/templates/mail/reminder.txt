@@ -1,0 +1,18 @@
+{% autoescape off %}Il vous reste {{ minutes }} minute{{ minutes|pluralize }} pour finir votre questionnaire tri-offres. Vous reprenez à l’écran où vous en étiez.
+
+Votre code :
+
+{{ code }}
+
+Ou, pour vous connecter sur cet appareil, ouvrez ce lien :
+{{ link }}
+
+Ce code et ce lien restent valables {{ code_minutes }} minutes. Plus tard, demandez un nouveau code sur {{ home_url }}
+
+Vous ne souhaitez plus ce rappel ? Ignorez ce message : nous ne vous relancerons pas.
+
+Pour ne plus recevoir ces mails :
+{{ unsubscribe_url }}
+
+tri-offres
+{% endautoescape %}

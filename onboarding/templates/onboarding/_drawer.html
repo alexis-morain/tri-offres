@@ -1,0 +1,22 @@
+{% load ui %}<details class="drawer{% if drawer_wide_only %} drawer--wide-only{% endif %}" data-drawer open>
+  <summary class="drawer__summary">
+    {% with count=cards|length %}<span class="drawer__heading">Votre fichier
+      <span class="drawer__count">{{ count }} fiche{{ count|pluralize }}</span></span>{% endwith %}{% icon "next" %}
+    {% if cards.0.counter %}{# The one live region: still visible when the file is folded on phones. #}
+    <span class="drawer__counter" data-counter-summary aria-live="polite">{{ cards.0.counter }}</span>{% endif %}
+  </summary>
+  <div class="drawer__cards">{% for card in cards %}
+    <article class="card card--{{ card.block.tone }}{% if card.filed %} card--filed{% endif %}">
+      <header class="card__head"><h2 class="card__title">{{ card.block.name }}</h2>{% if card.ai_label %}
+        <span class="ai-label">Synthèse rédigée par IA</span>{% endif %}</header>
+      {% if card.own_text %}<div class="card__text">{{ card.own_text|linebreaks }}</div>
+      <p class="muted small">Vous avez modifié ce texte vous-même.</p>
+      {% elif card.paragraphs %}<div class="card__text">{% for paragraph in card.paragraphs %}
+        <p>{{ paragraph }}</p>{% endfor %}</div>
+      {% elif card.rows %}<dl class="card__rows">{% for label, text in card.rows %}
+        <div><dt>{{ label }}</dt><dd>{{ text }}</dd></div>{% endfor %}
+      </dl>{% else %}<p class="card__empty">Chaque réponse validée s’inscrit ici.</p>{% endif %}
+      {% if card.counter %}<p class="card__counter" data-counter aria-hidden="true">{{ card.counter }}</p>{% endif %}
+    </article>{% endfor %}
+  </div>
+</details>

@@ -1,0 +1,8 @@
+{% autoescape off %}Votre compte tri-offres est supprimé.
+
+Vos réponses au questionnaire, le résumé de votre CV, vos synthèses, vos avis, vos notes et l’historique de vos mails sont effacés. Les sauvegardes du service en gardent une copie 30 jours au plus, puis elle disparaît.
+
+Vous n’avez pas demandé cette suppression ? Répondez à ce mail.
+
+tri-offres
+{% endautoescape %}

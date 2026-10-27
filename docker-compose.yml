@@ -1,0 +1,89 @@
+# Local use only. Never add `env_file: .env`: that file also holds personal tokens and API keys
+# that must not enter this container. Compose reads .env only to interpolate the values below.
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/data
+    environment: &app-environment
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-0}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      DATABASE_PATH: /data/tri-offres.sqlite3
+      DJANGO_SECRET_KEY_FALLBACKS: ${DJANGO_SECRET_KEY_FALLBACKS:-}
+      SITE_URL: ${SITE_URL:-http://localhost:8000}
+      # 1 while the beta lasts (free, no trial end); 0 sets and reads the end of the trial (accounts/trial.py).
+      BETA: ${BETA:-1}
+      BETA_CAPACITY: ${BETA_CAPACITY:-80}
+      LOGIN_MAIL_DAILY_CAP: ${LOGIN_MAIL_DAILY_CAP:-60}
+      DEV_EMAILS: ${DEV_EMAILS:-}
+      # Sender, reply-to (also the legal contact) and publisher name: required once RESEND_API_KEY is set and
+      # DJANGO_DEBUG is 0; without a key, example.org stands in.
+      DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-}
+      MAIL_REPLY_TO: ${MAIL_REPLY_TO:-}
+      LEGAL_NAME: ${LEGAL_NAME:-}
+      LEGAL_ADDRESS: ${LEGAL_ADDRESS:-}
+      LEGAL_SIRET: ${LEGAL_SIRET:-}
+      CLAUDE_ENGINE: ${CLAUDE_ENGINE:-}
+      # Supervision (9.2): empty means no ping and alert mails to MAIL_REPLY_TO. The ping URL is a secret.
+      HEALTHCHECKS_PING_URL: ${HEALTHCHECKS_PING_URL:-}
+      ALERT_EMAIL: ${ALERT_EMAIL:-}
+      # Off here: port 8000 is published directly, so CF-Connecting-IP would be client-controlled.
+      TRUST_CF_CONNECTING_IP: ${TRUST_CF_CONNECTING_IP:-0}
+      # Empty means the default (an hour in https, off in http).
+      HSTS_SECONDS: ${HSTS_SECONDS:-}
+      # Cloudflare Access in front of /admin, checked in the code once SITE_URL is https:// (config/admin_access.py);
+      # both empty with an https SITE_URL closes /admin.
+      ADMIN_ACCESS_TEAM_DOMAIN: ${ADMIN_ACCESS_TEAM_DOMAIN:-}
+      ADMIN_ACCESS_AUD: ${ADMIN_ACCESS_AUD:-}
+      # Without RESEND_API_KEY, mails are printed to the container log.
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      # The collection runs the actor in a subprocess with a filtered environment (jobs/scraper.py); its storage,
+      # registry included, is /data/scraper. SCRAPER_PROXY_URL may hold a password: never shown. Set
+      # SCRAPER_PROXY_REQUIRED=1 to refuse a collection without the proxy.
+      # By hand: `docker compose run --rm web python manage.py collecte`
+      # (the entrypoint runs a given command as it is, without migrating).
+      SCRAPER_PROXY_URL: ${SCRAPER_PROXY_URL:-}
+      SCRAPER_PROXY_REQUIRED: ${SCRAPER_PROXY_REQUIRED:-0}
+    healthcheck:
+      # Sends the first DJANGO_ALLOWED_HOSTS as Host (docker/healthcheck.py).
+      test: ["CMD", "python", "docker/healthcheck.py"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+
+  # Starts manage.py nuit at 04:00, 07:00 and 18:00 Paris time (supervision/management/commands/planificateur.py).
+  # Same image, volume and variables as web; it waits for web to have migrated the database.
+  scheduler:
+    build: .
+    command: ["python", "manage.py", "planificateur"]
+    volumes:
+      - ./data:/data
+    environment: *app-environment
+    restart: unless-stopped
+
+  # Replicates the database to Cloudflare R2 (docker/litestream.yml, restore: docs/restauration.md). Off by default:
+  # `docker compose --profile backup up -d litestream`. Its variables are interpolated here and in no other service;
+  # the keys must be an R2 token of their own. The image is pinned by digest (tag 0.5.17, multi-arch index).
+  litestream:
+    image: litestream/litestream:0.5.17@sha256:4b02b9859a6b6b4087d8b8944e15f7e984bd7957cba322bbeee38b0e27b9656a
+    profiles: ["backup"]
+    command: ["replicate", "-config", "/etc/litestream.yml"]
+    user: "1000:1000"
+    volumes:
+      - ./data:/data
+      - ./docker/litestream.yml:/etc/litestream.yml:ro
+    environment:
+      LITESTREAM_ACCESS_KEY_ID: ${LITESTREAM_ACCESS_KEY_ID:-}
+      LITESTREAM_SECRET_ACCESS_KEY: ${LITESTREAM_SECRET_ACCESS_KEY:-}
+      LITESTREAM_R2_BUCKET: ${LITESTREAM_R2_BUCKET:-}
+      LITESTREAM_R2_ENDPOINT: ${LITESTREAM_R2_ENDPOINT:-}
+      LITESTREAM_HEARTBEAT_URL: ${LITESTREAM_HEARTBEAT_URL:-}
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped

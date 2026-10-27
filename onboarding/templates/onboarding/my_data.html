@@ -1,0 +1,93 @@
+{% extends "onboarding/account.html" %}
+{% block title %}Mes données, tri-offres{% endblock %}
+{% block page %}
+<div class="question my-data">
+  <h1 class="question__title">Mes données</h1>
+  <p class="question__why">Ce que tri-offres garde sur vous.
+    <a href="{% url 'accounts:privacy' %}">Ce que nous gardons et pourquoi</a></p>
+  <dl class="my-data__list">
+    <div class="my-data__row">
+      <dt>Adresse mail</dt>
+      <dd class="my-data__address">{{ profile.user.email }}</dd>
+    </div>
+    <div class="my-data__row">
+      <dt>Inscription</dt>
+      <dd>Le {{ profile.user.date_joined|date:"j F Y" }}</dd>
+    </div>
+    <div class="my-data__row">
+      <dt>Réponses au questionnaire</dt>
+      <dd>Vos filtres, vos préférences et vos textes, tels que le tri les lit :
+        <a href="{% url 'onboarding:my_search' %}">voir «&nbsp;Ma recherche&nbsp;»</a></dd>
+    </div>
+    <div class="my-data__row">
+      <dt>CV</dt>
+      {% if cv_rows %}
+      <dd>{% if profile.cv_processed_at %}Lu le {{ profile.cv_processed_at|date:"j F Y" }}. {% endif %}Le fichier a été
+        supprimé à la lecture ; seul le résumé est gardé.
+        <span class="my-data__detail">{% for key, label, text in cv_rows %}{{ text }}{% if not forloop.last %},
+          {% endif %}{% endfor %}</span></dd>
+      {% else %}
+      <dd>Aucun CV envoyé.</dd>
+      {% endif %}
+    </div>
+    {% if trial_until or trial_ended %}
+    <div class="my-data__row">
+      <dt>Essai</dt>
+      <dd>{% if trial_over %}Terminé le {{ trial_ended }}.{% else %}Jusqu’au {{ trial_until }}.{% endif %}</dd>
+    </div>
+    {% endif %}
+    {% if profile.user.status == "active" or profile.user.status == "unsubscribed" %}
+    <div class="my-data__row">
+      <dt>Mail du matin</dt>
+      {% if profile.user.status == "active" %}
+      {% if trial_over %}
+      <dd>Le mail du matin s’est arrêté à la fin de votre essai.</dd>
+      {% elif profile.onboarding_completed_at %}
+      <dd>Vous recevez le mail du matin.</dd>
+      {% else %}
+      <dd>Vous recevrez le mail du matin dès que le questionnaire sera terminé.</dd>
+      {% endif %}
+      {% elif trial_over %}
+      <dd>Vous ne recevez plus de mail.</dd>
+      {% else %}
+      <dd>Vous ne recevez plus de mail.
+        <form class="my-data__resubscribe" method="post" action="{% url 'onboarding:resubscribe' %}">
+          {% csrf_token %}<button class="button button--secondary" type="submit">Recevoir de nouveau le mail du matin</button>
+        </form></dd>
+      {% endif %}
+    </div>
+    {% endif %}
+    <div class="my-data__row">
+      <dt>Synthèse <span class="ai-label">rédigée par IA</span></dt>
+      <dd>
+        {% if own_text %}<div class="my-data__summary">{{ own_text|linebreaks }}</div>
+        {% elif sentences %}<div class="my-data__summary">{% for sentence in sentences %}
+          <p>{{ sentence.text }}</p>{% endfor %}</div>
+        {% elif pending %}Je rédige cette synthèse cette nuit.
+        {% else %}Pas encore rédigée.{% endif %}
+        {% if stale %}<p class="muted small">Vos réponses ont changé depuis.</p>{% endif %}
+      </dd>
+    </div>
+    <div class="my-data__row">
+      <dt>Ce que j’ai appris de vos choix{% if profile.learned_summary.strip and not profile.learned_summary_own %}
+        <span class="ai-label">rédigé par IA</span>{% endif %}</dt>
+      <dd>{% if profile.learned_summary.strip %}<div class="my-data__summary">{{ profile.learned_summary|linebreaks }}</div>
+        {% else %}Rien pour l’instant.{% endif %}</dd>
+    </div>
+  </dl>
+  <div class="danger-zone">
+    {% if cv_rows %}
+    <form method="post" action="{% url 'onboarding:my_data_cv_delete' %}">
+      {% csrf_token %}<button class="button button--danger" type="submit">Supprimer le résumé de mon CV</button>
+    </form>
+    {% endif %}
+    {% if team %}
+    <p class="my-data__leave">La suppression de votre compte se fait par l’administration du site.</p>
+    {% else %}
+    <div class="my-data__delete">
+      <a class="button button--danger" href="{% url 'onboarding:delete_account' %}">Supprimer mon compte</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

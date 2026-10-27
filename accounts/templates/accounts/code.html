@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Vérifiez vos mails, tri-offres{% endblock %}
+{% block content %}
+<div class="question code-page">
+  <h1 class="question__title">Vérifiez vos mails</h1>
+  {% if beta_full %}
+  <p class="lede">
+    La bêta est complète. Si vous avez déjà un compte, votre code vient de partir.
+    Sinon, votre adresse est sur la liste d’attente : nous vous écrirons quand une place se libère.
+  </p>
+  <p class="code-page__address">Adresse indiquée : <strong>{{ email }}</strong>.</p>
+  {% else %}
+  <p class="lede">Un code à six chiffres vient de partir vers <strong>{{ email }}</strong>.</p>
+  {% endif %}
+  <p class="code-page__change">
+    <a class="button-reset" href="{% url 'accounts:home' %}?modifier=1">Ce n’est pas la bonne adresse ?</a>
+  </p>
+  {% if throttled %}<p class="notice code-page__throttled" role="status">{{ rate_limited }}</p>{% endif %}
+  <form class="code-page__form" method="post" action="{% url 'accounts:code' %}" novalidate>
+    {% csrf_token %}
+    {% include "ui/_error_summary.html" with title="Vérifiez le code" %}
+    {{ form.code.as_field_group }}
+    <button class="button code-page__submit" type="submit">Me connecter</button>
+  </form>
+  <p class="notice code-page__help">
+    Rien reçu ? Regardez dans les indésirables : l’expéditeur est {{ sender }}.
+    Le code reste valable {{ code_minutes }} minutes.
+  </p>
+  <div class="code-page__actions">
+    <form method="post" action="{% url 'accounts:resend' %}">
+      {% csrf_token %}
+      <button class="button button--secondary" type="submit" data-countdown="{{ resend_seconds }}">
+        Renvoyer le code
+      </button>
+    </form>
+    {% if webmail %}
+    <a class="button button--secondary" href="{{ webmail.1 }}" rel="noopener noreferrer">{{ webmail.0 }}</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

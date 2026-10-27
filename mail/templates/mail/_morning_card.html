@@ -1,0 +1,11 @@
+<p style="margin:0 0 20px;padding:14px 16px;background-color:#fcfdfe;border:1px solid #d3d9e4;
+  border-radius:2px;">
+<strong>{{ offer.title }}</strong><br>
+{{ offer.employer }}{% if offer.location %}
+· {{ offer.location }}{% endif %}{% if offer.contract %}
+· {{ offer.contract }}{% endif %}<br>
+<span style="font-size:14px;color:#465166;">{{ offer.score }} sur 10 · {{ offer.reason }}</span><br>
+<span style="font-size:14px;color:#465166;">Source : {{ offer.source }}{% if offer.attribution %}
+· {{ offer.attribution }}{% endif %}</span>{% if offer.link %}<br>
+<a href="{{ offer.link }}" style="color:#1f3cc4;">Voir l’offre</a>{% endif %}
+</p>

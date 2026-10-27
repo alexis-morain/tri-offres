@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Compte supprimé, tri-offres{% endblock %}
+{% block content %}
+<div class="question">
+  <h1 class="question__title">Votre compte est supprimé</h1>
+  <p class="lede">Vos réponses, le résumé de votre CV, vos synthèses, vos avis et vos notes sont effacés.</p>
+  <p class="muted">Les sauvegardes du service en gardent une copie 30 jours au plus, puis elle disparaît.
+    Vous pouvez vous réinscrire quand vous le souhaitez.</p>
+  <div class="question__actions"><a class="button" href="{% url 'accounts:home' %}">Retour à l’accueil</a></div>
+</div>
+{% endblock %}

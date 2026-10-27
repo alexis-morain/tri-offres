@@ -1,0 +1,14 @@
+{% load ui %}<div class="field{% if field.errors %} field--error{% endif %}" id="field-{{ field.html_name }}"{% if field.field.show_when %} data-show-when="{{ field.field.show_when }}"{% endif %}>
+{% if field.widget_type == "switch" %}
+  <div class="switch">{{ field }}<label class="switch__label" for="{{ field.id_for_label }}">{{ field.label }}</label></div>
+  {% if field.help_text %}<p class="field-hint field-hint--switch" id="{{ field.auto_id }}_helptext">{{ field.help_text }}</p>{% endif %}
+  {% if field.errors %}<p class="field-error" id="{{ field.auto_id }}_error">{% icon "alert" %}{{ field.errors|join:" " }}</p>{% endif %}
+{% else %}
+  {% if field.use_fieldset %}<fieldset class="field-group"{% if field.aria_describedby %} aria-describedby="{{ field.aria_describedby }}"{% endif %}>
+  <legend class="field-label">{{ field.label }}</legend>{% else %}<label class="field-label" for="{{ field.id_for_label }}">{{ field.label }}</label>{% endif %}
+  {% if field.help_text %}<p class="field-hint" id="{{ field.auto_id }}_helptext">{{ field.help_text }}</p>{% endif %}
+  {% if field.errors %}<p class="field-error" id="{{ field.auto_id }}_error">{% icon "alert" %}{{ field.errors|join:" " }}</p>{% endif %}
+  {{ field }}
+  {% if field.use_fieldset %}</fieldset>{% endif %}
+{% endif %}
+</div>

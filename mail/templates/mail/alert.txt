@@ -1,0 +1,12 @@
+{% autoescape off %}Alerte technique tri-offres : créneau {{ slot }} du {{ day|date:"d/m/Y" }}.
+{% for problem in problems %}
+== {{ problem.title }} ==
+{% if problem.detail %}{{ problem.detail }}
+{% endif %}{% if problem.output %}
+Dernières lignes de la sortie :
+{{ problem.output }}
+{% endif %}{% endfor %}
+Ce mail est technique : il n’y a rien à y répondre. Le détail des passages est dans l’admin, section Supervision.
+
+tri-offres
+{% endautoescape %}

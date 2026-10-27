@@ -1,0 +1,55 @@
+{% extends "onboarding/layout.html" %}
+{% block title %}{% if first_sort.state == "ready" %}Vos premières offres sont prêtes{% else %}Votre premier tri arrive{% endif %}, tri-offres{% endblock %}
+{% block head %}{% if first_sort.state == "running" %}<meta http-equiv="refresh" content="10">{% endif %}{% endblock %}
+{% block question %}
+<div class="question end">
+  <h1 class="question__title">{% if first_sort.state == "ready" %}Vos premières offres sont prêtes{% else %}Votre premier tri arrive{% endif %}</h1>
+  {% if first_sort.state == "ready" %}
+  <div class="end__sort">
+    <p>J’ai noté {{ first_sort.count }} offre{{ first_sort.count|pluralize }} assez proche{{ first_sort.count|pluralize }} de votre recherche.</p>
+    <a class="button" href="{% url 'matching:sort' %}">{% if first_sort.count == 1 %}Trier ma première offre{% else %}Trier mes {{ first_sort.count }} premières offres{% endif %}</a>
+  </div>
+  {% elif first_sort.state == "running" %}
+  <div class="end__sort">
+    <p role="status">Je note vos premières offres. Cette page se met à jour toute seule.</p>
+    <p><a href="{% url 'onboarding:end' %}">Voir si elles sont prêtes</a></p>
+  </div>
+  {% elif first_sort.state == "empty" %}
+  <p class="end__sort">Je n’ai rien trouvé d’assez proche dans les offres du mois. Je cherche chaque nuit.</p>
+  {% endif %}
+  {# The date stamp; its accessible name is the whole sentence. Printed once, never for a date already gone. #}
+  {% if passed %}
+  <p class="end__stamp">
+    <span class="stamp" role="img" aria-label="Premier tri {{ day }}, vers 7 h, depuis {{ sender }}.">{{ stamp }}<span
+          class="stamp__small">vers 7 h</span></span>
+  </p>
+  <p class="lede">Vos tris arrivent chaque jour ouvré vers 7 h, depuis {{ sender }}.</p>
+  {% else %}
+  <p class="end__stamp">
+    <span class="stamp{% if press %} stamp--press{% endif %}" role="img"
+          aria-label="Il arrive {{ day }}, vers 7 h, depuis {{ sender }}.">{{ stamp }}<span
+          class="stamp__small">vers 7 h</span></span>
+  </p>
+  <p class="lede">Il arrive {{ day }}, vers 7 h, depuis {{ sender }}.</p>
+  {% endif %}
+  {% if tips|length == 1 %}
+  <p class="end__tip">{{ tips.0.1 }}</p>
+  {% else %}
+  <p class="end__tip">{% if passed %}Pour que vos tris arrivent{% else %}Pour qu’il arrive{% endif %} dans votre
+    boîte principale, selon votre messagerie :</p>
+  <ul class="end__tips">{% for provider, tip in tips %}
+    <li>{{ provider }} : {{ tip }}</li>{% endfor %}
+  </ul>
+  {% endif %}
+  {% if not welcome_sent %}
+  <p class="end__welcome">Le mail de bienvenue n’est pas encore parti. Je réessaie à votre prochaine visite.</p>
+  {% elif not passed %}
+  <p class="end__welcome">Un mail de bienvenue vient de partir : s’il est dans les indésirables, sortez-le,
+    {% if is_tomorrow %}le tri de demain suivra{% else %}le premier tri suivra{% endif %}.</p>
+  {% endif %}
+  <ul class="end__links">
+    <li><a href="{% url 'onboarding:my_search' %}">Modifier ma recherche</a></li>
+    <li><a href="{% url 'onboarding:my_data' %}">Mes données</a></li>
+  </ul>
+</div>
+{% endblock %}

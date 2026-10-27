@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}tri-offres, les offres du jour déjà triées{% endblock %}
+{% block content %}
+<div class="home">
+  <div class="home__intro">
+    <h1 class="home__title">Les offres du jour, déjà triées, dans votre boîte à 7 h</h1>
+    <p class="lede">
+      tri-offres lit chaque nuit des sites d’emploi et des pages carrières, dans tous les domaines.
+      Chaque matin, un mail court : les offres qui vous correspondent, notées sur 10,
+      avec une phrase qui dit pourquoi.
+    </p>
+    <p class="home__promise">
+      Il ne postule jamais à votre place.
+      Vous triez d’un geste, et les notes des jours suivants apprennent de vos choix.
+    </p>
+    <form class="home__form" method="post" action="{% url 'accounts:home' %}" novalidate>
+      {% csrf_token %}
+      {% include "ui/_error_summary.html" %}
+      {{ form.email.as_field_group }}
+      <button class="button home__submit" type="submit">Recevoir mon code</button>
+    </form>
+    {% if beta_full %}
+    <p class="home__note muted small">
+      La bêta est complète. Vous avez déjà un compte ? Votre code arrive comme d’habitude.
+      Sinon, laissez votre adresse : nous vous écrirons quand une place se libère.
+    </p>
+    {% else %}
+    <p class="home__note muted small">{% if beta %}Bêta gratuite, {{ capacity }} places. {% endif %}Environ 4 minutes,
+      3 étapes.</p>
+    {% endif %}
+    <p class="home__note small"><a href="{% url 'accounts:privacy' %}">Ce que nous gardons et pourquoi</a></p>
+  </div>
+  <figure class="home__sample">
+    <div class="card card--sheet">
+      <div class="card__head"><h2 class="card__title">Mardi · 6 offres à regarder</h2></div>
+      <ul class="sample-offers">
+        <li class="sample-offer">
+          <p class="sample-offer__title">Chargée de médiation culturelle</p>
+          <p class="sample-offer__meta muted small">Musée des Beaux-Arts, Lyon</p>
+          {% include "ui/_gauge.html" with score=8 %}
+          <p class="card card--green card--strip">
+            Vous voulez parler aux publics : le poste est à moitié sur le terrain.
+          </p>
+        </li>
+        <li class="sample-offer">
+          <p class="sample-offer__title">Assistante d’édition jeunesse</p>
+          <p class="sample-offer__meta muted small">Maison d’édition indépendante, Paris</p>
+          {% include "ui/_gauge.html" with score=7 %}
+          <p class="card card--green card--strip">
+            L’édition jeunesse est dans vos métiers visés ; CDD de 8 mois.
+          </p>
+        </li>
+      </ul>
+    </div>
+    <figcaption class="home__caption muted small">
+      Exemple avec des offres fictives. Notes générées par IA, la décision vous appartient.
+    </figcaption>
+  </figure>
+</div>
+{% endblock %}

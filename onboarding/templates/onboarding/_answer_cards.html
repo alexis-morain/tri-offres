@@ -1,0 +1,19 @@
+{% comment %}The answer cards, word for word, each row with its "Modifier". With block_links
+(« Ma recherche »), each card also links to its block's page.{% endcomment %}
+    {% for card in answer_cards %}
+    <article class="card card--{{ card.block.tone }} summary__card summary__card--{{ card.block.slug }}">
+      <header class="card__head">
+        <h2 class="card__title">{{ card.block.name }}</h2>
+        {% if block_links %}<a class="card__action" href="{% url 'onboarding:my_search_block' card.block.slug %}"
+        >Modifier tout le bloc<span class="visually-hidden"> {{ card.block.name|lower }}</span></a>{% endif %}
+      </header>
+      {% spaceless %}<dl class="answers">{% for row in card.rows %}
+        <div class="answers__row">
+          <dt>{{ row.label }}</dt>
+          <dd{% if row.missing %} class="answers__missing"{% endif %}>{{ row.text }}</dd>
+          <dd class="answers__edit">
+            <a href="{{ row.url }}">Modifier<span class="visually-hidden"> {{ row.name }}</span></a></dd>
+        </div>{% endfor %}
+      </dl>{% endspaceless %}
+    </article>
+    {% endfor %}

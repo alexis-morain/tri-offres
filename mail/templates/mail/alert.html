@@ -1,0 +1,12 @@
+{% include "mail/_layout_top.html" with title="Alerte tri-offres" %}
+<p style="margin:0 0 20px;">Alerte technique : créneau {{ slot }} du {{ day|date:"d/m/Y" }}.</p>
+{% for problem in problems %}
+<h2 style="margin:0 0 8px;font-size:18px;">{{ problem.title }}</h2>
+{% if problem.detail %}<p style="margin:0 0 12px;">{{ problem.detail }}</p>{% endif %}
+{% if problem.output %}<p style="margin:0 0 6px;font-size:14px;color:#465166;">Dernières lignes de la sortie :</p>
+<pre style="margin:0 0 20px;padding:12px;background-color:#f3f5f9;border:1px solid #d3d9e4;font-size:13px;
+  line-height:1.4;white-space:pre-wrap;word-break:break-word;">{{ problem.output }}</pre>{% endif %}
+{% endfor %}
+<p style="margin:0;font-size:14px;color:#465166;">Ce mail est technique : il n’y a rien à y répondre. Le détail des
+passages est dans l’admin, section Supervision.</p>
+{% include "mail/_layout_bottom.html" %}

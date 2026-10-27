@@ -1,0 +1,30 @@
+{# One sheet. The script clones it for the other cards and fills every data-field / data-if with textContent. #}
+<article class="card card--sheet sort-card" aria-labelledby="sort-title-{{ card.id }}">
+  <p class="sort-card__explore" data-if="exploration"
+     {% if not card.exploration %}hidden{% endif %}>Une piste à côté</p>
+  <h2 class="sort-card__title" id="sort-title-{{ card.id }}" tabindex="-1"
+      data-field="title">{{ card.title }}</h2>
+  <p class="sort-card__employer" data-field="employer"
+     {% if not card.employer %}hidden{% endif %}>{{ card.employer }}</p>
+  <p class="sort-card__meta small muted">
+    <span data-field="location"{% if not card.location %} hidden{% endif %}>{{ card.location }}</span>
+    <span data-field="contract"{% if not card.contract %} hidden{% endif %}>{{ card.contract }}</span>
+    <span class="typed" data-field="date"
+          {% if not card.date %}hidden{% endif %}>
+      {% if card.date %}publiée le {{ card.date|slice:"8:10" }}/{{ card.date|slice:"5:7" }}{% endif %}</span>
+  </p>
+  {% include "ui/_gauge.html" with score=card.score %}
+  <div class="card card--green card--strip sort-card__reason" data-if="reason"
+       {% if not card.reason %}hidden{% endif %}>
+    <span class="ai-label">Raison rédigée par IA</span>
+    <p data-field="reason">{{ card.reason }}</p>
+  </div>
+  <p class="sort-card__summary small" data-field="summary"
+     {% if not card.summary %}hidden{% endif %}>{{ card.summary }}</p>
+  <p class="sort-card__source muted">Source : <span data-field="source">{{ card.source }}</span></p>
+  <p class="sort-card__attribution muted" data-field="attribution"
+     {% if not card.attribution %}hidden{% endif %}>{{ card.attribution }}</p>
+  <a class="sort-card__link" data-link{% if card.url %} href="{{ card.url }}"{% endif %} target="_blank"
+     rel="noopener noreferrer nofollow"{% if not card.url %} hidden{% endif %}>
+    Voir l’offre<span class="visually-hidden">, nouvel onglet</span></a>
+</article>

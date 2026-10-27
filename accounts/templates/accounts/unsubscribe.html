@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Ne plus recevoir le mail du matin, tri-offres{% endblock %}
+{% block content %}
+<div class="question link-page">
+  <h1 class="question__title">Ne plus recevoir le mail du matin</h1>
+  <p class="lede">Votre compte reste ouvert : vous pourrez recevoir de nouveau le mail depuis
+    «&nbsp;Mes données&nbsp;».</p>
+  <form class="question__actions" method="post">
+    {% csrf_token %}
+    <button class="button" type="submit">Arrêter les mails</button>
+  </form>
+</div>
+{% endblock %}

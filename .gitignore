@@ -1,0 +1,12 @@
+.env
+.env.bak.*
+__pycache__/
+*.pyc
+*.sqlite3
+/data/
+.venv/
+staticfiles/
+.claude/
+.impeccable/review/
+.impeccable/config.local.json
+/vendor

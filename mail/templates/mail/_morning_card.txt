@@ -1,0 +1,6 @@
+{{ offer.title }}
+{{ offer.employer }}{% if offer.location %} · {{ offer.location }}{% endif %}{% if offer.contract %} · {{ offer.contract }}{% endif %}
+{{ offer.score }} sur 10 · {{ offer.reason }}
+Source : {{ offer.source }}{% if offer.attribution %} · {{ offer.attribution }}{% endif %}
+{% if offer.link %}Voir l’offre : {{ offer.link }}
+{% endif %}

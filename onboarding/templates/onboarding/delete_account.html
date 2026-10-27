@@ -1,0 +1,28 @@
+{% extends "onboarding/account.html" %}{% load ui %}
+{% block title %}Supprimer mon compte, tri-offres{% endblock %}
+{% block page %}
+<div class="question delete-account">
+  <h1 class="question__title">Supprimer mon compte</h1>
+  {% if team %}
+  <p class="question__why">La suppression de votre compte se fait par l’administration du site.</p>
+  <div class="question__actions">
+    <a class="link-back" href="{% url 'onboarding:my_data' %}">{% icon "back" %}Retour à «&nbsp;Mes données&nbsp;»</a>
+  </div>
+  {% else %}
+  <p class="question__why">Vous allez effacer votre compte tri-offres. C’est définitif et immédiat.</p>
+  <div class="prose">
+    <p>Sont effacés : vos réponses au questionnaire, le résumé de votre CV, vos synthèses, vos avis sur les offres,
+      vos notes et l’historique de vos mails. Rien ne peut être récupéré ensuite.</p>
+    <p>Les sauvegardes du service gardent une copie de votre compte 30 jours au plus, puis elle disparaît.</p>
+  </div>
+  <div class="question__actions">
+    <a class="link-back" href="{% url 'onboarding:my_data' %}">{% icon "back" %}Annuler</a>
+  </div>
+  <div class="danger-zone">
+    <form method="post" action="{% url 'onboarding:delete_account' %}">
+      {% csrf_token %}<button class="button button--danger" type="submit">Supprimer définitivement mon compte</button>
+    </form>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

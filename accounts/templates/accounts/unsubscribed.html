@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Mails arrêtés, tri-offres{% endblock %}
+{% block content %}
+<div class="question">
+  <h1 class="question__title">C’est fait, vous ne recevrez plus de mail.</h1>
+  <p class="muted">Votre compte reste ouvert. Pour recevoir de nouveau le mail du matin, ouvrez
+    «&nbsp;Mes données&nbsp;» une fois connecté.</p>
+  <div class="question__actions"><a class="button" href="{% url 'accounts:home' %}">Retour à l’accueil</a></div>
+</div>
+{% endblock %}

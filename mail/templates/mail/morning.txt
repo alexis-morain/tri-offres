@@ -1,0 +1,23 @@
+{% autoescape off %}{% if to_review or maybe or side_track %}{% if to_review %}À regarder
+
+{% for offer in to_review %}{% include "mail/_morning_card.txt" %}{% endfor %}{% endif %}{% if maybe %}Peut-être
+
+{% for offer in maybe %}{% include "mail/_morning_card.txt" %}{% endfor %}{% endif %}{% if side_track %}Une piste à côté
+
+{% with offer=side_track %}{% include "mail/_morning_card.txt" %}{% endwith %}{% endif %}Trier ces offres :
+{{ sort_url }}
+
+Notes générées par IA, la décision vous appartient.
+{% else %}{% if read_tonight == 1 %}J’ai lu 1 offre pour vous cette nuit, elle n’était pas assez proche.{% elif read_tonight %}J’ai lu {{ read_tonight }} offres pour vous cette nuit, aucune n’était assez proche.{% else %}Je n’ai rien trouvé d’assez proche cette nuit.{% endif %} Je cherche à nouveau demain.
+
+Pour élargir ou changer vos critères, ouvrez « Ma recherche » :
+{{ my_search_url }}
+{% endif %}
+{% if trial_last %}C’est votre dernier mail du matin : votre essai se termine le {{ trial_end_day }}. Vos réponses et vos avis restent dans « Mes données » jusqu’à ce que vous supprimiez votre compte :
+{{ my_data_url }}
+
+{% endif %}Pour ne plus recevoir ces mails :
+{{ unsubscribe_url }}
+
+tri-offres
+{% endautoescape %}

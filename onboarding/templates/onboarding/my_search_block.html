@@ -1,0 +1,52 @@
+{% extends "onboarding/account.html" %}{% load ui %}
+{% block title %}{{ page_block.name }}, tri-offres{% endblock %}
+{% block page %}
+<div class="block-page">
+<form class="question" method="post" action="{% url 'onboarding:my_search_block' page_block.slug %}" novalidate>
+  <h1 class="question__title">{{ page_block.name }}</h1>
+  <p class="question__why">Tous les écrans du bloc sur une page. Rien ne change avant «&nbsp;Enregistrer&nbsp;».</p>
+  {% if has_errors %}<div class="error-summary" role="alert" tabindex="-1" data-error-summary>
+    <h2 class="error-summary__title">{% icon "alert" %}Une réponse est à revoir</h2>
+    {# Every screen's errors in one list, as ui/_error_summary.html words them for one form. #}
+    <ul>{% for section in sections %}{% for field in section.form.visible_fields %}{% if field.errors %}
+      <li><a href="#{% if field.use_fieldset %}{{ field.auto_id }}_0{% else %}{{ field.id_for_label }}{% endif %}"
+      >{{ field.label }} : {{ field.errors|first }}</a></li>{% endif %}{% endfor %}
+      {% for error in section.form.non_field_errors %}<li>{{ error }}</li>{% endfor %}{% endfor %}
+    </ul>
+  </div>{% endif %}
+  {% csrf_token %}
+  {% for section in sections %}
+  <section class="block-page__screen" data-tone="{{ page_block.tone }}"
+           aria-labelledby="screen-{{ section.step.slug }}">
+    <h2 class="block-page__title" id="screen-{{ section.step.slug }}"
+    >{{ section.title|keep_inversions }}</h2>
+    <p class="question__why">{{ section.why }}</p>
+    {% for field in section.form.hidden_fields %}{{ field }}{% endfor %}
+    <div class="question__body">
+      {% for field in section.form.visible_fields %}{{ field.as_field_group }}{% endfor %}
+    </div>
+  </section>
+  {% endfor %}
+  <div class="question__actions">
+    <button class="button" type="submit">Enregistrer</button>
+    <a class="link-back" href="{% url 'onboarding:my_search' %}"
+    >{% icon "back" %}Retour à «&nbsp;Ma recherche&nbsp;»</a>
+  </div>
+</form>
+  {% if page_block.slug == "words" %}
+  <section class="question block-page__screen block-page__cv" data-tone="{{ page_block.tone }}"
+           aria-labelledby="screen-cv">
+    <h2 class="block-page__title" id="screen-cv">Votre CV</h2>
+    {% if has_cv %}
+    <p>{% if cv_processed_at %}Lu le {{ cv_processed_at|date:"j F Y" }}. {% endif %}
+      Le CV a son propre écran :
+      enregistrez d’abord ce qui précède.</p>
+    <p class="block-page__cv-link"><a href="{% url 'onboarding:cv' %}{{ cv_query }}">Modifier mon CV</a></p>
+    {% else %}
+    <p>Aucun CV envoyé.</p>
+    <p class="block-page__cv-link"><a href="{% url 'onboarding:cv' %}{{ cv_query }}">Envoyer un CV</a></p>
+    {% endif %}
+  </section>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}{% if valid %}Connexion à tri-offres{% else %}Ce lien a expiré, tri-offres{% endif %}{% endblock %}
+{% block content %}
+<div class="question link-page">
+{% if valid %}
+  <h1 class="question__title">Connexion à tri-offres</h1>
+  <p class="lede">en tant que <strong>{{ email }}</strong></p>
+  <form class="question__actions" method="post">
+    {% csrf_token %}
+    <button class="button" type="submit">Me connecter</button>
+  </form>
+  <p class="link-page__other-device muted small">
+    Vous aviez commencé sur un autre appareil ? Tapez-y plutôt le code <span class="typed">{{ code }}</span>.
+  </p>
+{% else %}
+  <h1 class="question__title">Ce lien a expiré</h1>
+  <p class="lede">Demandez un nouveau code : il arrive en moins d’une minute.</p>
+  <div class="question__actions"><a class="button" href="{% url 'accounts:home' %}">Demander un nouveau code</a></div>
+{% endif %}
+</div>
+{% endblock %}

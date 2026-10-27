@@ -1,0 +1,68 @@
+{% extends "onboarding/account.html" %}
+{% block title %}Vos offres à trier, tri-offres{% endblock %}
+{% block page %}
+<div class="sort" data-sort data-queue-key="{{ queue_key }}" data-count="{{ count }}"
+     data-verdict-url="{% url 'matching:verdict' %}" data-undo-url="{% url 'matching:undo' %}">
+  <h1>Vos offres à trier</h1>
+  {% if card %}
+  <p class="sort__count"><span class="typed" data-sort-count>{{ count }} offre{{ count|pluralize }}</span></p>
+  {% endif %}
+  <p class="sort__ai small muted">Notes générées par IA, la décision vous appartient.</p>
+  {% if trial_over %}
+  <p class="notice sort__trial small">Votre essai est terminé : aucune nouvelle offre n’arrive. Vos avis restent possibles sur les offres déjà là.</p>
+  {% endif %}
+  {% if learned %}
+  <article class="card card--green sort__learned" aria-labelledby="learned-title">
+    <header class="card__head">
+      <h2 class="card__title" id="learned-title">Ce que j’ai appris de vos choix</h2>
+      {% if not learned_own %}<span class="ai-label">Rédigé par IA</span>{% endif %}
+    </header>
+    <div class="card__text">{{ learned|linebreaks }}</div>
+    <div class="sort__learned-actions">
+      <a href="{% url 'matching:learned' %}">Corriger</a>
+      <form method="post" action="{% url 'matching:learned_clear' %}">
+        {% csrf_token %}<button class="button-reset" type="submit">Effacer</button>
+      </form>
+    </div>
+  </article>
+  {% endif %}
+  <div class="sort__stage" data-sort-stage>
+    {% if card %}{% include "matching/_sort_card.html" %}{% endif %}
+  </div>
+  {% if card %}
+  <form class="sort-actions" method="post" action="{% url 'matching:verdict' %}" data-sort-actions>
+    {% csrf_token %}
+    <input type="hidden" name="offer" value="{{ card.id }}">
+    <button class="button button--secondary" type="submit" name="verdict" value="no" aria-label="Non, pas pour moi">
+      <span class="sort-actions__full">Pas pour moi</span>
+      <span class="sort-actions__short" aria-hidden="true">Non</span>
+    </button>
+    <button class="button button--secondary" type="submit" name="verdict" value="maybe">Peut-être</button>
+    <button class="button" type="submit" name="verdict" value="yes" aria-label="Oui, ça m’intéresse">
+      <span class="sort-actions__full">Ça m’intéresse</span>
+      <span class="sort-actions__short" aria-hidden="true">Oui</span>
+    </button>
+  </form>
+  {% endif %}
+  <p class="visually-hidden" aria-live="polite" aria-atomic="true" data-sort-live></p>
+  <div class="sort__end" tabindex="-1" data-sort-end{% if card %} hidden{% endif %}>
+    <p class="sort__recap" data-sort-recap hidden></p>
+    <p data-sort-done>Tout est trié.{% if not trial_over %} Les prochaines offres arrivent avec le mail de demain matin.{% endif %}</p>
+    <p data-sort-more hidden>
+      <button class="button" type="button" data-sort-reload>Voir les offres suivantes</button>
+    </p>
+    <p><a href="{% url 'onboarding:my_search' %}">Modifier ma recherche</a></p>
+  </div>
+  <form class="sort__undo" method="post" action="{% url 'matching:undo' %}" data-sort-undo
+        {% if not undo_offer %}hidden{% endif %}>
+    {% csrf_token %}
+    <input type="hidden" name="offer" value="{{ undo_offer|default_if_none:'' }}">
+    <button class="button-reset" type="submit">Annuler mon dernier avis</button>
+  </form>
+  <div class="notice sort__notice" role="status" data-sort-notice hidden>
+    <p data-sort-notice-text></p>
+    <button class="button button--secondary" type="button" data-sort-reload hidden>Recharger la page</button>
+  </div>
+  {{ cards|json_script:"cards" }}
+</div>
+{% endblock %}

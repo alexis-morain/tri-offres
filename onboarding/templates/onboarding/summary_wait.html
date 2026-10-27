@@ -1,0 +1,19 @@
+{% extends "onboarding/layout.html" %}
+{% block title %}Je rédige ce que j’ai compris, tri-offres{% endblock %}
+{% block question %}
+{% comment %}With JavaScript the form sends itself on load; without it, the button does. What Claude reads, nothing
+invented. A text the person wrote is never replaced silently: then the form waits for the button.{% endcomment %}
+<form class="question" method="post" action="{% url 'onboarding:summary_write' %}"
+      {% if not replaces_own_text %}data-auto-submit{% endif %}>
+  <h1 class="question__title">Je rédige ce que j’ai compris</h1>
+  <ul class="reading">{% for line in lines %}
+    <li>{{ line }}</li>{% endfor %}
+  </ul>
+  {% if replaces_own_text %}
+  <p class="summary__replaces">Votre texte modifié sera remplacé par une nouvelle synthèse.</p>{% endif %}
+  {% csrf_token %}
+  <div class="question__actions">
+    <button class="button" type="submit" data-auto-submit-button>Rédiger la synthèse</button>
+  </div>
+</form>
+{% endblock %}

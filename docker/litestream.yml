@@ -1,0 +1,34 @@
+# Litestream 0.5.17 (docker-compose.yml, `backup` profile). No secret in this file: bucket, endpoint, heartbeat URL
+# and the R2 keys come from the environment of that one service (${...} is expanded by Litestream when it reads the
+# file; the keys LITESTREAM_ACCESS_KEY_ID and LITESTREAM_SECRET_ACCESS_KEY are read by Litestream itself).
+# Keys of the 0.5 reference: https://litestream.io/reference/config/ . Litestream does not reject an unknown key,
+# so config/test_backups.py checks the ones that matter.
+#
+# Not set on purpose: no `age` block (0.5 has no client-side encryption; R2 encrypts at rest), no `addr`, `mcp-addr`
+# or `socket` (nothing listens), no access-key-id in the file. The account journal (accounts/journal.py) sits next
+# to the database and is not replicated: this file lists one database and no directory.
+dbs:
+  - path: /data/tri-offres.sqlite3
+    replica:
+      type: s3
+      # https://<account>.eu.r2.cloudflarestorage.com for a bucket in the EU jurisdiction.
+      endpoint: ${LITESTREAM_R2_ENDPOINT}
+      bucket: ${LITESTREAM_R2_BUCKET}
+      path: tri-offres
+      region: auto
+
+# The privacy page announces BACKUP_DAYS days (config/backups.py). A snapshot is taken every `interval` and one is
+# dropped once older than `retention`, so the oldest restore point is at most retention + interval old:
+# 696 h + 24 h = 720 h = 30 days. Change one, change the other and the constant: config/test_backups.py checks it.
+snapshot:
+  interval: 24h
+  retention: 696h
+
+# Litestream deletes what falls out of the retention (the R2 token needs the delete right; docs/restauration.md).
+retention:
+  enabled: true
+
+# Empty means no heartbeat. Litestream pings only while every database synced within the interval, so a missing
+# ping means the replication is stuck or stopped.
+heartbeat-url: ${LITESTREAM_HEARTBEAT_URL}
+heartbeat-interval: 5m

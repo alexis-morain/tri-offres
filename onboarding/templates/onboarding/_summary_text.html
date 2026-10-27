@@ -1,0 +1,14 @@
+{% if own_text %}
+      <div class="summary__text">{{ own_text|linebreaks }}</div>
+      <p class="muted small">Vous avez modifié ce texte vous-même.</p>
+      {% else %}
+      <div class="summary__sentences">{% for sentence in sentences %}
+        <details class="source">
+          <summary class="source__sentence">{{ sentence.text }}</summary>
+          <div class="source__body">{% for label, text in sentence.sources %}
+            <p class="source__from">D’après : {{ label }}</p>
+            <p class="source__text">{{ text }}</p>{% endfor %}
+          </div>
+        </details>{% endfor %}
+      </div>
+      {% endif %}

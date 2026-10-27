@@ -1,0 +1,16 @@
+**/.env*
+.claude/
+.git
+.venv
+data/
+docs/
+plans/
+spikes/
+staticfiles/
+**/__pycache__
+**/*.pyc
+**/*.sqlite3
+CLAUDE.md
+scripts/
+# Built on the workstation; the image makes its own (Dockerfile).
+vendor/actor-venv

@@ -1,0 +1,1 @@
+{{ code }} : il vous reste {{ minutes }} minute{{ minutes|pluralize }} sur tri-offres

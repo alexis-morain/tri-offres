@@ -1,0 +1,24 @@
+{% extends "base.html" %}{% load ui %}
+{% block masthead_aside %}
+<form method="post" action="{% url 'accounts:logout' %}">
+  {% csrf_token %}<button class="button-reset" type="submit">Se déconnecter</button>
+</form>
+{% endblock %}
+{% block content %}
+<nav class="progress" aria-label="Étapes du questionnaire">
+  {% spaceless %}<ol class="progress__blocks">{% for item in progress %}
+    <li class="progress__block{% if item.done %} progress__block--done{% endif %}"
+        data-tone="{{ item.block.tone }}"{% if item.current %} aria-current="step"{% endif %}>
+      {% if item.done %}{% icon "check" %}{% endif %}
+      <span class="progress__name">{{ item.block.name }}{% if item.done %}<span
+        class="visually-hidden"> (terminé)</span>{% endif %}</span>
+    </li>{% endfor %}
+  </ol>{% endspaceless %}
+  {% if time_left %}<p class="progress__time">{{ time_left }}</p>{% endif %}
+</nav>
+{# The file comes first so that on phones its folded band, with the counter, sits above the question. #}
+<div class="question-layout">
+  {% if cards %}{% include "onboarding/_drawer.html" %}{% endif %}
+  {% block question %}{% endblock %}
+</div>
+{% endblock %}

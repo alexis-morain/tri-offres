@@ -1,0 +1,13 @@
+{% autoescape off %}Votre code tri-offres :
+
+{{ code }}
+
+Ou, pour vous connecter sur cet appareil, ouvrez ce lien :
+{{ link }}
+
+Ce code et ce lien restent valables {{ minutes }} minutes.
+
+Vous n’avez rien demandé ? Ignorez ce message.
+
+tri-offres
+{% endautoescape %}

@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}Confidentialité, tri-offres{% endblock %}
+{% block content %}
+<div class="prose legal">
+  <h1>Ce que nous gardons et pourquoi</h1>
+  <p class="lede">tri-offres garde ce qu’il faut pour vous envoyer des offres triées pour vous, et rien d’autre.
+    Cette page dit quoi, pourquoi et combien de temps.</p>
+
+  <h2>Ce qui est gardé</h2>
+  <p>La base légale est l’exécution du service que vous demandez, sauf pour la sécurité des connexions
+    (intérêt légitime : éviter les abus). Les durées ci-dessous sont celles que le site applique.</p>
+  <dl class="my-data__list">
+    <div class="my-data__row">
+      <dt>Adresse mail</dt>
+      <dd>Pour vous connecter et vous écrire. Gardée tant que votre compte existe.</dd>
+    </div>
+    {% if trial %}
+    <div class="my-data__row">
+      <dt>Fin d’essai</dt>
+      <dd>La date de fin de votre essai de {{ trial_days }} jours, pour arrêter le mail du matin ce jour-là.
+        Gardée tant que votre compte existe. Après l’essai, votre compte et vos données restent jusqu’à ce que
+        vous le supprimiez dans «&nbsp;Mes données&nbsp;».</dd>
+    </div>
+    {% endif %}
+    <div class="my-data__row">
+      <dt>Réponses au questionnaire</dt>
+      <dd>Vos filtres, vos préférences et vos textes, pour choisir et noter les offres.
+        Gardées tant que votre compte existe. Vous les corrigez dans «&nbsp;Ma recherche&nbsp;».</dd>
+    </div>
+    <div class="my-data__row">
+      <dt>CV</dt>
+      <dd>Le fichier n’est jamais enregistré : il est lu en mémoire, puis oublié. Seul un résumé est gardé,
+        tant que votre compte existe, ou jusqu’à ce que vous le supprimiez dans «&nbsp;Mes données&nbsp;».</dd>
+    </div>
+    <div class="my-data__row">
+      <dt>Synthèses</dt>
+      <dd>La synthèse de vos critères et ce que le tri a appris de vos choix, rédigées par une IA.
+        Gardées tant que votre compte existe.</dd>
+    </div>
+    <div class="my-data__row">
+      <dt>Avis</dt>
+      <dd>Vos choix d’offres, pour affiner les notes. Gardés tant que votre compte existe.</dd>
+    </div>
+    <div class="my-data__row">
+      <dt>Notes des offres</dt>
+      <dd>Une note et une raison par offre. Effacées avec l’offre au bout de {{ offer_days }} jours.
+        Si vous avez donné un avis sur l’offre, elle reste (sans son texte complet), et sa note avec elle,
+        tant que votre compte existe.</dd>
+    </div>
+    <div class="my-data__row">
+      <dt>Texte complet des offres</dt>
+      <dd>Lu pour résumer et noter, effacé au bout de {{ full_text_days }} jours.
+        Ces offres sont publiques et communes à tous les comptes.</dd>
+    </div>
+    <div class="my-data__row">
+      <dt>Envois</dt>
+      <dd>La date, le nombre d’offres et l’identifiant de chaque mail du matin, pour ne pas vous renvoyer
+        la même chose. Gardés tant que votre compte existe.</dd>
+    </div>
+    <div class="my-data__row">
+      <dt>Journal technique</dt>
+      <dd>Les étapes de votre inscription, et les passages de notation (nombre d’offres, volume traité,
+        code d’erreur éventuel), sans contenu. Gardés tant que votre compte existe.</dd>
+    </div>
+    <div class="my-data__row">
+      <dt>Codes de connexion</dt>
+      <dd>Votre adresse, une empreinte du code et du lien (jamais le code lui-même), l’adresse IP de la demande
+        et l’heure, pour la sécurité des connexions. Effacés au bout de {{ code_days }} jours.</dd>
+    </div>
+    <div class="my-data__row">
+      <dt>Connexion</dt>
+      <dd>Un cookie vous reconnaît {{ session_days }} jours après la connexion, puis il expire. Il sert à la connexion
+        et à la sécurité des formulaires. Il n’y a aucun outil de mesure d’audience.</dd>
+    </div>
+    <div class="my-data__row">
+      <dt>Liste d’attente</dt>
+      <dd>Si la bêta est complète et que vous laissez votre adresse, elle est gardée jusqu’à votre demande
+        d’effacement par mail, ou jusqu’à la suppression d’un compte à cette adresse.</dd>
+    </div>
+    <div class="my-data__row">
+      <dt>Sauvegardes</dt>
+      <dd>Une copie complète de la base est faite en continu chez Cloudflare R2, dans l’Union européenne, et
+        gardée {{ backup_days }} jours. Un compte supprimé y reste au plus {{ backup_days }} jours, puis disparaît.</dd>
+    </div>
+    <div class="my-data__row">
+      <dt>Journal des comptes</dt>
+      <dd>Pour qu’une sauvegarde restaurée n’annule pas une suppression ou une désinscription, le serveur note
+        l’heure, le genre d’action et une empreinte de l’adresse (jamais l’adresse elle-même). Ce fichier reste
+        sur le serveur, hors des sauvegardes. Effacé au bout de {{ journal_days }} jours.</dd>
+    </div>
+    <div class="my-data__row">
+      <dt>Échecs de connexion à l’administration</dt>
+      <dd>Quand quelqu’un se trompe de mot de passe sur la page d’administration, le site garde l’heure, une
+        empreinte de l’adresse saisie et l’adresse IP, pour bloquer les essais répétés. Effacés au bout de
+        {{ failure_days }} jours.</dd>
+    </div>
+  </dl>
+
+  <h2>Où cela va</h2>
+  <p>Le site tourne sur un serveur personnel en France. Il passe par Cloudflare pour être joignable. Les
+    sauvegardes de la base sont envoyées à Cloudflare R2, dans l’Union européenne.</p>
+  <p>Anthropic (États-Unis) reçoit vos réponses, le résumé de votre CV et les offres, pour rédiger la synthèse et
+    noter. Anthropic garde ce qu’il reçoit selon ses propres règles, que le site ne contrôle pas.</p>
+  <p>Resend (États-Unis) envoie les mails : il reçoit votre adresse et le contenu de chaque mail, et les garde de
+    son côté.</p>
+  <p>Les villes que vous tapez sont envoyées au service public geo.api.gouv.fr pour l’autocomplétion.</p>
+
+  <h2>Vos droits</h2>
+  <ul>
+    <li>Accès : «&nbsp;Mes données&nbsp;» montre ce que le site garde sur vous.</li>
+    <li>Rectification : vous modifiez vos réponses dans «&nbsp;Ma recherche&nbsp;».</li>
+    <li>Effacement : «&nbsp;Supprimer mon compte&nbsp;», dans «&nbsp;Mes données&nbsp;». C’est immédiat et
+      définitif : le compte, ses réponses, son résumé de CV, ses avis, ses notes, ses envois, ses sessions
+      et ses codes de connexion sont effacés. Seuls les codes demandés depuis moins de {{ kept_hours }} heures
+      restent, sans adresse ni empreinte, pour le plafond d’envoi du site. Les sauvegardes, Resend et Anthropic
+      gardent ce qu’ils ont déjà reçu, comme indiqué plus haut.</li>
+    <li>Opposition aux mails : chaque mail du matin et chaque relance porte un lien pour ne plus en recevoir.
+      Rien n’est effacé, et vous vous réabonnez depuis
+      «&nbsp;Mes données&nbsp;»{% if trial %} pendant votre essai{% endif %}. Le mail de code et le mail
+      de bienvenue sont envoyés à votre demande et n’ont pas ce lien.</li>
+    <li>Réclamation : auprès de la CNIL, <a href="https://www.cnil.fr">www.cnil.fr</a>.</li>
+  </ul>
+  <p>Pour toute question : <a href="mailto:{{ legal_email }}">{{ legal_email }}</a>.</p>
+</div>
+{% endblock %}

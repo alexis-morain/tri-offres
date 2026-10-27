@@ -1,0 +1,52 @@
+{% extends "onboarding/layout.html" %}{% load ui %}
+{% block title %}{{ title }}, tri-offres{% endblock %}
+{% block question %}
+<div class="summary">
+  <h1 class="question__title">{{ title|keep_inversions }}</h1>
+  <p class="question__why">{{ why }}</p>
+  {% include "ui/_error_summary.html" with form=correction_form %}
+  {% include "ui/_error_summary.html" with form=text_form %}
+  {# The file spread open: the answers word for word, each with its way back to its screen. #}
+  <div class="summary__cards">
+    {% include "onboarding/_answer_cards.html" %}
+    <article class="card card--green summary__card summary__card--understood">
+      <header class="card__head">
+        <h2 class="card__title">Ce que j’ai compris</h2><span class="ai-label">Synthèse rédigée par IA</span>
+      </header>
+      {% if pending %}
+      <p class="summary__pending">Je rédige cette synthèse cette nuit. Vous la trouverez dans « Ma recherche ».
+        Vos filtres ci-dessus s’appliquent dès demain.</p>
+      {% else %}
+      {% if error %}<p class="summary__error" role="alert">{% icon "alert" %}{{ error }}</p>{% endif %}
+      {% if stale %}
+      {% include "onboarding/_summary_stale.html" %}
+      {% endif %}
+      {% include "onboarding/_summary_text.html" %}
+      <form class="summary__correct" method="post" action="{% url 'onboarding:summary_correct' %}" novalidate>
+        {% csrf_token %}
+        {% for field in correction_form.visible_fields %}{% if field.name != "correction" %}
+        {{ field.as_field_group }}{% endif %}{% endfor %}
+        <p class="muted small summary__evolves">Cette synthèse évoluera avec vos tris.</p>
+        {{ correction_form.correction.as_field_group }}
+        <button class="button button--secondary" type="submit">Corriger</button>
+      </form>
+      <details class="summary__edit"{% if text_open %} open{% endif %}>
+        <summary>Modifier le texte moi-même{% icon "next" %}</summary>
+        <form method="post" action="{% url 'onboarding:summary_text' %}" novalidate>
+          {% csrf_token %}{{ text_form.text.as_field_group }}
+          <button class="button button--secondary" type="submit">Enregistrer mon texte</button>
+        </form>
+      </details>
+      {% endif %}
+    </article>
+  </div>
+  <form method="post" action="{% url 'onboarding:summary_validate' %}">
+    {% csrf_token %}
+    <div class="question__actions">
+      <button class="button" type="submit">Ça me va</button>
+      {% if previous %}
+      <a class="link-back" href="{% url 'onboarding:step' previous.slug %}">{% icon "back" %}Retour</a>{% endif %}
+    </div>
+  </form>
+</div>
+{% endblock %}

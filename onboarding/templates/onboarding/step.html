@@ -1,0 +1,26 @@
+{% extends "onboarding/layout.html" %}{% load ui %}
+{% block title %}{{ title }}, tri-offres{% endblock %}
+{% block question %}
+<form class="question" method="post" action="{% url 'onboarding:step' step.slug %}{{ return_query }}" novalidate
+      {% if live_counter %}data-counter-url="{% url 'onboarding:counter' %}?step={{ step.slug }}"{% endif %}>
+  <h1 class="question__title">{{ title|keep_inversions }}</h1>
+  <p class="question__why">{{ why }}</p>
+  {% include "ui/_error_summary.html" %}
+  {% csrf_token %}{% for field in form.hidden_fields %}{{ field }}{% endfor %}
+  <div class="question__body">
+    {% for field in form.visible_fields %}{% if field.name == form.fallback_field %}
+    <details class="fallback"{% if form.fallback_open %} open{% endif %}>
+      <summary>Je ne trouve pas mon poste{% icon "next" %}</summary>
+      {{ field.as_field_group }}
+    </details>{% else %}{{ field.as_field_group }}{% endif %}
+    {% if field.name == form.consequence_after %}
+    <p class="field-consequence" data-consequence aria-live="polite">{{ consequence }}</p>{% endif %}{% endfor %}
+  </div>
+  <div class="question__actions">
+    <button class="button" type="submit">Continuer</button>
+    {% if back %}
+    <a class="link-back" href="{{ back }}">{% icon "back" %}{{ back_label }}</a>{% elif previous %}
+    <a class="link-back" href="{% url 'onboarding:step' previous.slug %}">{% icon "back" %}Retour</a>{% endif %}
+  </div>
+</form>
+{% endblock %}

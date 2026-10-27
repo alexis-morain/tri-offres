@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}La page a expiré, tri-offres{% endblock %}
+{% block content %}
+<div class="question">
+  <h1 class="question__title">La page a expiré</h1>
+  <p class="lede">Rechargez-la, puis réessayez. Si cela recommence, demandez un nouveau code.</p>
+  <div class="question__actions"><a class="button" href="{% url 'accounts:home' %}">Revenir à l’accueil</a></div>
+</div>
+{% endblock %}

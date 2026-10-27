@@ -1,0 +1,115 @@
+{% extends "admin/base_site.html" %}
+{% load l10n %}
+
+{% block title %}Tableau de bord | {{ site_title }}{% endblock %}
+
+{# No welcome line: it would print the address of the signed-in account, and this page carries none (S6). #}
+{% block welcome-msg %}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">Accueil</a>
+&rsaquo; Tableau de bord
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  <div class="module">
+    <table>
+      <caption>Comptes (hors équipe)</caption>
+      <tbody>
+        <tr><th scope="row">Inscrits</th><td>{{ signed_up }}</td></tr>
+        <tr><th scope="row">Questionnaires finis</th><td>{{ finished }}</td></tr>
+        <tr><th scope="row">Abonnés au mail</th><td>{{ subscribers }}</td></tr>
+        <tr><th scope="row">Désinscrits</th><td>{{ unsubscribed }}</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="module">
+    <table>
+      <caption>Actifs de la semaine</caption>
+      <tbody>
+        <tr>
+          <th scope="row">Part des abonnés</th>
+          <td>
+            {{ active }} sur {{ subscribers }}{% if active_percent is not None %}, {{ active_percent }} %{% endif %}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="help">Critère de la bêta : la moitié au moins.</p>
+    <p class="help">
+      Actif : au moins un avis ou une connexion sur 7 jours. Les ouvertures de mail ne sont pas comptées.
+    </p>
+  </div>
+
+  <div class="module">
+    <table>
+      <caption>Avis par jour, 14 derniers jours</caption>
+      <thead>
+        <tr><th scope="col">Jour</th><th scope="col">Avis</th><th scope="col">Personnes</th></tr>
+      </thead>
+      <tbody>
+        {% for row in days %}
+        <tr><th scope="row">{{ row.day|date:"l j F" }}</th><td>{{ row.feedback }}</td><td>{{ row.people }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="module">
+    <table>
+      <caption>Sources en échec</caption>
+      {% if failing_sources %}
+      <thead>
+        <tr>
+          <th scope="col">Source</th><th scope="col">Clé de l’actor</th>
+          <th scope="col">Nuits vides de suite</th><th scope="col">Dernière collecte</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for source in failing_sources %}
+        <tr>
+          <th scope="row"><a href="{% url 'admin:jobs_source_change' source.pk %}">{{ source.name }}</a></th>
+          <td>{{ source.actor_source|default:"-" }}</td>
+          <td>{{ source.empty_runs }}</td>
+          <td>{{ source.last_run_at|date:"j F Y, H:i"|default:"jamais" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      {% else %}
+      <tbody><tr><td>Aucune source en échec.</td></tr></tbody>
+      {% endif %}
+    </table>
+  </div>
+
+  <div class="module">
+    <table>
+      <caption>14 derniers passages de tâches</caption>
+      {% if runs %}
+      <thead>
+        <tr>
+          <th scope="col">Créneau</th><th scope="col">Jour</th><th scope="col">État</th>
+          <th scope="col">Durée</th><th scope="col">Étapes en échec</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for run in runs %}
+        <tr>
+          <th scope="row"><a href="{% url 'admin:supervision_taskrun_change' run.pk %}">{{ run.slot }}</a></th>
+          <td>{{ run.day|date:"j F Y" }}</td>
+          <td>{{ run.status_label }}</td>
+          <td>{% if run.duration is None %}-{% else %}{{ run.duration.total_seconds|floatformat:0 }} s{% endif %}</td>
+          <td>{{ run.failed_steps|join:", "|default:"-" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      {% else %}
+      <tbody><tr><td>Aucun passage enregistré.</td></tr></tbody>
+      {% endif %}
+    </table>
+  </div>
+</div>
+{% endblock %}
