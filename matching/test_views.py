@@ -437,7 +437,8 @@ class SheetTests(SortTestCase):
         self.assertIn("<h1>Vos offres à trier</h1>", html)
         self.assertRegex(html, r'class="typed[^"]*"[^>]*data-sort-count>2 offres<')
         self.assertIn("Notes générées par IA, la décision vous appartient.", html)
-        self.assertRegex(html, r'href="/tri/"[^>]*aria-current="page"[^>]*>Mes offres</a>\s*'
+        self.assertRegex(html, r'href="/tri/"[^>]*aria-current="page"[^>]*>À trier</a>\s*'
+                               r'<a href="/mes-offres/"[^>]*>Mes offres</a>\s*'
                                r'<a href="/ma-recherche/"[^>]*>Ma recherche</a>')
 
     def test_the_sheet_is_named_by_its_title_and_shows_every_field(self):

@@ -1251,3 +1251,17 @@ main:has(.sort) { overflow-x: clip; }  /* a sheet flying off must not widen the 
 .stack > * + * { margin-top: var(--space-4); }
 .space-top { margin-top: var(--space-6); }
 .space-top-l { margin-top: var(--space-7); }
+
+/* « Mes offres »: the offers judged, one sheet each with its follow-up form. */
+.history__tabs { margin-bottom: var(--space-5); }
+.history__list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-5); }
+.history__title { font-size: var(--size-l, 1.25rem); margin: 0 0 var(--space-2); }
+.history__form { display: grid; gap: var(--space-3); margin-top: var(--space-4); }
+.history__form .field + .field { margin-top: 0; }
+.history__form textarea { min-height: 4rem; }
+.history__form .button { justify-self: start; }
+@media (min-width: 48rem) {
+  .history__form { grid-template-columns: 1fr 1fr; }
+  .history__form .field:has(textarea), .history__form .button { grid-column: 1 / -1; }
+}
+.history__pages { display: flex; gap: var(--space-4); justify-content: center; margin-top: var(--space-6); }

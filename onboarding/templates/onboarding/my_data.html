@@ -20,6 +20,11 @@
         <a href="{% url 'onboarding:my_search' %}">voir «&nbsp;Ma recherche&nbsp;»</a></dd>
     </div>
     <div class="my-data__row">
+      <dt>Avis et candidatures</dt>
+      <dd>Les offres que vous avez triées, avec leur statut et vos notes :
+        <a href="{% url 'matching:history' %}">voir «&nbsp;Mes offres&nbsp;»</a></dd>
+    </div>
+    <div class="my-data__row">
       <dt>CV</dt>
       {% if cv_rows %}
       <dd>{% if profile.cv_processed_at %}Lu le {{ profile.cv_processed_at|date:"j F Y" }}. {% endif %}Le fichier a été

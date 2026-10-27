@@ -1,0 +1,58 @@
+{% extends "onboarding/account.html" %}
+{% block title %}Mes offres, tri-offres{% endblock %}
+{% block page %}
+<div class="history">
+  <h1>Mes offres</h1>
+  <p class="question__why">Les offres que vous avez triées. Suivez vos candidatures et changez d’avis ici.</p>
+  <nav class="account-nav history__tabs" aria-label="Vos avis">
+    {% for value, label, count in tabs %}
+    <a href="?avis={{ value }}"{% if value == tab %} aria-current="page"{% endif %}>{{ label }}
+      <span class="typed">({{ count }})</span></a>
+    {% endfor %}
+  </nav>
+  {% if page.object_list %}
+  <ol class="history__list" role="list">
+    {% for score in page %}{% with offer=score.offer id=score.offer_id %}
+    <li class="card card--sheet history__item" id="offre-{{ id }}" aria-labelledby="titre-{{ id }}">
+      <h2 class="history__title" id="titre-{{ id }}">{% if score.url %}<a href="{{ score.url }}" target="_blank"
+        rel="noopener noreferrer nofollow">{{ offer.title }}<span class="visually-hidden">, nouvel onglet</span></a>{% else %}{{ offer.title }}{% endif %}</h2>
+      <p class="small muted">
+        {% if offer.employer %}{{ offer.employer }} · {% endif %}{% if offer.location %}{{ offer.location }} · {% endif %}{% if offer.contract %}{{ offer.contract }} · {% endif %}avis du
+        {{ score.given_at|date:"j F" }}{% if score.expired %} · <strong>Offre expirée</strong>{% endif %}</p>
+      <form class="history__form" method="post" action="{% url 'matching:follow' id %}">
+        {% csrf_token %}<input type="hidden" name="avis" value="{{ tab }}">
+        <div class="field">
+          <label class="field-label" for="avis-{{ id }}">Mon avis</label>
+          <select name="verdict" id="avis-{{ id }}">{% for value, label in verdicts %}
+            <option value="{{ value }}"{% if value == score.verdict %} selected{% endif %}>{{ label }}</option>{% endfor %}
+          </select>
+        </div>
+        {% if tab == "yes" %}
+        <div class="field">
+          <label class="field-label" for="statut-{{ id }}">Où j’en suis</label>
+          <select name="status" id="statut-{{ id }}">{% for value, label in statuses %}
+            <option value="{{ value }}"{% if value == score.status %} selected{% endif %}>{{ label }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label" for="note-{{ id }}">Note</label>
+          <textarea name="note" id="note-{{ id }}" rows="2" maxlength="{{ note_max }}">{{ score.note|default_if_none:"" }}</textarea>
+        </div>
+        {% endif %}
+        <button class="button button--secondary" type="submit">Enregistrer</button>
+      </form>
+    </li>
+    {% endwith %}{% endfor %}
+  </ol>
+  {% if page.has_other_pages %}
+  <nav class="history__pages small" aria-label="Pages">
+    {% if page.has_previous %}<a href="?avis={{ tab }}&amp;page={{ page.previous_page_number }}">Plus récentes</a>{% endif %}
+    <span class="typed">Page {{ page.number }} sur {{ page.paginator.num_pages }}</span>
+    {% if page.has_next %}<a href="?avis={{ tab }}&amp;page={{ page.next_page_number }}">Plus anciennes</a>{% endif %}
+  </nav>
+  {% endif %}
+  {% else %}
+  <p>Aucune offre ici pour l’instant. <a href="{% url 'matching:sort' %}">Trier mes offres</a></p>
+  {% endif %}
+</div>
+{% endblock %}

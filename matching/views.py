@@ -4,9 +4,11 @@ Every answer is `no-store`, the site's default referrer policy stays (offers lin
 answer never repeats what was sent: constant bodies only.
 """
 import re
+from collections import Counter
 from functools import wraps
 
 from django.conf import settings
+from django.core.paginator import Paginator
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -18,8 +20,8 @@ from accounts import trial
 from accounts.models import Profile
 from jobs.summaries import SUMMARY_MAX
 from matching import deck
-from matching.forms import LearnedForm
-from matching.models import Score
+from matching.forms import FollowForm, LearnedForm
+from matching.models import Application, Feedback, Score
 from matching.scoring import REASON_MAX
 from matching.text import clean_text
 from onboarding import flow
@@ -156,3 +158,55 @@ def learned(request):
 @sorter
 def learned_clear(request):
     return _write_learned(request, "", own=False)
+
+
+HISTORY_PAGE = 30
+
+
+def _tab(value):
+    return value if value in Feedback.Verdict.values else Feedback.Verdict.YES
+
+
+@never_cache
+@require_safe
+@sorter
+def history(request):
+    """« Mes offres »: the offers the person judged, one tab per verdict, with the follow-up of the yes."""
+    tab = _tab(request.GET.get("avis", ""))
+    judged = deck.judged(request.user)
+    counts = Counter(judged.values_list("verdict", flat=True))
+    page = Paginator(judged.filter(verdict=tab), HISTORY_PAGE).get_page(request.GET.get("page"))
+    now = timezone.now()
+    for score in page:
+        score.url = deck.safe_link(score.offer.origin_url)
+        score.expired = score.offer.expires_at is not None and score.offer.expires_at <= now
+        score.status = score.status or Application.Status.TO_APPLY
+    return render(request, "matching/history.html", {
+        "section": "history", "tab": tab, "page": page,
+        "tabs": [(value, label, counts[value]) for value, label in Feedback.Verdict.choices],
+        "verdicts": Feedback.Verdict.choices, "statuses": Application.Status.choices,
+        "note_max": Application.NOTE_MAX,
+    })
+
+
+@never_cache
+@require_POST
+@sorter
+def follow(request, offer_id):
+    """One offer of « Mes offres »: its verdict, and its status and note when the form sent them; back to the tab."""
+    offer_id = int(offer_id)
+    form = FollowForm(request.POST)
+    if not form.is_valid():
+        return HttpResponse(status=400)
+    try:
+        deck.give(request.user, offer_id, form.cleaned_data["verdict"])
+        if "status" in request.POST:
+            deck.follow(request.user, offer_id, form.cleaned_data["status"] or Application.Status.TO_APPLY,
+                        form.cleaned_data["note"].strip())
+    except Score.DoesNotExist:
+        return HttpResponse(status=404)
+    except deck.CapReached:
+        return HttpResponse(status=429)
+    response = redirect(f"{reverse('matching:history')}?avis={_tab(request.POST.get('avis', ''))}#offre-{offer_id}")
+    response.status_code = 303
+    return response

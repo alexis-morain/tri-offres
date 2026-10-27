@@ -17,7 +17,7 @@ from accounts.testing import make_finished_profile, make_login_code
 from config.testing import PLAIN_STATIC, assert_french_copy, assert_unique_ids, visible_text
 from jobs.models import JobOffer, Source
 from jobs.testing import make_offer, make_source
-from matching.models import Delivery, Feedback, Score, ScoringRun
+from matching.models import Application, Delivery, Feedback, Score, ScoringRun
 
 LOCMEM = "django.core.mail.backends.locmem.EmailBackend"
 CONFIRM = "/mes-donnees/supprimer/"
@@ -36,6 +36,7 @@ def fill(user):
     offer = make_offer(source, external_id=f"offer-{user.pk}")
     Score.objects.create(user=user, offer=offer, score=8, reason="Une raison.", category=Score.Category.TO_REVIEW)
     Feedback.objects.create(user=user, offer=offer, verdict=Feedback.Verdict.YES)
+    Application.objects.create(user=user, offer=offer, note="Appeler le théâtre")
     Delivery.objects.create(user=user, date=timezone.localdate(), offer_count=1)
     ScoringRun.objects.create(user=user, kind=ScoringRun.Kind.ON_DEMAND, state=ScoringRun.State.RUNNING)
     OnboardingEvent.objects.create(user=user, name=events.CODE_ENTERED)
@@ -44,7 +45,7 @@ def fill(user):
 
 def count_rows(user):
     return {model.__name__: model.objects.filter(user=user).count()
-            for model in (Profile, Score, Feedback, Delivery, ScoringRun, OnboardingEvent)}
+            for model in (Profile, Score, Feedback, Application, Delivery, ScoringRun, OnboardingEvent)}
 
 
 def session_users():
@@ -77,7 +78,7 @@ class ServiceTests(DeletionTestCase):
         key = self.user.pk
         self.delete()
         self.assertFalse(User.objects.filter(pk=key).exists())
-        for model in (Profile, Score, Feedback, Delivery, ScoringRun, OnboardingEvent):
+        for model in (Profile, Score, Feedback, Application, Delivery, ScoringRun, OnboardingEvent):
             with self.subTest(model=model.__name__):
                 self.assertFalse(model.objects.filter(user_id=key).exists())
         self.assertEqual(count_rows(self.other), other_rows)

@@ -9,11 +9,11 @@ from datetime import timedelta
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import OuterRef, Q, Subquery
 from django.utils import timezone
 
 from matching import on_demand, scoring
-from matching.models import Feedback, Score
+from matching.models import Application, Feedback, Score
 
 SHOW_MIN = scoring.MAYBE_MIN
 WINDOW = on_demand.WINDOW
@@ -78,6 +78,26 @@ def undo(user, offer_id):
     row.cancelled = True
     row.save(update_fields=["cancelled"])
     return offer_id
+
+
+def judged(user):
+    """`user`'s scores that carry a standing verdict, annotated with it (`verdict`, `given_at`) and with their
+    application (`status`, `note`, None without one), latest verdict first: « Mes offres »."""
+    latest = (Feedback.objects.filter(user=user, offer_id=OuterRef("offer_id"), cancelled=False)
+              .order_by("-created_at", "-pk"))
+    application = Application.objects.filter(user=user, offer_id=OuterRef("offer_id"))
+    return (Score.objects.filter(user=user)
+            .annotate(verdict=Subquery(latest.values("verdict")[:1]), given_at=Subquery(latest.values("created_at")[:1]),
+                      status=Subquery(application.values("status")[:1]), note=Subquery(application.values("note")[:1]))
+            .filter(verdict__isnull=False).select_related("offer__source").order_by("-given_at", "-pk"))
+
+
+@transaction.atomic
+def follow(user, offer_id, status, note):
+    """`user`'s application status and note on the offer. Raises Score.DoesNotExist when the person has no score on
+    it (the same refusal as give())."""
+    Score.objects.get(user=user, offer_id=offer_id)
+    Application.objects.update_or_create(user=user, offer_id=offer_id, defaults={"status": status, "note": note})
 
 
 def last_given(user):

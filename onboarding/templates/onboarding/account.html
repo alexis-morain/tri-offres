@@ -6,7 +6,8 @@
 {% endblock %}
 {% block content %}
 <nav class="account-nav" aria-label="Votre compte">
-  <a href="{% url 'matching:sort' %}"{% if section == "sort" %} aria-current="page"{% endif %}>Mes offres</a>
+  <a href="{% url 'matching:sort' %}"{% if section == "sort" %} aria-current="page"{% endif %}>À trier</a>
+  <a href="{% url 'matching:history' %}"{% if section == "history" %} aria-current="page"{% endif %}>Mes offres</a>
   <a href="{% url 'onboarding:my_search' %}"{% if section == "search" %} aria-current="page"{% endif %}>Ma recherche</a>
   <a href="{% url 'onboarding:my_data' %}"{% if section == "data" %} aria-current="page"{% endif %}>Mes données</a>
 </nav>

@@ -80,6 +80,38 @@ class Feedback(models.Model):
         return f"{self.get_verdict_display()} : {self.offer}"
 
 
+class Application(models.Model):
+    """The person's follow-up of an offer they said yes to, in « Mes offres ». Never read by Claude: the note is
+    theirs. No row reads as TO_APPLY; the row stays when the verdict changes."""
+
+    class Status(models.TextChoices):
+        TO_APPLY = "to_apply", "À postuler"
+        APPLIED = "applied", "Candidature envoyée"
+        INTERVIEW = "interview", "Entretien"
+        OFFER = "offer", "Offre reçue"
+        ACCEPTED = "accepted", "Acceptée"
+        REJECTED = "rejected", "Refusée"
+
+    NOTE_MAX = 1000
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="applications",
+                             verbose_name="utilisateur")
+    offer = models.ForeignKey(JobOffer, on_delete=models.CASCADE, related_name="applications", verbose_name="offre")
+    status = models.CharField("statut", max_length=20, choices=Status, default=Status.TO_APPLY)
+    note = models.CharField("note", max_length=NOTE_MAX, blank=True)
+    updated_at = models.DateTimeField("mis à jour le", auto_now=True)
+
+    class Meta:
+        verbose_name = "candidature"
+        verbose_name_plural = "candidatures"
+        constraints = [
+            models.UniqueConstraint(fields=["user", "offer"], name="application_unique_per_user_offer"),
+            models.CheckConstraint(condition=models.Q(status__in=["to_apply", "applied", "interview", "offer",
+                                                                  "accepted", "rejected"]),
+                                   name="application_valid_status"),
+        ]
+
+
 class Delivery(models.Model):
     """One daily email sent to a user."""
 
