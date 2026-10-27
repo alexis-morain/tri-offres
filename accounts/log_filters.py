@@ -3,15 +3,20 @@ import logging
 import re
 
 LINK_TOKEN = re.compile(r"(/(?:connexion/lien|desinscription)/)[^/\s\"']+")
+# A person's OpenRouter key (accounts/openrouter.py): it spends their money.
+OPENROUTER_KEY = re.compile(r"sk-or-[\w-]+")
 
 
 def redact(value):
-    return LINK_TOKEN.sub(r"\1[redacted]", value) if isinstance(value, str) else value
+    if not isinstance(value, str):
+        return value
+    return OPENROUTER_KEY.sub("[redacted]", LINK_TOKEN.sub(r"\1[redacted]", value))
 
 
 class RedactLoginTokens(logging.Filter):
-    """Remove the token from /connexion/lien/<token>/ and /desinscription/<token>/ paths in a record's message,
-    arguments and traceback (the formatted traceback is set as the record's `exc_text`, which handlers reuse)."""
+    """Remove the token from /connexion/lien/<token>/ and /desinscription/<token>/ paths, and any OpenRouter key, in a
+    record's message, arguments and traceback (the formatted traceback is set as the record's `exc_text`, which
+    handlers reuse)."""
 
     def filter(self, record):
         record.msg = redact(record.msg)

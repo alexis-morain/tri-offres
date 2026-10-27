@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from django.test import TestCase, override_settings
+from django.test import TestCase
 from django.utils import timezone
 
 from accounts.models import User
@@ -303,40 +303,3 @@ class CandidatesOrderTests(SelectionTestCase):
             sources = [offer.source.name for offer in picked]
         self.assertEqual(len(sources), 2)
 
-
-class TrialGateTests(SelectionTestCase):
-    """Outside the beta a finished trial leaves the selection; in the beta its date is not read (8.1)."""
-
-    def setUp(self):
-        super().setUp()
-        self.running = set_user(make_profile("nora@example.fr", hard_criteria=CDI_ONLY),
-                                trial_ends_at=self.now + timedelta(days=2))
-        self.over = set_user(make_profile("paul@example.fr", hard_criteria=CDD_ONLY),
-                             trial_ends_at=self.now - timedelta(minutes=1))
-        self.dateless = make_profile("zoe@example.fr", domains=["J"])
-
-    @override_settings(BETA=False)
-    def test_active_profiles_leave_out_the_finished_trial(self):
-        self.assertCountEqual(active_profiles(self.now), [self.running, self.dateless])
-
-    @override_settings(BETA=False)
-    def test_active_profiles_take_the_time_they_are_given(self):
-        self.assertCountEqual(active_profiles(self.now + timedelta(days=3)), [self.dateless])
-        self.assertCountEqual(active_profiles(self.now - timedelta(days=3)), [self.running, self.over, self.dateless])
-
-    @override_settings(BETA=True)
-    def test_in_beta_everyone_is_active_whatever_the_date(self):
-        self.assertCountEqual(active_profiles(self.now + timedelta(days=30)), [self.running, self.over, self.dateless])
-        self.assertCountEqual(active_profiles(), [self.running, self.over, self.dateless])
-
-    @override_settings(BETA=False)
-    def test_the_prepass_does_not_read_the_filters_of_the_finished_trial(self):
-        cdi = self.offer(contract_type=JobOffer.Contract.CDI)
-        self.offer(contract_type=JobOffer.Contract.CDD)  # only the finished trial's filters let it in
-        self.assertEqual(list(offers_to_summarize(self.now)), [cdi])
-
-    @override_settings(BETA=True)
-    def test_in_beta_the_prepass_reads_every_filter(self):
-        cdi = self.offer(contract_type=JobOffer.Contract.CDI)
-        cdd = self.offer(contract_type=JobOffer.Contract.CDD)
-        self.assertCountEqual(list(offers_to_summarize(self.now)), [cdi, cdd])

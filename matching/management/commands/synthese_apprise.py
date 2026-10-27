@@ -23,7 +23,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, dry_run=False, user=None, **options):
         now = timezone.now()
-        profiles = selection.active_profiles(now)
+        profiles = selection.active_profiles()
         if user is not None:
             if not User.objects.filter(email__iexact=user).exists():
                 raise CommandError("Aucun compte pour cette adresse.")

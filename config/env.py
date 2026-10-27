@@ -5,6 +5,7 @@ import re
 import warnings
 from urllib.parse import urlsplit
 
+from cryptography.fernet import Fernet
 from django.core.exceptions import ImproperlyConfigured
 from django.core.management.utils import get_random_secret_key
 
@@ -135,6 +136,21 @@ def publisher_identity(debug, resend_api_key, environ=None):
             raise ImproperlyConfigured(f"{', '.join(missing)} must be set when mail is sent and DJANGO_DEBUG is off.")
     return (values["DEFAULT_FROM_EMAIL"] or "tri-offres <noreply@example.org>",
             values["MAIL_REPLY_TO"] or "contact@example.org", values["LEGAL_NAME"] or "Nom de l’éditeur")
+
+
+def fernet_keys(engine, environ=None):
+    """OPENROUTER_KEYS_FERNET: Fernet keys separated by commas, the first seals and all of them open (a leaked key
+    can be rotated out, accounts/openrouter.py). Required under the api engine; read whenever set, so a typo stops
+    the start. The errors never repeat a value."""
+    keys = env_list("OPENROUTER_KEYS_FERNET", environ=environ)
+    if not keys and engine == "api":
+        raise ImproperlyConfigured("OPENROUTER_KEYS_FERNET must be set when CLAUDE_ENGINE is api.")
+    for key in keys:
+        try:
+            Fernet(key)
+        except ValueError:
+            raise ImproperlyConfigured("OPENROUTER_KEYS_FERNET must hold Fernet keys separated by commas.") from None
+    return keys
 
 
 def secret_key(debug, environ=None):

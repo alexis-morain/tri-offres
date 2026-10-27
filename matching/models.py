@@ -165,14 +165,19 @@ class ScoringRun(models.Model):
         CRASH = "crash"  # an unexpected error
         STALE = "stale"  # still running after STALE_AFTER
         CAP = "cap"  # refused by the site's on-demand cap
-        TRIAL_OVER = "trial_over"  # the person's trial ended between the request and the execution of the run
-        PRIORITY = (CRASH, REFUSED, ENGINE)  # which code a run with several failed batches keeps
+        KEY = "key"  # OpenRouter refused the person's own key (401, 402 or its limit): expected, theirs to fix
+        KEY_UNREADABLE = "key_unreadable"  # the person's key cannot be opened: ours to fix
+        PRIORITY = (CRASH, KEY_UNREADABLE, REFUSED, KEY, ENGINE)  # which code a run with several failed batches keeps
 
         @classmethod
         def of(cls, error):
             """The code of a batch that raised `error`."""
             if isinstance(error, llm.EngineRefused):
                 return cls.REFUSED
+            if isinstance(error, llm.EngineKeyUnreadable):
+                return cls.KEY_UNREADABLE
+            if isinstance(error, llm.EngineKeyError):
+                return cls.KEY
             return cls.ENGINE if isinstance(error, llm.LLMError) else cls.CRASH
 
     # A run still running after this died with its thread or its command (decision 8).

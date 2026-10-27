@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}OpenRouter est connecté, tri-offres{% endblock %}
+{% block content %}
+<div class="question">
+  <h1 class="question__title">OpenRouter est connecté</h1>
+  <p class="lede">Posez une limite sur votre clé : sans elle, rien n’arrête la dépense sauf votre crédit.</p>
+  <p class="muted">Ouvrez la <a href="{{ key_url }}" rel="noopener noreferrer">page de votre clé</a>, saisissez le plafond
+    voulu dans «&nbsp;Credit limit&nbsp;» et enregistrez. Le lien ne s’ouvre que pour vous.</p>
+  <div class="question__actions"><a class="button" href="{{ next_url }}">Continuer</a></div>
+</div>
+{% endblock %}

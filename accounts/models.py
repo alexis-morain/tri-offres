@@ -1,9 +1,8 @@
+from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 from django.db.models.functions import Lower
 from django.utils import timezone
-
-from accounts import trial
 
 
 def normalize_email(email):
@@ -28,13 +27,17 @@ class UserManager(BaseUserManager):
     def get_by_natural_key(self, email):
         return self.get(email=normalize_email(email))
 
-    def mailable(self, now=None):
-        """Users who get the daily email: an active status and, outside the beta, a trial not over at `now` (default:
-        the real time). The one gate of the sending and of every scoring that costs a call (accounts/trial.py): a
-        missing date is served, the exact end is not."""
-        users = self.filter(is_active=True, status=User.Status.ACTIVE)
-        if trial.enabled():
-            users = users.exclude(trial_ends_at__lte=now or timezone.now())
+    def reachable(self):
+        """Users we may write to: active, not unsubscribed nor paused."""
+        return self.filter(is_active=True, status=User.Status.ACTIVE)
+
+    def mailable(self):
+        """Users who get the daily email: reachable and, under the api engine, with an OpenRouter key that works (none,
+        or an episode of refusal in progress, leaves the account out). The one gate of the sending and of every
+        scoring that costs a call."""
+        users = self.reachable()
+        if settings.CLAUDE_ENGINE == "api":
+            users = users.filter(openrouter_key__isnull=False, openrouter_key__refused_since__isnull=True)
         return users
 
 
@@ -46,9 +49,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     email = models.EmailField("adresse mail", unique=True)
     date_joined = models.DateTimeField("inscrit le", default=timezone.now)
-    trial_ends_at = models.DateTimeField("fin d'essai", null=True, blank=True)
     # status is the person's mailing choice; UserManager.mailable() decides whether the daily email goes out (the
-    # status and, outside the beta, the end of the trial).
+    # status and, under the api engine, the OpenRouter key).
     # is_active keeps Django's meaning: may log in (an inactive user is never mailed either).
     status = models.CharField("statut d'envoi", max_length=20, choices=Status, default=Status.ACTIVE)
     is_active = models.BooleanField("actif", default=True)
@@ -132,6 +134,28 @@ class Profile(models.Model):
 
     def __str__(self):
         return f"Profil de {self.user}"
+
+
+class OpenRouterKey(models.Model):
+    """A person's OpenRouter key, sealed (accounts/openrouter.py, contract 5.3). Never registered in the admin, never
+    shown, logged or mailed: it can spend the person's money. Its row goes with the account (CASCADE)."""
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="openrouter_key",
+                                verbose_name="utilisateur")
+    # The Fernet token of the key, as text.
+    encrypted_key = models.TextField("clé chiffrée", editable=False)
+    # SHA-256 hex of the key: OpenRouter's own handle for it (the link to its page), and the check at each decryption.
+    fingerprint = models.CharField("empreinte", max_length=64)
+    connected_at = models.DateTimeField("connectée le", default=timezone.now)
+    # Start of the episode of refusal in progress (402 or key limit); blank when the key works.
+    refused_since = models.DateTimeField("refusée depuis", null=True, blank=True)
+
+    class Meta:
+        verbose_name = "clé OpenRouter"
+        verbose_name_plural = "clés OpenRouter"
+
+    def __str__(self):
+        return f"Clé OpenRouter du compte {self.user_id}"
 
 
 class LoginCode(models.Model):

@@ -80,6 +80,8 @@ MESSAGES = {
     "unreadable": "Je n’arrive pas à lire ce fichier. Essayez un export PDF, ou passez cette étape.",
     "empty": "Je n’ai trouvé ni poste, ni compétence, ni formation dans ce fichier. Est-ce bien un CV ?",
     "engine": "Je n’arrive pas à analyser votre CV pour le moment. Réessayez plus tard, ou passez cette étape.",
+    "key": "OpenRouter refuse votre clé : crédit épuisé, limite atteinte ou clé révoquée. Voyez « Mes données », "
+           "puis réessayez, ou passez cette étape.",
     # The two limits, followed by what to do: it depends on whether a list is there to edit.
     "limit": "Vous avez envoyé trois CV en 24 heures.",
     "site_cap": "Je ne peux plus lire de CV pour le moment.",
@@ -208,7 +210,7 @@ def analyse(user, data):
         result = llm.complete_json(TASK, SYSTEM, prompt_content(text), CV_SCHEMA, user)
     except llm.LLMError as exc:
         logger.warning("CV not analysed: %s", type(exc).__name__)
-        raise CVError("engine") from None
+        raise CVError("key" if isinstance(exc, llm.EngineKeyError) else "engine") from None
     result = tidy(result)
     if not result:
         raise CVError("empty")  # the attempt was counted all the same

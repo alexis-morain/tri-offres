@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Connecter OpenRouter pas à pas, tri-offres{% endblock %}
+{% block content %}
+<div class="question">
+  <h1 class="question__title">Connecter OpenRouter pas à pas</h1>
+  <p class="question__why">Cinq étapes, environ cinq minutes. Gardez cette page ouverte dans un onglet.</p>
+  <ol class="prose tutorial">
+    <li>
+      <h2 class="education__heading">Créer un compte OpenRouter</h2>
+      <p>Allez sur <a href="https://openrouter.ai" rel="noopener noreferrer">openrouter.ai</a>, puis «&nbsp;Sign
+        in&nbsp;» et «&nbsp;Sign up&nbsp;». Une adresse mail et un mot de passe suffisent, ou votre compte Google.</p>
+    </li>
+    <li>
+      <h2 class="education__heading">Ajouter du crédit</h2>
+      <p>Ouvrez <a href="https://openrouter.ai/credits" rel="noopener noreferrer">la page des crédits</a>, choisissez
+        un montant ({{ advised_credit }} suffisent) et validez avec vos coordonnées bancaires. Laissez la recharge
+        automatique désactivée.</p>
+    </li>
+    <li>
+      <h2 class="education__heading">Revenir ici et cliquer</h2>
+      <p>Revenez sur <a href="{% url 'accounts:openrouter_connect' %}">la page de connexion</a> et cliquez sur
+        «&nbsp;Connecter OpenRouter&nbsp;». OpenRouter vous demande d’autoriser tri-offres : acceptez, vous revenez
+        ici tout seul.</p>
+    </li>
+    <li>
+      <h2 class="education__heading">Poser une limite</h2>
+      <p>Une fois connecté, ouvrez le lien «&nbsp;page de votre clé&nbsp;». Dans «&nbsp;Credit limit&nbsp;», saisissez
+        le plafond que vous voulez ({{ advised_credit }} par exemple) et enregistrez. La notation s’arrête quand il
+        est atteint.</p>
+    </li>
+    <li>
+      <h2 class="education__heading">Voir votre dépense</h2>
+      <p>La page <a href="https://openrouter.ai/activity" rel="noopener noreferrer">Activity</a> de votre compte
+        liste chaque appel et son coût. Vous pouvez aussi déconnecter OpenRouter dans
+        «&nbsp;<a href="{% url 'onboarding:my_data' %}">Mes données</a>&nbsp;» et révoquer la clé chez eux.</p>
+    </li>
+  </ol>
+  <div class="question__actions"><a class="button" href="{% url 'accounts:openrouter_connect' %}">Connecter OpenRouter</a></div>
+</div>
+{% endblock %}

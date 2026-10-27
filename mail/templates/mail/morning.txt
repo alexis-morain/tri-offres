@@ -13,10 +13,7 @@ Notes générées par IA, la décision vous appartient.
 Pour élargir ou changer vos critères, ouvrez « Ma recherche » :
 {{ my_search_url }}
 {% endif %}
-{% if trial_last %}C’est votre dernier mail du matin : votre essai se termine le {{ trial_end_day }}. Vos réponses et vos avis restent dans « Mes données » jusqu’à ce que vous supprimiez votre compte :
-{{ my_data_url }}
-
-{% endif %}Pour ne plus recevoir ces mails :
+Pour ne plus recevoir ces mails :
 {{ unsubscribe_url }}
 
 tri-offres

@@ -45,7 +45,6 @@ class UserManagerTests(TestCase):
     def test_defaults(self):
         user = User.objects.create_user("nora@example.fr")
         self.assertEqual(user.status, User.Status.ACTIVE)
-        self.assertIsNone(user.trial_ends_at)
         self.assertIsNotNone(user.date_joined)
 
     def test_get_by_natural_key_is_case_insensitive(self):

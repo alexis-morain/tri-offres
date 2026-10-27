@@ -2,17 +2,19 @@ from functools import wraps
 
 from django.conf import settings
 from django.contrib.auth import logout
+from django.db import IntegrityError
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods, require_POST, require_safe
+from django.views.decorators.debug import sensitive_variables
+from django.views.decorators.http import require_GET, require_http_methods, require_POST, require_safe
 
-from accounts import auth, deletion, journal, trial, unsubscribe
+from accounts import auth, deletion, journal, openrouter, pkce, unsubscribe
 from accounts.auth import SignIn
 from accounts.forms import CodeForm, EmailForm
 from accounts.management.commands import purge_login_codes
-from accounts.models import Profile
+from accounts.models import OpenRouterKey, Profile
 from config.backups import BACKUP_DAYS
 from jobs.models import FULL_TEXT_DAYS, OFFER_DAYS
 
@@ -30,9 +32,12 @@ OUTLOOK = ("Ouvrir Outlook", "https://outlook.live.com/mail/")
 
 def after_login_url(user):
     """Where a signed-in person goes. Computed here only: no `next` parameter is ever followed.
-    Once the questionnaire is over, the sort page; the questionnaire where it stopped otherwise."""
+    The OpenRouter connection first when it is required (api engine, no key); then, once the questionnaire is over,
+    the sort page; the questionnaire where it stopped otherwise."""
     from onboarding import flow  # the onboarding app builds on accounts: imported here, not at module level
 
+    if openrouter.must_connect(user):
+        return reverse("accounts:openrouter_connect")
     profile = Profile.objects.filter(user_id=user.pk).first()
     if profile is not None and flow.is_finished(profile):
         return reverse("matching:sort")
@@ -170,8 +175,7 @@ def privacy(request):
         "full_text_days": FULL_TEXT_DAYS, "offer_days": OFFER_DAYS, "code_days": purge_login_codes.KEEP.days,
         "session_days": settings.SESSION_COOKIE_AGE // 86400, "backup_days": BACKUP_DAYS,
         "journal_days": journal.KEEP.days, "failure_days": purge_login_codes.KEEP.days,
-        "kept_hours": int(deletion.CODE_KEEP.total_seconds() // 3600), "legal_email": settings.LEGAL_EMAIL,
-        "trial": trial.enabled(), "trial_days": trial.TRIAL_DAYS})
+        "kept_hours": int(deletion.CODE_KEEP.total_seconds() // 3600), "legal_email": settings.LEGAL_EMAIL})
 
 
 @require_safe
@@ -212,3 +216,80 @@ def unsubscribe_one_click(request, token):
         return HttpResponse(status=400)
     unsubscribe.stop_mails(token)
     return HttpResponse()
+
+
+def signed_in(view):
+    """Sign-in pages compute their own destination, so not login_required (its `next` is never followed): anyone else
+    goes to the home page."""
+    @wraps(view)
+    def wrapped(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect("accounts:home")
+        return view(request, *args, **kwargs)
+    return wrapped
+
+
+@signed_in
+@require_safe
+def openrouter_connect(request):
+    """The connection screen: the education screen with the button, or the state of the key once connected."""
+    row = OpenRouterKey.objects.filter(user_id=request.user.pk).first()
+    return render(request, "accounts/openrouter_connect.html", {
+        "connected": row is not None, "connected_at": row and row.connected_at,
+        "refused": bool(row and row.refused_since), "key_url": row and openrouter.key_url(row.fingerprint),
+        "signup_cost": openrouter.SIGNUP_COST, "month_cost": openrouter.MONTH_COST_MAX,
+        "advised_credit": openrouter.ADVISED_CREDIT})
+
+
+@require_safe
+def openrouter_tutorial(request):
+    """The step-by-step tutorial: a static page, open to anyone (no account needed to read it)."""
+    return render(request, "accounts/openrouter_tutorial.html", {"advised_credit": openrouter.ADVISED_CREDIT})
+
+
+@private_headers
+@require_POST
+@signed_in
+def openrouter_start(request):
+    return redirect(pkce.begin(request.session, request.user.pk))
+
+
+@sensitive_variables("code", "verifier", "key")
+@private_headers
+@require_GET
+def openrouter_return(request):
+    """Where OpenRouter sends the person back (contract 5.10). Always a 302 to a fixed page, never to a `next`. Without
+    a code nothing happens and the slot stays; with one the slot is taken out, whatever follows."""
+    code = request.GET.get("code")
+    if not code:
+        return redirect("accounts:openrouter_cancelled")
+    verifier = pkce.take(request.session, request.user, request.GET.get("state", ""))
+    key = pkce.exchange(code, verifier) if verifier and len(code) <= pkce.MAX_CODE else None
+    if key is not None:
+        try:
+            openrouter.store(request.user.pk, key)
+        except IntegrityError:  # the account went away meanwhile
+            key = None
+    return redirect("accounts:openrouter_done" if key is not None else "accounts:openrouter_cancelled")
+
+
+@signed_in
+@require_safe
+def openrouter_done(request):
+    row = OpenRouterKey.objects.filter(user_id=request.user.pk).first()
+    return render(request, "accounts/openrouter_done.html", {
+        "key_url": row and openrouter.key_url(row.fingerprint), "next_url": after_login_url(request.user)})
+
+
+@signed_in
+@require_safe
+def openrouter_cancelled(request):
+    return render(request, "accounts/openrouter_cancelled.html", {
+        "connected": openrouter.is_connected(request.user)})
+
+
+@require_POST
+@signed_in
+def openrouter_disconnect(request):
+    openrouter.disconnect(request.user)
+    return redirect("accounts:openrouter_connect")

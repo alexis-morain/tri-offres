@@ -47,6 +47,8 @@ WINDOW = timedelta(hours=24)
 MESSAGES = {
     "engine": "Je n’arrive pas à réécrire la synthèse pour le moment. Votre version actuelle est gardée. "
               "Réessayez plus tard.",
+    "key": "OpenRouter refuse votre clé : crédit épuisé, limite atteinte ou clé révoquée. Voyez « Mes données », puis "
+           "réessayez. Votre version actuelle est gardée.",
     "limit": "Vous avez demandé plusieurs synthèses en 24 heures. Modifiez le texte vous-même, ou réessayez plus tard.",
 }
 
@@ -305,7 +307,7 @@ def _attempt(profile, event, correction=None):
         result = compose(profile, correction)
     except llm.LLMError as exc:
         logger.warning("Summary of user %s not written: %s", profile.user.pk, type(exc).__name__)
-        return _failed(profile, type(exc).__name__, "engine")
+        return _failed(profile, type(exc).__name__, "key" if isinstance(exc, llm.EngineKeyError) else "engine")
     profile.summary_sentences = result["sentences"]
     profile.summary_questions = [{**question, "answer": ""} for question in result["questions"]]
     profile.summary_text = ""

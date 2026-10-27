@@ -213,15 +213,6 @@ class UploadTests(CVTestCase):
         self.assertNotIn("Nora-Testard-CV-confidentiel", repr(fake.calls))
         self.assertFalse(OnboardingEvent.objects.exclude(details={}).exists())
 
-    def test_the_cv_is_still_analysed_once_the_trial_is_over(self):
-        User.objects.filter(pk=self.user.pk).update(trial_ends_at=timezone.now() - timedelta(days=2))
-        for beta in (False, True):
-            with self.subTest(beta=beta), override_settings(BETA=beta):
-                fake.calls.clear()
-                self.assertEqual(self.upload(make_pdf()).status_code, 302)
-                self.assertEqual(self.profile.cv_profile, GOOD)
-                self.assertEqual(len(fake.calls), 1)
-
     def test_docx_is_read(self):
         self.assertEqual(self.upload(make_docx(), name="cv.docx").status_code, 302)
         self.assertEqual(self.profile.cv_profile, GOOD)
@@ -364,6 +355,14 @@ class RefusalTests(CVTestCase):
             with self.subTest(response=str(response)[:40]), extractor_returns(), self.assertLogs(level="WARNING"):
                 self.assertRefused(self.upload(make_pdf()), "engine")
         self.assertEqual(self.profile.cv_profile, {})
+
+    def test_a_refused_key_has_its_own_message_that_points_to_the_connection(self):
+        for error in (llm.EngineKeyRejected("x"), llm.EngineCreditExhausted("x"), llm.EngineKeyLimitReached("x")):
+            fake.set_response(cv.TASK, error)
+            with self.subTest(error=type(error).__name__), extractor_returns(), self.assertLogs(level="WARNING"):
+                self.assertRefused(self.upload(make_pdf()), "key")
+        self.assertIn("OpenRouter", cv.MESSAGES["key"])
+        self.assertIn("Mes données", cv.MESSAGES["key"])
 
     def test_nothing_found_has_its_message_and_counts(self):
         fake.set_response(cv.TASK, {"positions": [{"title": " ", "organisation": "", "years": ""}], "skills": [" "],

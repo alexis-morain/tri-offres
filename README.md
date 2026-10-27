@@ -7,7 +7,7 @@ lets you swipe through them; your answers refine the next scores. Nothing is eve
 The interface and the mails are in French only. The code, comments and docs are in English.
 
 **Status: pre-beta.** The sign-in, the questionnaire, the collection, the scoring, the sort page, the morning mail,
-the data-protection pages, the end of the trial, a scheduler and its monitoring are coded and tested. One hosted
+the data-protection pages, the OpenRouter key of each person, a scheduler and its monitoring are coded and tested. One hosted
 instance is run by the authors; it is not open to the public yet. This README describes what the code does today.
 
 ## What it does
@@ -98,8 +98,10 @@ This is possible but not supported: the authors run one hosted instance and answ
 ### What you need
 
 - Docker with Compose.
-- **Your own Anthropic API key** (`CLAUDE_ENGINE=api`, `ANTHROPIC_API_KEY`). Scoring, summaries and CV extraction
-  call Claude on your key and at your cost. The other engine, `oauth`, runs `claude -p` on a Claude subscription:
+- **An OpenRouter account** (`CLAUDE_ENGINE=api`, `OPENROUTER_API_KEY`) for the calls that serve no one in
+  particular (the offers' pre-pass), at your cost. Every call made for a person (CV extraction, summary, scoring)
+  goes out on that person's own OpenRouter key, which they connect by OAuth and which is sealed with
+  `OPENROUTER_KEYS_FERNET`. The site never falls back to your key for them. The other engine, `oauth`, runs `claude -p` on a Claude subscription:
   it exists for local development only, and the code refuses to use it for any account outside `DEV_EMAILS`. A
   personal Claude subscription must never serve other people.
 - **A Resend account** to send mail (`RESEND_API_KEY`), and a sender address on a domain you control. Without the
@@ -133,15 +135,15 @@ its values from your shell, or from a `.env` file next to it, which Compose uses
 | `SITE_URL` | `http://localhost:8000` | Public address used in mails. The one-click unsubscribe header is only sent with `https://` |
 | `DATABASE_PATH` | `/data/tri-offres.sqlite3` in the image | SQLite file |
 | `CLAUDE_ENGINE` | empty (no Claude) | `api` for self-hosting; `fake` is used by the tests |
-| `ANTHROPIC_API_KEY` | none | Your key, for the `api` engine |
-| `OPENROUTER_API_KEY` | none | If set, the `api` engine goes through OpenRouter instead, and this key wins over the Anthropic one |
+| `OPENROUTER_API_KEY` | none | The site's own OpenRouter key, for the shared calls of the `api` engine (never a person's) |
+| `OPENROUTER_KEYS_FERNET` | none | Fernet keys, comma-separated: the first seals the people's OpenRouter keys, all of them open (rotation). **Required** with `CLAUDE_ENGINE=api`. Generate one with `python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"`; lose it and everyone reconnects |
 | `RESEND_API_KEY` | none | Without it, mails go to the log |
 | `DEFAULT_FROM_EMAIL` | `tri-offres <noreply@example.org>` | Sender of every mail. **Required** when `RESEND_API_KEY` is set and `DJANGO_DEBUG` is off: the site refuses to start without it |
 | `MAIL_REPLY_TO` | `contact@example.org` | Reply-to of every mail, and the contact address of the legal pages. Required in the same case |
 | `LEGAL_NAME`, `LEGAL_ADDRESS`, `LEGAL_SIRET` | `Nom de l’éditeur`, empty, empty | The publisher on the legal notice; an empty address or SIRET hides its line. `LEGAL_NAME` is required in the same case as the two above |
 | `ALERT_EMAIL` | `MAIL_REPLY_TO` | Where the scheduler sends its alerts |
 | `HEALTHCHECKS_PING_URL` | empty | healthchecks.io ping URL (a secret); empty means no ping |
-| `BETA` | `1` | While `1`, the service is free and there is no end of trial; `0` gives each account a trial that ends |
+| `BETA` | `1` | While `1`, the site says « bêta gratuite » (wording only) |
 | `ADMIN_ACCESS_TEAM_DOMAIN`, `ADMIN_ACCESS_AUD` | empty | With an `https://` `SITE_URL`, `/admin` answers 404 unless the request carries a valid Cloudflare Access token for this team and audience. Over `http://` (local use) the guard is off and the admin login of Django applies |
 | `HSTS_SECONDS` | empty | Empty means one hour in HTTPS and off in HTTP |
 | `DEV_EMAILS` | empty | Addresses the `oauth` engine may serve (development only) |
@@ -168,7 +170,7 @@ Run management commands with `docker compose exec web python manage.py …` in t
 `docker compose run --rm web python manage.py …`: the entrypoint runs a given command as it is, without migrating).
 
 `docker-compose.yml` is written for local use: it publishes port 8000 directly and does not list
-`ANTHROPIC_API_KEY`, `OPENROUTER_API_KEY` nor `RESEND_API_KEY` (it does pass `CLAUDE_ENGINE` from your shell). Add the
+`OPENROUTER_API_KEY` nor `RESEND_API_KEY` (it does pass `CLAUDE_ENGINE` and `OPENROUTER_KEYS_FERNET` from your shell). Add the
 keys you use to its `environment:` block for a real instance, and put the site behind an HTTPS proxy. The admin is at
 `/admin/`, a health check at `/healthz`.
 

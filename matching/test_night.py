@@ -11,7 +11,6 @@ from django.test import TestCase, override_settings
 from django.utils import timezone
 
 import llm
-from accounts.models import Profile, User
 from accounts.testing import make_profile
 from jobs import summaries
 from jobs.models import JobOffer
@@ -466,58 +465,3 @@ class DryRunTests(NightTestCase):
         self.assertEqual((report.people_cut_offers, report.people_cut_persons), (50, 2))
         self.assertTrue(report.dry_run)
 
-
-class TrialGateTests(NightTestCase):
-    """Outside the beta the night skips a finished trial in both phases; in the beta the date is not read (8.1)."""
-
-    def setUp(self):
-        super().setUp()
-        self.running = make_profile("nora@example.fr")
-        self.over = make_profile("paul@example.fr")
-        User.objects.filter(pk=self.running.user_id).update(trial_ends_at=self.now + timedelta(days=1))
-        User.objects.filter(pk=self.over.user_id).update(trial_ends_at=self.now - timedelta(seconds=1))
-        self.offers(3)
-
-    def scored_users(self):
-        return {call.user for call in self.calls(scoring.TASK)}
-
-    @override_settings(BETA=False)
-    def test_the_finished_trial_is_not_scored(self):
-        report = self.run_night(phases=["personnes"])
-        self.assertEqual(self.scored_users(), {self.running.user})
-        self.assertEqual([person.label for person in report.people], [f"compte {self.running.user_id}"])
-        self.assertFalse(ScoringRun.objects.filter(user=self.over.user).exists())
-        self.assertFalse(Score.objects.filter(user=self.over.user).exists())
-
-    @override_settings(BETA=False)
-    def test_the_night_judges_the_trial_at_its_own_time(self):
-        report = night.run_night(self.now + timedelta(days=2), sleep=self.sleeps.append, phases=["personnes"])
-        self.assertEqual(report.people, [])
-        self.assertEqual(fake.calls, [])
-
-    def give_the_finished_trial_its_own_domain(self):
-        Profile.objects.filter(pk=self.over.pk).update(domains=["K"])
-        self.offers(2, source=make_source(name="Carenews", domains=["K"]))
-
-    @override_settings(BETA=False)
-    def test_the_prepass_does_not_read_the_offers_only_the_finished_trial_wants(self):
-        self.give_the_finished_trial_its_own_domain()
-        self.run_night(phases=["resumes"])
-        self.assertEqual([size(call) for call in self.calls(summaries.TASK)], [3])
-        self.assertEqual(JobOffer.objects.filter(summary_written_at__isnull=True).count(), 2)
-
-    @override_settings(BETA=True)
-    def test_in_beta_the_prepass_reads_them(self):
-        self.give_the_finished_trial_its_own_domain()
-        self.run_night(phases=["resumes"])
-        self.assertEqual([size(call) for call in self.calls(summaries.TASK)], [5])
-
-    @override_settings(BETA=False)
-    def test_a_dry_run_counts_only_the_running_trial(self):
-        report = self.run_night(phases=["personnes"], dry_run=True)
-        self.assertEqual([person.label for person in report.people], [f"compte {self.running.user_id}"])
-
-    @override_settings(BETA=True)
-    def test_in_beta_the_date_is_not_read(self):
-        self.run_night(phases=["personnes"])
-        self.assertEqual(self.scored_users(), {self.running.user, self.over.user})

@@ -14,7 +14,7 @@ services:
       DATABASE_PATH: /data/tri-offres.sqlite3
       DJANGO_SECRET_KEY_FALLBACKS: ${DJANGO_SECRET_KEY_FALLBACKS:-}
       SITE_URL: ${SITE_URL:-http://localhost:8000}
-      # 1 while the beta lasts (free, no trial end); 0 sets and reads the end of the trial (accounts/trial.py).
+      # 1 while the beta lasts: « bêta gratuite » is written on the site.
       BETA: ${BETA:-1}
       BETA_CAPACITY: ${BETA_CAPACITY:-80}
       LOGIN_MAIL_DAILY_CAP: ${LOGIN_MAIL_DAILY_CAP:-60}
@@ -27,6 +27,9 @@ services:
       LEGAL_ADDRESS: ${LEGAL_ADDRESS:-}
       LEGAL_SIRET: ${LEGAL_SIRET:-}
       CLAUDE_ENGINE: ${CLAUDE_ENGINE:-}
+      # Fernet keys, comma-separated, that seal each person's OpenRouter key (accounts/openrouter.py): required with
+      # CLAUDE_ENGINE=api. The site's own OPENROUTER_API_KEY (shared calls) is added by hand, like RESEND_API_KEY.
+      OPENROUTER_KEYS_FERNET: ${OPENROUTER_KEYS_FERNET:-}
       # Supervision (9.2): empty means no ping and alert mails to MAIL_REPLY_TO. The ping URL is a secret.
       HEALTHCHECKS_PING_URL: ${HEALTHCHECKS_PING_URL:-}
       ALERT_EMAIL: ${ALERT_EMAIL:-}

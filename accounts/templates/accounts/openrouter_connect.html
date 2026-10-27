@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}OpenRouter, tri-offres{% endblock %}
+{% block content %}
+<div class="question">
+  {% if connected %}
+  <h1 class="question__title">OpenRouter</h1>
+  <p class="lede">
+    {% if refused %}OpenRouter refuse votre clé pour l’instant : crédit épuisé ou limite atteinte.
+    {% else %}OpenRouter est connecté depuis le {{ connected_at|date:"j F Y" }}.{% endif %}
+  </p>
+  <p class="muted small">
+    Votre clé se règle chez OpenRouter : <a href="{{ key_url }}" rel="noopener noreferrer">page de votre clé</a>
+    (limite de dépense, révocation).
+  </p>
+  <form class="question__actions" method="post" action="{% url 'accounts:openrouter_disconnect' %}">
+    {% csrf_token %}
+    <button class="button" type="submit">Déconnecter OpenRouter</button>
+  </form>
+  {% else %}
+  <h1 class="question__title">Connectez OpenRouter</h1>
+  <p class="lede">Pour noter vos offres, tri-offres a besoin de votre compte OpenRouter. Cinq points avant de cliquer.</p>
+  <ol class="education">
+    <li class="education__point">
+      <h2 class="education__heading">Pourquoi</h2>
+      <p>Chaque matin, une IA (Claude, d’Anthropic) lit les offres et les note pour vous. Chaque lecture coûte quelques
+        centimes. Le service est gratuit : vous réglez seulement ce que l’IA consomme pour vous, directement, sans
+        intermédiaire qui prend une marge.</p>
+    </li>
+    <li class="education__point">
+      <h2 class="education__heading">Où va l’argent</h2>
+      <p>À OpenRouter, un service qui donne accès à Claude. Vous y ajoutez du crédit, et tri-offres le dépense pour vos
+        seules notes. Nous ne touchons rien et ne voyons jamais vos coordonnées bancaires.</p>
+    </li>
+    <li class="education__point">
+      <h2 class="education__heading">Budget</h2>
+      <p>Une inscription coûte environ {{ signup_cost }}, un mois de mails {{ month_cost }} au plus.</p>
+      <p>Conseil : ajoutez {{ advised_credit }} et posez une limite sur la clé. Nous ne dépensons jamais au-delà du
+        crédit et de la limite que vous avez posée (attention à la recharge automatique d’OpenRouter) ; quand ils sont
+        atteints, la notation s’arrête et nous vous prévenons par mail.</p>
+    </li>
+    <li class="education__point">
+      <h2 class="education__heading">Contrôle</h2>
+      <p>Vous voyez chaque dépense dans votre compte OpenRouter
+        (<a href="https://openrouter.ai/activity" rel="noopener noreferrer">lien direct vers votre activité</a>), et
+        vous pouvez couper l’accès à tout moment, chez eux ou dans «&nbsp;Mes données&nbsp;».</p>
+    </li>
+    <li class="education__point">
+      <h2 class="education__heading">Vos données</h2>
+      <p>Vos réponses et votre CV passent par votre compte OpenRouter pour être lus par Claude, comme expliqué dans
+        <a href="{% url 'accounts:privacy' %}">Ce que nous gardons et pourquoi</a>.</p>
+    </li>
+  </ol>
+  {% include "accounts/_openrouter_start.html" %}
+  <p class="muted small"><a href="{% url 'accounts:openrouter_tutorial' %}">Un compte OpenRouter à créer ? Le tuto pas à pas</a></p>
+  {% endif %}
+</div>
+{% endblock %}

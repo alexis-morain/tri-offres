@@ -16,6 +16,8 @@ SUMMARY_FAILED = "summary_failed"
 ONBOARDING_COMPLETED = "onboarding_completed"
 WELCOME_SENT = "welcome_sent"
 REMINDER_SENT = "reminder_sent"
+# The one-off mail « connectez OpenRouter » sent by `manage.py inviter_openrouter`, once per account.
+OPENROUTER_INVITED = "openrouter_invited"
 
 
 def step(slug):

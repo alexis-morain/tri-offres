@@ -2,16 +2,16 @@ from datetime import datetime, timezone as dt_timezone
 
 from django.core.management.base import BaseCommand, CommandError
 
-from accounts import deletion, journal, unsubscribe
-from accounts.models import User
+from accounts import deletion, journal, openrouter, unsubscribe
+from accounts.models import OpenRouterKey, User
 
 INSTANT = "%Y-%m-%dT%H:%M"
 
 
 class Command(BaseCommand):
-    help = ("Après une restauration de la base : rejoue dans l’ordre les suppressions, désinscriptions et "
-            "réabonnements du journal des comptes postérieurs à l’instant de la sauvegarde "
-            "(docs/restauration.md). Aucun mail ne part. La sortie ne nomme les comptes que par leur clé.")
+    help = ("Après une restauration de la base : rejoue dans l’ordre les suppressions, désinscriptions, "
+            "réabonnements et déconnexions d’OpenRouter du journal des comptes postérieurs à l’instant de la "
+            "sauvegarde (docs/restauration.md). Aucun mail ne part. La sortie ne nomme les comptes que par leur clé.")
 
     def add_arguments(self, parser):
         parser.add_argument("--depuis", required=True, metavar="AAAA-MM-JJTHH:MM",
@@ -48,6 +48,10 @@ class Command(BaseCommand):
             done, text, plan = True, "supprimé", "à supprimer"
         elif entry.kind == journal.UNSUBSCRIPTION:
             done, text, plan = user.status != User.Status.UNSUBSCRIBED, "désinscrit", "à désinscrire"
+        elif entry.kind == journal.OPENROUTER_DISCONNECTION:
+            # Only a key connected before the line: a reconnection after it survives.
+            done = OpenRouterKey.objects.filter(user_id=user.pk, connected_at__lt=entry.at).exists()
+            text, plan = "déconnecté d’OpenRouter", "à déconnecter d’OpenRouter"
         else:
             done, text, plan = user.status == User.Status.UNSUBSCRIBED, "réabonné", "à réabonner"
         if not done:
@@ -60,6 +64,8 @@ class Command(BaseCommand):
             deletion.delete_account(user, replay=True)
         elif entry.kind == journal.UNSUBSCRIPTION:
             unsubscribe.stop_user_mails(user, replay=True)
+        elif entry.kind == journal.OPENROUTER_DISCONNECTION:
+            openrouter.disconnect(user, before=entry.at, replay=True)
         else:
             unsubscribe.resume_mails(user, replay=True)
         self.stdout.write(f"{head} : compte {key} {text}.")

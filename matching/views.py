@@ -16,7 +16,6 @@ from django.utils import timezone
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_http_methods, require_POST, require_safe
 
-from accounts import trial
 from accounts.models import Profile
 from jobs.summaries import SUMMARY_MAX
 from matching import deck
@@ -89,8 +88,6 @@ def sort(request):
         "count": deck.deck_count(request.user, now),
         "undo_offer": deck.last_given(request.user),
         "learned": profile.learned_summary.strip(), "learned_own": profile.learned_summary_own,
-        # Outside the beta a finished trial brings no new offer; the page stays open for opinions on the ones here.
-        "trial_over": trial.is_over(request.user, now),
         # The key of the script's queue in localStorage, tied to this account.
         "queue_key": f"tri.queue.{request.user.pk}",
     })

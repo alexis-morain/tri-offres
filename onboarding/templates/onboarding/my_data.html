@@ -35,25 +35,38 @@
       <dd>Aucun CV envoyé.</dd>
       {% endif %}
     </div>
-    {% if trial_until or trial_ended %}
+    {% if key_required or key_connected %}
     <div class="my-data__row">
-      <dt>Essai</dt>
-      <dd>{% if trial_over %}Terminé le {{ trial_ended }}.{% else %}Jusqu’au {{ trial_until }}.{% endif %}</dd>
+      <dt>OpenRouter</dt>
+      {% if key_connected %}
+      <dd>{% if key_refused %}OpenRouter refuse votre clé pour l’instant : crédit épuisé ou limite atteinte. Les notes
+        reprennent quand vous ajoutez du crédit ou relevez la limite.{% else %}Connecté depuis le
+        {{ key_connected_at|date:"j F Y" }}.{% endif %}
+        <a href="{{ key_url }}" rel="noopener noreferrer">Page de votre clé</a> (limite de dépense, révocation).
+        <form class="my-data__resubscribe" method="post" action="{% url 'accounts:openrouter_disconnect' %}">
+          {% csrf_token %}<button class="button button--secondary" type="submit">Déconnecter OpenRouter</button>
+        </form>
+        <span class="my-data__detail">Déconnecter efface la clé chez nous ; pensez à révoquer la clé chez
+          OpenRouter.</span></dd>
+      {% else %}
+      <dd>Pas connecté : vos offres ne sont pas notées et le mail du matin ne part pas.
+        <a href="{% url 'accounts:openrouter_connect' %}">Connecter OpenRouter</a></dd>
+      {% endif %}
     </div>
     {% endif %}
     {% if profile.user.status == "active" or profile.user.status == "unsubscribed" %}
     <div class="my-data__row">
       <dt>Mail du matin</dt>
       {% if profile.user.status == "active" %}
-      {% if trial_over %}
-      <dd>Le mail du matin s’est arrêté à la fin de votre essai.</dd>
+      {% if key_required and not key_connected %}
+      <dd>Le mail du matin ne part pas tant qu’OpenRouter n’est pas connecté.</dd>
+      {% elif key_refused %}
+      <dd>Le mail du matin est suspendu tant qu’OpenRouter refuse votre clé.</dd>
       {% elif profile.onboarding_completed_at %}
       <dd>Vous recevez le mail du matin.</dd>
       {% else %}
       <dd>Vous recevrez le mail du matin dès que le questionnaire sera terminé.</dd>
       {% endif %}
-      {% elif trial_over %}
-      <dd>Vous ne recevez plus de mail.</dd>
       {% else %}
       <dd>Vous ne recevez plus de mail.
         <form class="my-data__resubscribe" method="post" action="{% url 'onboarding:resubscribe' %}">

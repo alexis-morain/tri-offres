@@ -1,4 +1,4 @@
-{% autoescape off %}Il vous reste {{ minutes }} minute{{ minutes|pluralize }} pour finir votre questionnaire tri-offres. Vous reprenez à l’écran où vous en étiez.
+{% autoescape off %}Il vous reste {{ minutes }} minute{{ minutes|pluralize }} pour finir votre questionnaire tri-offres. Vous reprenez à l’écran où vous en étiez.{% if needs_openrouter %} Une étape de plus au début : connecter votre compte OpenRouter, qui note vos offres.{% endif %}
 
 Votre code :
 

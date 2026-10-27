@@ -11,9 +11,11 @@ def main():
     if sys.argv[1:2] == ["test"]:
         # Tests run with DEBUG off, like production, and must not need a real secret.
         os.environ.setdefault("DJANGO_SECRET_KEY", "test-only-secret-key")
+        # Assigned too: tests seal OpenRouter keys (accounts/openrouter.py) with this throwaway key, never a real one.
+        os.environ["OPENROUTER_KEYS_FERNET"] = "dGVzdC1vbmx5LWZlcm5ldC1rZXktMDEyMzQ1Njc4OWE="
         # Assigned, not setdefault: an exported CLAUDE_ENGINE=oauth or api must never reach Claude from a test.
         os.environ["CLAUDE_ENGINE"] = "fake"
-        # Assigned too: an exported BETA=0 must not change the default of the tests (they use override_settings).
+        # Assigned too: an exported BETA=0 must not change the wording the tests expect (they use override_settings).
         os.environ["BETA"] = "1"
         # Same for the ping key: no test may reach healthchecks.io, whatever the shell exports.
         os.environ["HEALTHCHECKS_PING_URL"] = ""

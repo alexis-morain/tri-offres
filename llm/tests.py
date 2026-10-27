@@ -463,38 +463,30 @@ def status_error(cls, status, request_id="req_err_9"):
 @override_settings(CLAUDE_ENGINE="api")
 class ApiEngineTests(FakeEngineMixin, SimpleTestCase):
     def run_with(self, message=None, side_effect=None, environ=None):
-        environ = {"ANTHROPIC_API_KEY": "test-key-test", "OPENROUTER_API_KEY": ""} if environ is None else environ
+        # A shared call, on the site's key: a person's own key has its tests in llm/test_openrouter_key.py.
+        environ = {"OPENROUTER_API_KEY": "sk-or-test"} if environ is None else environ
         with mock.patch.dict(os.environ, environ), mock.patch("anthropic.Anthropic") as client_cls:
             create = client_cls.return_value.beta.messages.create
             create.return_value = api_message() if message is None else message
             create.side_effect = side_effect
             self.client_cls, self.create = client_cls, create
-            return call(user=SimpleNamespace(email="nora@example.fr"))
+            return call(user=llm.SHARED)
 
     def test_success(self):
         self.assertEqual(self.run_with(), GOOD)
 
     def test_client_and_request_parameters(self):
         self.run_with()
-        self.client_cls.assert_called_once_with(timeout=30, max_retries=1)
+        self.client_cls.assert_called_once_with(timeout=30, max_retries=1, base_url="https://openrouter.ai/api",
+                                                auth_token="sk-or-test", api_key=None)
         kwargs = self.create.call_args.kwargs
-        self.assertEqual(kwargs["model"], "claude-sonnet-5-5")
+        self.assertEqual(kwargs["model"], "anthropic/claude-sonnet-5.5")
         self.assertEqual(kwargs["max_tokens"], 4000)
         self.assertEqual(kwargs["system"], SYSTEM)
         self.assertEqual(kwargs["messages"], [{"role": "user", "content": SENTINEL}])
         self.assertEqual(kwargs["output_config"]["effort"], "medium")
         self.assertEqual(kwargs["output_config"]["format"]["type"], "json_schema")
         self.assertEqual(kwargs["output_config"]["format"]["schema"], anthropic.transform_schema(SCHEMA))
-        self.assertEqual(kwargs["betas"], ["server-side-fallback-2026-07-01"])
-        self.assertEqual(kwargs["fallbacks"], "default")
-
-    def test_openrouter_key_routes_through_openrouter(self):
-        self.assertEqual(self.run_with(environ={"ANTHROPIC_API_KEY": "", "OPENROUTER_API_KEY": "sk-or-test"}), GOOD)
-        self.client_cls.assert_called_once_with(timeout=30, max_retries=1, base_url="https://openrouter.ai/api",
-                                                auth_token="sk-or-test", api_key=None)
-        kwargs = self.create.call_args.kwargs
-        self.assertEqual(kwargs["model"], "anthropic/claude-sonnet-5.5")
-        self.assertEqual(kwargs["output_config"]["format"]["type"], "json_schema")
         # OpenRouter answers 400 to `fallbacks` (probe of 26/10).
         self.assertNotIn("fallbacks", kwargs)
         self.assertNotIn("betas", kwargs)
@@ -539,7 +531,7 @@ class ApiEngineTests(FakeEngineMixin, SimpleTestCase):
     def test_missing_key_is_unavailable(self):
         with mock.patch.dict(os.environ, {}, clear=True), mock.patch("anthropic.Anthropic") as client_cls:
             with self.assertRaises(llm.EngineUnavailable):
-                call()
+                call(user=llm.SHARED)
         client_cls.assert_not_called()
 
     def test_each_sdk_error_is_an_engine_error_without_content(self):
@@ -576,10 +568,10 @@ class ApiEngineTests(FakeEngineMixin, SimpleTestCase):
             self.assertTrue(caught.exception.__suppress_context__)
 
     def test_unexpected_exception_from_client_construction_is_an_engine_error(self):
-        with mock.patch.dict(os.environ, {"ANTHROPIC_API_KEY": "test-key-test"}), \
+        with mock.patch.dict(os.environ, {"OPENROUTER_API_KEY": "sk-or-test"}), \
                 mock.patch("anthropic.Anthropic", side_effect=TypeError(SENTINEL)):
             with self.assertRaises(llm.EngineError) as caught:
-                call()
+                call(user=llm.SHARED)
         self.assertNotIn("SENTINEL", str(caught.exception))
 
     def test_status_and_request_id_logged(self):
@@ -701,8 +693,9 @@ def run_oauth(result=None, side_effect=None, **kwargs):
 
 
 def run_api(message=None, side_effect=None, **kwargs):
-    """One call under the api engine, anthropic.Anthropic mocked. Returns (output, usage, client_cls, create)."""
-    with mock.patch.dict(os.environ, {"ANTHROPIC_API_KEY": "test-key-test"}), \
+    """One shared call under the api engine, anthropic.Anthropic mocked. Returns (output, usage, client_cls, create)."""
+    kwargs.setdefault("user", llm.SHARED)
+    with mock.patch.dict(os.environ, {"OPENROUTER_API_KEY": "sk-or-test"}), \
             mock.patch("anthropic.Anthropic") as client_cls:
         create = client_cls.return_value.beta.messages.create
         create.return_value = api_message() if message is None else message
@@ -813,9 +806,9 @@ class ModelAllowlistTests(FakeEngineMixin, SimpleTestCase):
     @override_settings(CLAUDE_ENGINE="api")
     def test_api_receives_the_model(self):
         *_, create = run_api(model=llm.HAIKU)
-        self.assertEqual(create.call_args.kwargs["model"], "claude-haiku-5-5")
+        self.assertEqual(create.call_args.kwargs["model"], "anthropic/claude-haiku-5.5")
         *_, create = run_api()
-        self.assertEqual(create.call_args.kwargs["model"], "claude-sonnet-5-5")
+        self.assertEqual(create.call_args.kwargs["model"], "anthropic/claude-sonnet-5.5")
 
     def test_default_is_sonnet(self):
         fake.set_response("cv_extract", GOOD)
@@ -1022,9 +1015,11 @@ class TimeoutProfileTests(FakeEngineMixin, SimpleTestCase):
     @override_settings(CLAUDE_ENGINE="api")
     def test_api_client_gets_the_profile(self):
         _, _, client_cls, _ = run_api()
-        client_cls.assert_called_once_with(timeout=30, max_retries=1)
+        client_cls.assert_called_once_with(timeout=30, max_retries=1, base_url=api_engine.OPENROUTER_URL,
+                                           auth_token="sk-or-test", api_key=None)
         _, _, client_cls, _ = run_api(timeouts=llm.BATCH)
-        client_cls.assert_called_once_with(timeout=90, max_retries=1)
+        client_cls.assert_called_once_with(timeout=90, max_retries=1, base_url=api_engine.OPENROUTER_URL,
+                                           auth_token="sk-or-test", api_key=None)
 
     @override_settings(CLAUDE_ENGINE="oauth")
     def test_oauth_subprocess_gets_the_profile(self):

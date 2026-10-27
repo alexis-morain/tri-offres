@@ -10,7 +10,6 @@ from django.core import signing
 from django.db import connection
 from django.test import Client, SimpleTestCase, TestCase, override_settings
 from django.urls import URLPattern, URLResolver, get_resolver
-from django.utils import timezone
 
 from accounts import unsubscribe
 from accounts.log_filters import redact
@@ -397,42 +396,3 @@ class ResubscribeTests(TestCase):
         self.csrf_post()
         self.assertEqual(User.objects.get(pk=paul.pk).status, User.Status.UNSUBSCRIBED)
 
-
-    def end_trial(self):
-        past = timezone.now() - timedelta(days=1)
-        User.objects.filter(pk=self.user.pk).update(trial_ends_at=past)
-
-    @override_settings(BETA=False)
-    def test_resubscribing_after_the_trial_ends_does_not_bring_the_mails_back(self):
-        self.end_trial()
-        self.set_status(User.Status.UNSUBSCRIBED)
-        self.csrf_post()
-        self.assertEqual(self.status(), User.Status.ACTIVE)
-        self.assertNotIn(self.user, User.objects.mailable())
-
-    @override_settings(BETA=True)
-    def test_resubscribing_with_beta_on_brings_the_mails_back(self):
-        self.end_trial()
-        self.set_status(User.Status.UNSUBSCRIBED)
-        self.csrf_post()
-        self.assertIn(self.user, User.objects.mailable())
-
-
-@override_settings(BETA=False, SITE_URL=SITE, STORAGES=PLAIN_STATIC)
-class UnsubscribeAfterTheTrialTests(UnsubscribeTestCase):
-    def setUp(self):
-        super().setUp()
-        past = timezone.now() - timedelta(days=1)
-        User.objects.filter(pk=self.user.pk).update(trial_ends_at=past)
-        self.client = Client(enforce_csrf_checks=True)
-
-    def test_one_click_still_unsubscribes(self):
-        response = self.client.post(one_click_path(self.token), ONE_CLICK_BODY, content_type=FORM)
-        self.assertEqual((response.status_code, response.content), (200, b""))
-        self.assertEqual(self.status(), User.Status.UNSUBSCRIBED)
-
-    def test_the_page_still_unsubscribes(self):
-        page = self.client.get(page_path(self.token))
-        csrf = re.search(r'name="csrfmiddlewaretoken" value="([^"]+)"', page.content.decode()).group(1)
-        self.client.post(page_path(self.token), {"csrfmiddlewaretoken": csrf})
-        self.assertEqual(self.status(), User.Status.UNSUBSCRIBED)

@@ -1,0 +1,14 @@
+{% autoescape off %}tri-offres change de fonctionnement : chaque personne branche son propre compte OpenRouter, et l’IA qui note vos offres consomme ce compte. Le service reste gratuit : vous réglez seulement ce que l’IA consomme pour vous.
+
+Une inscription coûte environ {{ signup_cost }}, un mois de mails {{ month_cost }} au plus. Conseil : ajoutez {{ advised_credit }} et posez une limite sur la clé.
+
+Tant qu’OpenRouter n’est pas connecté, vos offres ne sont plus notées et le mail du matin ne part pas. Vos réponses et vos avis sont gardés.
+
+Pour connecter OpenRouter (un écran explique tout, et un tuto pas à pas) :
+{{ connect_url }}
+
+Pour ne plus recevoir ces mails :
+{{ unsubscribe_url }}
+
+tri-offres
+{% endautoescape %}

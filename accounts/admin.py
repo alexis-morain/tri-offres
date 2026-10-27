@@ -9,14 +9,14 @@ from onboarding import criteria, cv, preferences, rome
 class UserAdmin(admin.ModelAdmin):
     """Plain admin: no username and no password form, people sign in by magic link."""
 
-    list_display = ["email", "status", "date_joined", "trial_ends_at", "is_active", "is_staff"]
-    list_filter = ["status", "is_active", "is_staff", "trial_ends_at"]
+    list_display = ["email", "status", "date_joined", "is_active", "is_staff"]
+    list_filter = ["status", "is_active", "is_staff"]
     search_fields = ["email"]
     ordering = ["-date_joined"]
     readonly_fields = ["date_joined", "last_login"]
     filter_horizontal = ["groups", "user_permissions"]
     fieldsets = [
-        (None, {"fields": ["email", "status", "trial_ends_at", "is_active"]}),
+        (None, {"fields": ["email", "status", "is_active"]}),
         ("Administration", {"fields": ["is_staff", "is_superuser", "groups", "user_permissions"],
                             "classes": ["collapse"]}),
         ("Dates", {"fields": ["date_joined", "last_login"]}),

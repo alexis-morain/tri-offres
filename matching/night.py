@@ -38,6 +38,7 @@ PHASES = (SUMMARIES, PEOPLE)
 CRITERIA = "criteria"  # a person skipped because their criteria do not read
 CRASH = ScoringRun.Error.CRASH  # a person skipped because preparing their batches failed
 SKIP_REASONS = {CRITERIA: "critères illisibles", CRASH: "erreur imprévue"}
+EVERYONE = "everyone"  # in `halted`: a key could not be opened, no person is called any more tonight
 
 logger = logging.getLogger(__name__)
 
@@ -63,6 +64,11 @@ class RunReport:
     @property
     def engine_refused(self):
         return ScoringRun.Error.REFUSED in self.errors
+
+    @property
+    def key_refused(self):
+        """Every failed batch was OpenRouter refusing the person's own key: expected, not the operator's to fix."""
+        return self.errors == {ScoringRun.Error.KEY}
 
     @property
     def crashed(self):
@@ -93,7 +99,7 @@ class NightReport:
         for report in ([self.summaries] if self.summaries else []) + self.people:
             if report.engine_refused:
                 lines.append(f"{report.name} : refusé par le moteur")
-            elif report.failed_batches:
+            elif report.failed_batches and not report.key_refused:
                 line = f"{report.name} : {_count(report.failed_batches, 'lot')} en échec"
                 lines.append(line + (" (erreur imprévue)" if report.crashed else ""))
         lines += [f"compte {skipped.account} : {SKIP_REASONS[skipped.reason]}, personne sautée"
@@ -130,15 +136,26 @@ class Job(NamedTuple):
     report: RunReport
 
 
-def _attempt(call, prepared, sleep):
-    """In a pool thread: the call, and its one retry after RETRY_DELAY for an LLMError other than EngineRefused.
-    Never raises; closes any connection the engine opened."""
+def _attempt(call, prepared, sleep, account, halted):
+    """In a pool thread: the call, and its one retry after RETRY_DELAY for an LLMError other than EngineRefused or
+    a refusal of the person's key. Such a refusal puts the account in `halted` (the key is no good tonight: none of
+    its other batches calls again), an unreadable key puts EVERYONE (the person's calls stop for the night); a batch
+    that finds its account halted fails at once with the same error. `account` is None for a shared call, never
+    halted. Never raises; closes any connection the engine opened."""
     usages = []
     try:
         for attempt in (1, 2):
+            if account is not None and (cause := halted.get(account) or halted.get(EVERYONE)):
+                return Attempt(None, usages, cause)
             try:
                 output, usage = call(prepared)
             except llm.EngineRefused as error:
+                return Attempt(None, usages, error)
+            except llm.EngineKeyUnreadable as error:
+                halted[EVERYONE] = error
+                return Attempt(None, usages, error)
+            except llm.EngineKeyError as error:
+                halted[account] = error
                 return Attempt(None, usages, error)
             except llm.LLMError as error:
                 if getattr(error, "usage", None) is not None:
@@ -170,8 +187,9 @@ def _run_jobs(jobs, sleep):
     """Calls in the pool; usage, results and failures written here, in the main thread, as they come."""
     if not jobs:
         return
+    halted = {}  # {account key or EVERYONE: the error that stopped it}
     with ThreadPoolExecutor(max_workers=PARALLEL_BATCHES) as pool:
-        futures = {pool.submit(_attempt, job.call, job.prepared, sleep): job for job in jobs}
+        futures = {pool.submit(_attempt, job.call, job.prepared, sleep, job.run.user_id, halted): job for job in jobs}
         for future in as_completed(futures):
             job = futures[future]
             attempt = future.result()
@@ -222,14 +240,14 @@ def _cap_reached(dry_run, message, *counts):
         logger.error("notation: " + message, *counts)
 
 
-def _profiles(profiles, now):
-    """The profiles active at `now`; only those among `profiles` when given (manage.py essai_notation)."""
-    active = active_profiles(now)
+def _profiles(profiles):
+    """The profiles active now; only those among `profiles` when given (manage.py essai_notation)."""
+    active = active_profiles()
     return active if profiles is None else active.filter(pk__in=[profile.pk for profile in profiles])
 
 
 def _summaries_phase(now, profiles, dry_run, sleep, night_report):
-    offers = list(offers_to_summarize(now, _profiles(profiles, now)))
+    offers = list(offers_to_summarize(now, _profiles(profiles)))
     night_report.summaries_cut = max(len(offers) - settings.PREPASS_NIGHT_CAP, 0)
     offers = offers[:settings.PREPASS_NIGHT_CAP]
     if night_report.summaries_cut:
@@ -261,7 +279,7 @@ def _apply_scores(prepared, output):
 
 
 def _people_phase(now, email, profiles, dry_run, sleep, night_report):
-    profiles = _profiles(profiles, now).order_by("pk")
+    profiles = _profiles(profiles).order_by("pk")
     if email is not None:
         profiles = profiles.filter(user__email__iexact=email)
     budget = night_report.budget = _site_budget(now)
@@ -403,4 +421,7 @@ def format_report(night_report):
             else:
                 lines += _run_lines(report, _count(report.written, "note écrite", "notes écrites"),
                                     _count(report.refused, "raison refusée", "raisons refusées"))
+                if report.key_refused:
+                    lines.append("    La clé OpenRouter de la personne est refusée : sautée cette nuit, nouvel essai "
+                                 "la nuit suivante.")
     return lines

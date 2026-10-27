@@ -11,8 +11,8 @@ from django.urls import reverse
 from django.utils import timezone
 
 import mail
-from accounts import events, trial
-from accounts.models import OnboardingEvent, Profile, User
+from accounts import events
+from accounts.models import OnboardingEvent, Profile
 from matching import deck, on_demand
 from matching.models import ScoringRun
 from onboarding import schedule
@@ -85,18 +85,12 @@ def complete(profile):
     """Record the end of the questionnaire the first time it is reached, then send the welcome mail if it has not
     gone out yet. Safe to call on every visit of the end screen."""
     now = timezone.now()
-    # One transaction: the end of the questionnaire and the end of the trial are recorded together or not at all.
     with transaction.atomic():
         # A conditional update: two requests at once cannot both record the end.
         if Profile.objects.filter(pk=profile.pk, onboarding_completed_at=None).update(onboarding_completed_at=now,
                                                                                         updated_at=now):
             OnboardingEvent.objects.create(user=profile.user, name=events.ONBOARDING_COMPLETED)
-            if trial.enabled():
-                # Never over a date already there (set by hand), never for the team.
-                User.objects.filter(pk=profile.user_id, trial_ends_at__isnull=True, is_staff=False,
-                                    is_superuser=False).update(trial_ends_at=trial.end_for(now))
     profile.refresh_from_db(fields=["onboarding_completed_at"])
-    profile.user.refresh_from_db(fields=["trial_ends_at"])
     return send_welcome(profile)
 
 
@@ -105,19 +99,14 @@ def send_welcome(profile):
 
     The welcome_sent event is claimed first (one transaction, so a concurrent request sees it) and given back when
     the mail did not go out, whatever the reason, so the next visit (end screen or « Ma recherche ») tries again.
-    The delivery date is counted from now: a mail sent late never announces a day already gone. Outside the beta it
-    also says when the trial ends; when the trial is already over (a late retry), it announces neither a first sort
-    nor an end, since no mail is coming."""
+    The delivery date is counted from now: a mail sent late never announces a day already gone."""
     user = profile.user
     with transaction.atomic():
         if OnboardingEvent.objects.filter(user=user, name=events.WELCOME_SENT).exists():
             return True
         claim = OnboardingEvent.objects.create(user=user, name=events.WELCOME_SENT)
     now = timezone.now()
-    first_sort = not trial.is_over(user, now)
     context = {"day": rendezvous(now, now)["day"], "sender": sender_address(), "tips": all_tips(),
-               "first_sort": first_sort, "trial_days": trial.TRIAL_DAYS,
-               "trial_end_day": trial.end_label(user) if first_sort and trial.enabled() else None,
                "my_search_url": settings.SITE_URL + reverse("onboarding:my_search")}
     try:
         if mail.send("welcome", user.email, context) > 0:

@@ -14,14 +14,12 @@
       <dt>Adresse mail</dt>
       <dd>Pour vous connecter et vous écrire. Gardée tant que votre compte existe.</dd>
     </div>
-    {% if trial %}
     <div class="my-data__row">
-      <dt>Fin d’essai</dt>
-      <dd>La date de fin de votre essai de {{ trial_days }} jours, pour arrêter le mail du matin ce jour-là.
-        Gardée tant que votre compte existe. Après l’essai, votre compte et vos données restent jusqu’à ce que
-        vous le supprimiez dans «&nbsp;Mes données&nbsp;».</dd>
+      <dt>Clé OpenRouter</dt>
+      <dd>La clé de votre compte OpenRouter, qui sert à noter vos offres, est gardée chiffrée, avec sa date de
+        connexion. Elle n’est jamais affichée ni envoyée par mail. Gardée tant que votre compte existe, ou jusqu’à
+        ce que vous la déconnectiez dans «&nbsp;Mes données&nbsp;».</dd>
     </div>
-    {% endif %}
     <div class="my-data__row">
       <dt>Réponses au questionnaire</dt>
       <dd>Vos filtres, vos préférences et vos textes, pour choisir et noter les offres.
@@ -104,8 +102,12 @@
   <h2>Où cela va</h2>
   <p>Le site tourne sur un serveur personnel en France. Il passe par Cloudflare pour être joignable. Les
     sauvegardes de la base sont envoyées à Cloudflare R2, dans l’Union européenne.</p>
-  <p>Anthropic (États-Unis) reçoit vos réponses, le résumé de votre CV et les offres, pour rédiger la synthèse et
-    noter. Anthropic garde ce qu’il reçoit selon ses propres règles, que le site ne contrôle pas.</p>
+  <p>OpenRouter (États-Unis) est notre sous-traitant pour les appels à l’IA. Les appels faits pour vous passent
+    par votre compte OpenRouter, sur votre clé : lecture de votre CV, synthèse, notes. Ils lui transmettent vos
+    réponses, le résumé de votre CV et les offres, qu’il fait lire par Claude. Le résumé de chaque offre, commun à
+    tous, est lu sur le compte du service, sans rien de personnel.</p>
+  <p>Anthropic (États-Unis), qui fait tourner Claude, reçoit donc ces textes par OpenRouter. OpenRouter et Anthropic
+    gardent ce qu’ils reçoivent selon leurs propres règles, que le site ne contrôle pas.</p>
   <p>Resend (États-Unis) envoie les mails : il reçoit votre adresse et le contenu de chaque mail, et les garde de
     son côté.</p>
   <p>Les villes que vous tapez sont envoyées au service public geo.api.gouv.fr pour l’autocomplétion.</p>
@@ -117,11 +119,11 @@
     <li>Effacement : «&nbsp;Supprimer mon compte&nbsp;», dans «&nbsp;Mes données&nbsp;». C’est immédiat et
       définitif : le compte, ses réponses, son résumé de CV, ses avis, son suivi des candidatures, ses notes,
       ses envois, ses sessions et ses codes de connexion sont effacés. Seuls les codes demandés depuis moins de {{ kept_hours }} heures
-      restent, sans adresse ni empreinte, pour le plafond d’envoi du site. Les sauvegardes, Resend et Anthropic
+      restent, sans adresse ni empreinte, pour le plafond d’envoi du site. Les sauvegardes, Resend, OpenRouter et Anthropic
       gardent ce qu’ils ont déjà reçu, comme indiqué plus haut.</li>
     <li>Opposition aux mails : chaque mail du matin et chaque relance porte un lien pour ne plus en recevoir.
       Rien n’est effacé, et vous vous réabonnez depuis
-      «&nbsp;Mes données&nbsp;»{% if trial %} pendant votre essai{% endif %}. Le mail de code et le mail
+      «&nbsp;Mes données&nbsp;». Le mail de code et le mail
       de bienvenue sont envoyés à votre demande et n’ont pas ce lien.</li>
     <li>Réclamation : auprès de la CNIL, <a href="https://www.cnil.fr">www.cnil.fr</a>.</li>
   </ul>

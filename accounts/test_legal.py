@@ -1,13 +1,10 @@
 """Privacy page and legal notice (sub-step 7.3, the design plan): public pages written from the
 code (the durations are read from the constants that purge), settings-driven publisher lines, footer links on every
 page, and the mail line of « Mes données » for an account whose questionnaire is not finished."""
-from html import unescape
-from unittest import mock
-
 from django.conf import settings
 from django.test import Client, TestCase, override_settings
 
-from accounts import deletion, journal, trial
+from accounts import deletion, journal
 from accounts.management.commands import purge_login_codes
 from accounts.models import User
 from accounts.testing import make_finished_profile, make_profile
@@ -68,48 +65,6 @@ class PrivacyPageTests(TestCase):
 
     def test_contact_is_the_reply_address(self):
         self.assertContains(self.client.get(PRIVACY), f"mailto:{settings.MAIL_REPLY_TO}")
-
-
-@override_settings(STORAGES=PLAIN_STATIC)
-class PrivacyTrialTests(TestCase):
-    """The trial in the privacy page (sub-step 8.2): outside the beta only, nothing changes in the beta."""
-
-    ROW = ("Fin d’essai La date de fin de votre essai de 7 jours, pour arrêter le mail du matin ce jour-là. "
-           "Gardée tant que votre compte existe. Après l’essai, votre compte et vos données restent "
-           "jusqu’à ce que vous le supprimiez dans « Mes données ».")
-    OPPOSITION = "et vous vous réabonnez depuis « Mes données » pendant votre essai."
-    BEFORE = "et vous vous réabonnez depuis « Mes données ». Le mail de code"
-
-    def page(self):
-        html = self.client.get(PRIVACY).content.decode()
-        return " ".join(unescape(visible_text(html)).replace("\xa0", " ").split())
-
-    @override_settings(BETA=False)
-    def test_outside_the_beta_the_row_follows_the_address_and_the_opposition_says_during_the_trial(self):
-        response = self.client.get(PRIVACY)
-        page = " ".join(unescape(visible_text(response.content.decode())).replace("\xa0", " ").split())
-        self.assertIn(self.ROW, page)
-        self.assertIn(self.OPPOSITION, page)
-        self.assertNotIn(self.BEFORE, page)
-        self.assertLess(page.index("Adresse mail"), page.index("Fin d’essai"))
-        self.assertLess(page.index("Fin d’essai"), page.index("Réponses au questionnaire"))
-        assert_french_copy(self, response.content.decode())
-        assert_unique_ids(self, response.content.decode())
-
-    @override_settings(BETA=False)
-    def test_the_number_of_days_is_read_from_the_constant(self):
-        with mock.patch.object(trial, "TRIAL_DAYS", 5):
-            self.assertIn("votre essai de 5 jours", self.page())
-
-    @override_settings(BETA=True)
-    def test_in_the_beta_the_page_is_the_one_of_before(self):
-        page = self.page()
-        self.assertNotIn("Fin d’essai", page)
-        self.assertNotIn("votre essai", page)  # "essais répétés" (admin sign-in failures) is not the trial
-        self.assertIn(self.BEFORE, page)
-
-    def test_the_default_is_the_beta(self):
-        self.assertNotIn("votre essai", self.page())
 
 
 @override_settings(STORAGES=PLAIN_STATIC)

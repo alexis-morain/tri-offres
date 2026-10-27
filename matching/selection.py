@@ -25,10 +25,10 @@ SUMMARY_WEIGHT = 1
 logger = logging.getLogger(__name__)
 
 
-def active_profiles(now=None):
-    """Profiles of the people who get the daily email and finished the questionnaire: mailable at `now` (default: the
-    real time), so outside the beta a finished trial is left out."""
-    return (Profile.objects.filter(user__in=User.objects.mailable(now), onboarding_completed_at__isnull=False)
+def active_profiles():
+    """Profiles of the people who get the daily email and finished the questionnaire: the mailable ones, so under
+    the api engine only those with a working OpenRouter key."""
+    return (Profile.objects.filter(user__in=User.objects.mailable(), onboarding_completed_at__isnull=False)
             .select_related("user"))
 
 
@@ -44,7 +44,7 @@ def offers_to_summarize(now, profiles=None):
     active ones). SQLite cannot search inside JSON: the union is made here, one query per profile. A profile whose
     criteria do not read is left out, logged by its account's key."""
     if profiles is None:
-        profiles = active_profiles(now)
+        profiles = active_profiles()
     since = now - timedelta(days=FULL_TEXT_DAYS)
     alive = Q(expires_at__isnull=True) | Q(expires_at__gt=now)
     pending = Q(summary_written_at__isnull=True) & ~Q(full_text="") & alive
@@ -62,7 +62,7 @@ def offers_to_summarize(now, profiles=None):
 def person_words(profile, normalized_criteria):
     """The words of the jobs `profile` chose (ROME labels and typed jobs), of its previous_job and of the keywords it
     requires, but the names of its cities: the place is filtered already. Not seek_text: its common words
-    (« service », « public ») let unrelated offers in (step 6 plan, section 7, trial 5). Preferences that do not
+    (« service », « public ») let unrelated offers in (step 6 plan, section 7, essai 5). Preferences that do not
     read give no job, as in the scoring's prompt."""
     weighted = profile.weighted_preferences
     jobs = scoring.labels(weighted.get("jobs")) if isinstance(weighted, dict) else []

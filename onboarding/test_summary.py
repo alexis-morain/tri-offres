@@ -5,7 +5,6 @@ Claude is always the fake engine (llm.fake), which records what it would have re
 import io
 import json
 import re
-from datetime import timedelta
 from unittest import mock
 
 from django.core.management import CommandError, call_command
@@ -167,6 +166,16 @@ class GenerateTests(SummaryTestCase):
         self.assertIsNotNone(profile.summary_generated_at)
         self.assertIn(events.SUMMARY_GENERATED, self.event_names())
 
+    def test_a_refused_key_has_its_own_message_that_points_to_the_connection(self):
+        for error in (llm.EngineKeyRejected("x"), llm.EngineCreditExhausted("x"), llm.EngineKeyLimitReached("x")):
+            with self.subTest(error=type(error).__name__):
+                self.update(summary_status=SummaryStatus.NONE)
+                fake.set_response(summary.TASK, error)
+                with self.assertLogs("onboarding.summary", "WARNING"):
+                    self.assertEqual(summary.generate(self.profile), "key")
+        self.assertIn("OpenRouter", summary.MESSAGES["key"])
+        self.assertIn("Mes données", summary.MESSAGES["key"])
+
     def test_too_few_sourced_sentences_leave_it_pending(self):
         fake.set_response(summary.TASK, {"sentences": [sentence("Un.", "seek_text"), sentence("Deux.", "cv")],
                                          "questions": []})
@@ -198,34 +207,6 @@ class GenerateTests(SummaryTestCase):
         self.assertEqual(fake.calls, [])
         self.assertEqual(self.profile.summary_status, SummaryStatus.PENDING)
         self.assertEqual(OnboardingEvent.objects.get(name=events.SUMMARY_FAILED).details, {"error": "EngineRefused"})
-
-
-class AfterTheTrialTests(SummaryTestCase):
-    """The summary stays writable once the trial is over: the person corrects their answers (8.1, decision 5)."""
-
-    def over(self):
-        User.objects.filter(pk=self.user.pk).update(trial_ends_at=timezone.now() - timedelta(days=2))
-
-    @override_settings(BETA=False)
-    def test_generation_still_writes_the_summary_with_a_finished_trial(self):
-        self.over()
-        self.assertIsNone(summary.generate(self.profile))
-        self.assertEqual(self.profile.summary_status, SummaryStatus.READY)
-        self.assertEqual(len(fake.calls), 1)
-
-    @override_settings(BETA=True)
-    def test_in_beta_it_is_the_same(self):
-        self.over()
-        self.assertIsNone(summary.generate(self.profile))
-        self.assertEqual(self.profile.summary_status, SummaryStatus.READY)
-
-    @override_settings(BETA=False)
-    def test_the_daily_limit_still_applies(self):
-        self.over()
-        for _ in range(summary.USER_DAILY_LIMIT):
-            summary.reserve(self.user)
-        with self.assertRaises(summary.LimitReached):
-            summary.reserve(self.user)
 
 
 class CorrectTests(SummaryTestCase):

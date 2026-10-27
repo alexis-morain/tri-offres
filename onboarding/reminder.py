@@ -1,9 +1,11 @@
 """The single reminder (the design plan 4.8): a questionnaire started and left the day before gets
-one mail at 18:00 with a new sign-in code and link, never a second one.
+one mail at 18:00 with a new sign-in code and link, never a second one. Under the api engine it also reaches an account
+that signed in and never connected OpenRouter (plan 2026-10-27), which is why it reads `reachable`, not `mailable`.
 
 The code is issued by accounts.auth.issue_code, under the sign-in rules unchanged: the same hashes and lifetime,
 the same per-address limits and site cap, and the new code replaces the earlier ones only once its mail went out.
-Only the mail differs: "Il vous reste N minutes" instead of the plain sign-in mail.
+Only the mail differs: "Il vous reste N minutes" instead of the plain sign-in mail, with the OpenRouter step added
+for an account that has to connect it.
 """
 import datetime as dt
 import logging
@@ -12,7 +14,7 @@ from django.conf import settings
 from django.db.models import Exists, Max, OuterRef, Q
 
 import mail
-from accounts import auth, events, unsubscribe
+from accounts import auth, events, openrouter, unsubscribe
 from accounts.models import OnboardingEvent, Profile, User
 from onboarding import flow, schedule
 
@@ -29,12 +31,12 @@ def _paris_day_bounds(day):
 
 
 def due(now):
-    """Profiles to remind at `now`: mailable account (active, not unsubscribed), questionnaire started (a screen
+    """Profiles to remind at `now`: reachable account (active, not unsubscribed), questionnaire started (a screen
     validated, or signed in) and not finished, last event dated the day before (Paris time), never reminded."""
     start, end = _paris_day_bounds(now.astimezone(schedule.PARIS).date() - dt.timedelta(days=1))
     signed_in = OnboardingEvent.objects.filter(user=OuterRef("user"), name__in=SIGNED_IN)
     candidates = (Profile.objects.select_related("user")
-                  .filter(user__in=User.objects.mailable(), onboarding_completed_at=None)
+                  .filter(user__in=User.objects.reachable(), onboarding_completed_at=None)
                   .filter(~Q(onboarding_step="") | Q(Exists(signed_in)))
                   .exclude(user__onboarding_events__name=events.REMINDER_SENT)
                   .annotate(last_event=Max("user__onboarding_events__created_at"))
@@ -55,12 +57,13 @@ def remind(profile):
 
     def send(code, link_path):
         # Last look before the mail leaves (E10): the person may have unsubscribed or left since due().
-        if not User.objects.mailable().filter(pk=profile.user.pk).exists():
-            logger.info("Reminder of user %s not sent: no longer mailable.", profile.user.pk)
+        if not User.objects.reachable().filter(pk=profile.user.pk).exists():
+            logger.info("Reminder of user %s not sent: no longer reachable.", profile.user.pk)
             return 0
         return mail.send("reminder", email, {
             "code": auth.group_code(code), "link": settings.SITE_URL + link_path,
-            "code_minutes": auth.CODE_TTL_MINUTES, "minutes": minutes, "home_url": settings.SITE_URL + "/",
+            "code_minutes": auth.CODE_TTL_MINUTES, "minutes": minutes,
+            "needs_openrouter": openrouter.must_connect(profile.user), "home_url": settings.SITE_URL + "/",
             "unsubscribe_url": unsubscribe.unsubscribe_url(profile.user),
         }, headers=unsubscribe.mail_headers(profile.user))
 

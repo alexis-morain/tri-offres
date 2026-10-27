@@ -2,6 +2,7 @@ import functools
 import logging
 import os
 
+from django.conf import settings
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.http import Http404, JsonResponse
@@ -10,13 +11,13 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
 
-from accounts import deletion, events, trial, unsubscribe
-from accounts.models import OnboardingEvent, Profile, SummaryStatus, User
+from accounts import deletion, events, openrouter, unsubscribe
+from accounts.models import OnboardingEvent, OpenRouterKey, Profile, SummaryStatus, User
 from accounts.views import private_headers
 from jobs import rome_titles
 from jobs.filters import counter_text
 from matching import on_demand
-from onboarding import criteria, cv, cv_extract, finish, flow, forms, preferences, rome, schedule, summary, uploads
+from onboarding import criteria, cv, cv_extract, finish, flow, forms, preferences, rome, summary, uploads
 
 logger = logging.getLogger(__name__)
 
@@ -587,14 +588,12 @@ def my_search_block(request, block):
         "cv_processed_at": profile.cv_processed_at, "cv_query": f"?retour={flow.MY_SEARCH}"})
 
 
-def _trial_row(user):
-    """The « Essai » row of « Mes données »: nothing during the beta or without a date, otherwise the seventh day
-    while the trial runs and the eighth once it is over."""
-    if not trial.enabled() or user.trial_ends_at is None:
-        return {"trial_over": False, "trial_until": None, "trial_ended": None}
-    over = trial.is_over(user, timezone.now())
-    return {"trial_over": over, "trial_until": None if over else schedule.long_date(trial.last_day(user)),
-            "trial_ended": trial.end_label(user) if over else None}
+def _key_row(user):
+    """The OpenRouter row of « Mes données » and of the deletion screen: the key's state and the link to its page."""
+    row = OpenRouterKey.objects.filter(user_id=user.pk).first()
+    return {"key_required": settings.CLAUDE_ENGINE == "api", "key_connected": row is not None,
+            "key_connected_at": row and row.connected_at,
+            "key_refused": bool(row and row.refused_since), "key_url": row and openrouter.key_url(row.fingerprint)}
 
 
 @login_required
@@ -604,7 +603,7 @@ def my_data(request):
     profile = _profile(request.user)
     return render(request, "onboarding/my_data.html", {
         "section": "data", "profile": profile, "cv_rows": cv.describe(profile.cv_profile),
-        "team": request.user.is_staff or request.user.is_superuser, **_trial_row(request.user),
+        "team": request.user.is_staff or request.user.is_superuser, **_key_row(request.user),
         **_summary_card(request, profile)})
 
 
@@ -631,7 +630,7 @@ def delete_account(request):
         response = redirect("accounts:deleted")
         response.status_code = 303
         return response
-    return render(request, "onboarding/delete_account.html", {"section": "data"})
+    return render(request, "onboarding/delete_account.html", {"section": "data", **_key_row(request.user)})
 
 
 @login_required

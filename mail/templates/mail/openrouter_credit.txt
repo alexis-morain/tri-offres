@@ -1,0 +1,11 @@
+{% autoescape off %}Le crédit de votre compte OpenRouter est épuisé : tri-offres ne peut plus faire noter vos offres, et le mail du matin est suspendu.
+
+Ajoutez du crédit sur OpenRouter, nous réessayons chaque nuit :
+{{ credits_url }}
+
+Si la recharge automatique est active, vérifiez-la dans votre compte OpenRouter.
+
+Vous recevez ce message une seule fois tant que le problème dure.
+
+tri-offres
+{% endautoescape %}

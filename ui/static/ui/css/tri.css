@@ -1126,7 +1126,6 @@ main:has(.sort) { overflow-x: clip; }  /* a sheet flying off must not widen the 
 .sort { max-width: 34rem; }
 .sort__count { margin-top: var(--space-2); font-size: var(--size-s); }
 .sort__ai { margin-top: var(--space-1); }
-.sort__trial { margin-top: var(--space-3); }
 /* What the sorts taught, a green card (Claude's text) above the sheet; « Corriger » and « Effacer » under it. */
 .sort__learned { margin-top: var(--space-6); }
 .sort__learned + .sort__stage { margin-top: var(--space-6); }
@@ -1265,3 +1264,8 @@ main:has(.sort) { overflow-x: clip; }  /* a sheet flying off must not widen the 
   .history__form .field:has(textarea), .history__form .button { grid-column: 1 / -1; }
 }
 .history__pages { display: flex; gap: var(--space-4); justify-content: center; margin-top: var(--space-6); }
+
+/* OpenRouter education screen and tutorial (accounts): five numbered points, each under a ruled heading. */
+.education, .tutorial { margin: var(--space-6) 0 0; padding: 0; list-style: none; display: grid; gap: var(--space-5); }
+.education__point, .tutorial > li { padding-left: var(--space-4); border-left: 3px solid var(--action); }
+.education__heading { font-size: var(--size-m); margin-bottom: var(--space-1); }

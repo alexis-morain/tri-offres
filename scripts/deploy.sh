@@ -20,7 +20,7 @@
 # ces valeurs sont posées par le script, quoi que dise ENV_FILE.
 # Exception possible : TRI_DEPLOY_ENGINE=oauth, exporté dans le shell, déploie un site pour les
 # seules adresses de DEV_EMAILS, sur le jeton Max. Le jeton part alors (web et scheduler), DEV_EMAILS vient de
-# ENV_FILE, ANTHROPIC_API_KEY ne part pas et BETA_CAPACITY vaut le nombre d'adresses de DEV_EMAILS. Les garde-fous
+# ENV_FILE, aucune clé OpenRouter ne part et BETA_CAPACITY vaut le nombre d'adresses de DEV_EMAILS. Les garde-fous
 # de llm/core.py et mail.send refusent tout autre compte.
 #
 # Le dépôt est public : aucune valeur d'infrastructure ici. Tout vient de variables d'environnement obligatoires,
@@ -214,6 +214,7 @@ v_proxy() {
   [[ $VALUE != *[[:space:]]* ]] || die "$1 : URL sans espace attendue."
 }
 v_int() { [[ $VALUE =~ ^[0-9]+$ ]] || die "$1 : nombre entier attendu."; }
+v_fernet() { [[ $VALUE =~ ^[A-Za-z0-9_-]{43}=(,[A-Za-z0-9_-]{43}=)*$ ]] || die "$1 : clés Fernet (44 caractères) séparées par des virgules attendues."; }
 v_emails() {
   [[ $VALUE =~ ^[^,@[:space:]]+@[^,@[:space:]]+(,[^,@[:space:]]+@[^,@[:space:]]+)*$ ]] || die "$1 : adresses séparées par des virgules attendues."
   DEV_EMAILS_VALUE="$VALUE"
@@ -246,12 +247,10 @@ put_node_fixed() {
   put_fixed "$1" SCRAPER_PROXY_REQUIRED 1
   if [ "$ENGINE" = "api" ]; then
     put_fixed "$1" DEV_EMAILS ""
-    # An OpenRouter key, when present, takes the place of the Anthropic key (llm/api.py).
-    if env_value OPENROUTER_API_KEY && [ -n "$VALUE" ]; then
-      take "$1" OPENROUTER_API_KEY req
-    else
-      take "$1" ANTHROPIC_API_KEY req
-    fi
+    # The site's OpenRouter key serves the shared calls only; a person's calls go out on their own key, sealed with
+    # these Fernet keys (llm/api.py, accounts/openrouter.py). No ANTHROPIC_API_KEY: the engine never reads it.
+    take "$1" OPENROUTER_API_KEY req
+    take "$1" OPENROUTER_KEYS_FERNET req v_fernet
   else
     take "$1" DEV_EMAILS req v_emails
     take "$1" CLAUDE_CODE_OAUTH_TOKEN req
@@ -340,13 +339,17 @@ verify_env_files() {
       grep -qx 'DEV_EMAILS=' "$file" || die "$name.env : DEV_EMAILS doit être vide."
     else
       grep -qE '^DEV_EMAILS=.+' "$file" || die "$name.env : DEV_EMAILS ne doit pas être vide en oauth."
-      grep -qE '^(ANTHROPIC|OPENROUTER)_API_KEY=' "$file" && die "$name.env : pas de clé API en oauth."
+      grep -qE '^(ANTHROPIC_API_KEY|OPENROUTER_API_KEY|OPENROUTER_KEYS_FERNET)=' "$file" \
+        && die "$name.env : pas de clé OpenRouter ni Anthropic en oauth."
     fi
     grep -q '^LITESTREAM_' "$file" && die "$name.env : une clé R2 n’a rien à faire ici."
+    [ "$ENGINE" != "api" ] || grep -qE '^OPENROUTER_KEYS_FERNET=.+' "$file" \
+      || die "$name.env : OPENROUTER_KEYS_FERNET manque."
   done
   grep -q '^ADMIN_ACCESS_' "$STAGE/scheduler.env" && die "scheduler.env : les clés de l’admin sont réservées au site."
   grep -qE '^(SCRAPER_PROXY_URL|HEALTHCHECKS_PING_URL|ALERT_EMAIL)=' "$STAGE/web.env" \
     && die "web.env : le proxy, le ping et l’alerte sont réservés au planificateur."
+  grep -qE '^(OPENROUTER|ANTHROPIC)_' "$STAGE/litestream.env" && die "litestream.env : aucune clé API ne lui va."
   grep -qvE '^LITESTREAM_[A-Z0-9_]*=' "$STAGE/litestream.env" && die "litestream.env : seules les clés LITESTREAM_ y entrent."
   return 0
 }

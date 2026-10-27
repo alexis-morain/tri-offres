@@ -1,7 +1,7 @@
 """The account journal (arbitrage B of the security review of 21/10, the design plan).
 
-A backup brings back what was deleted or unsubscribed after it was taken. So every deletion, unsubscription and
-re-subscription also leaves one line in a text file outside the database, which Litestream does not replicate: it
+A backup brings back what was deleted or unsubscribed after it was taken. So every deletion, unsubscription,
+re-subscription and disconnection of OpenRouter also leaves one line in a text file outside the database, which Litestream does not replicate: it
 must survive a restore of the database, not the loss of the disk. `manage.py rejouer_journal` applies again the lines
 that follow a restored backup.
 
@@ -33,7 +33,10 @@ logger = logging.getLogger(__name__)
 DELETION = "suppression"
 UNSUBSCRIPTION = "desinscription"
 RESUBSCRIPTION = "reabonnement"
-KINDS = (DELETION, UNSUBSCRIPTION, RESUBSCRIPTION)
+# The person erased their OpenRouter key: a restored backup must not bring it back (the replay erases only a key
+# connected before the line, so a later reconnection survives).
+OPENROUTER_DISCONNECTION = "deconnexion_openrouter"
+KINDS = (DELETION, UNSUBSCRIPTION, RESUBSCRIPTION, OPENROUTER_DISCONNECTION)
 
 KEEP = timedelta(days=BACKUP_DAYS + 1)
 SALT = "tri-offres.account.journal"

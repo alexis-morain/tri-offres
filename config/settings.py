@@ -3,7 +3,7 @@
 from pathlib import Path
 
 from config.env import (email_backend, env, env_bool, env_hostname, env_https_url, env_int, env_list, env_proxy_url,
-                        env_strict_bool, publisher_identity, secret_key, security_settings)
+                        env_strict_bool, fernet_keys, publisher_identity, secret_key, security_settings)
 from llm.sdk_loggers import SDK_LOGGERS
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -44,6 +44,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "accounts.middleware.RequireOpenRouter",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -117,8 +118,8 @@ STORAGES = {
 # Sign-in by code and link (the design plan, section 9).
 # Absolute links in mails are built from SITE_URL, never from the request's Host header.
 SITE_URL = env("SITE_URL", "http://localhost:8000").strip().rstrip("/")
-# During the beta the trial does not exist: no end date is set and none is read (accounts/trial.py). Read strictly:
-# a typo stops the start instead of cutting people off.
+# While on, « bêta gratuite » is written on the site (ui/context_processors.py). Read strictly: a typo stops the
+# start instead of silently changing the wording.
 BETA = env_strict_bool("BETA", True)
 BETA_CAPACITY = env_int("BETA_CAPACITY", 80)
 # Login mails (codes and waiting list) per rolling 24 hours, for the whole site. Resend's free plan stops at 100.
@@ -136,6 +137,8 @@ ADMIN_ACCESS_AUD = env("ADMIN_ACCESS_AUD", "").strip()
 # "oauth" runs Claude on a developer's Max token: then no mail may go to anyone outside DEV_EMAILS.
 CLAUDE_ENGINE = env("CLAUDE_ENGINE", "").strip().lower()
 DEV_EMAILS = [email.lower() for email in env_list("DEV_EMAILS")]
+# Fernet keys that seal the OpenRouter key of each person (accounts/openrouter.py): the first seals, all open.
+OPENROUTER_KEYS_FERNET = fernet_keys(CLAUDE_ENGINE)
 # `claude` binary for the oauth engine (llm/oauth.py).
 CLAUDE_BIN = env("CLAUDE_BIN", "claude").strip() or "claude"
 

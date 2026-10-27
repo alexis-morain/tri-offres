@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Connexion annulée, tri-offres{% endblock %}
+{% block content %}
+<div class="question">
+  <h1 class="question__title">Connexion annulée</h1>
+  {% if connected %}
+  <p class="lede">Votre connexion OpenRouter reste active.</p>
+  <div class="question__actions"><a class="button" href="{% url 'accounts:openrouter_connect' %}">Retour</a></div>
+  {% else %}
+  <p class="lede">OpenRouter n’a pas été connecté. Vous pouvez recommencer quand vous voulez.</p>
+  {% include "accounts/_openrouter_start.html" %}
+  {% endif %}
+</div>
+{% endblock %}

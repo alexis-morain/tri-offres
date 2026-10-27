@@ -14,6 +14,9 @@
     <p>Sont effacés : vos réponses au questionnaire, le résumé de votre CV, vos synthèses, vos avis sur les offres,
       vos notes et l’historique de vos mails. Rien ne peut être récupéré ensuite.</p>
     <p>Les sauvegardes du service gardent une copie de votre compte 30 jours au plus, puis elle disparaît.</p>
+    <p>Votre clé OpenRouter est effacée avec le compte, mais elle reste valable chez OpenRouter :
+      pensez à révoquer la clé chez OpenRouter{% if key_url %}, depuis la
+      <a href="{{ key_url }}" rel="noopener noreferrer">page de votre clé</a>{% endif %}.</p>
   </div>
   <div class="question__actions">
     <a class="link-back" href="{% url 'onboarding:my_data' %}">{% icon "back" %}Annuler</a>

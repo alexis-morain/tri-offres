@@ -2,7 +2,7 @@
 and its « Exigences de security-review ». Offers are fictitious."""
 import json
 import re
-from datetime import datetime, timedelta
+from datetime import timedelta
 from unittest import mock
 from zoneinfo import ZoneInfo
 
@@ -695,79 +695,3 @@ class LearnedCsrfTests(LearnedTestCase):
             self.assertEqual(response.status_code, 403)
         self.assertEqual(self.stored().learned_summary, LEARNED_TEXT)
 
-
-class TrialNoticeTests(SortTestCase):
-    """The line of a finished trial (sub-step 8.2). The trial exists outside the beta only; fixed dates far enough
-    from the real clock for either side."""
-
-    NOTICE = ("Votre essai est terminé : aucune nouvelle offre n’arrive. "
-              "Vos avis restent possibles sur les offres déjà là.")
-    DONE = "Tout est trié."
-    OVER = datetime(2020, 1, 7, tzinfo=PARIS)
-    RUNNING = datetime(2099, 1, 7, tzinfo=PARIS)
-
-    def setUp(self):
-        super().setUp()
-        self.end(self.OVER)
-
-    def end(self, when):
-        User.objects.filter(pk=self.user.pk).update(trial_ends_at=when)
-
-    def html(self):
-        return self.client.get(SORT).content.decode()
-
-    @override_settings(BETA=False)
-    def test_the_line_sits_above_the_deck(self):
-        self.scored()
-        html = self.html()
-        self.assertEqual(html.count(self.NOTICE), 1)
-        self.assertLess(html.index(self.NOTICE), html.index("data-sort-stage"))
-        self.assertIn("Notes générées par IA", html)
-        assert_french_copy(self, html)
-        assert_unique_ids(self, html)
-
-    @override_settings(BETA=False)
-    def test_the_line_is_in_the_empty_state_and_the_promise_of_a_next_mail_is_gone(self):
-        html = self.html()
-        self.assertEqual(html.count(self.NOTICE), 1)
-        self.assertNotIn(EMPTY, html)
-        self.assertIn(self.DONE, html)
-        self.assertNotIn("mail de demain matin", html)
-        self.assertIn('href="/ma-recherche/"', html)
-
-    @override_settings(BETA=False)
-    def test_a_running_trial_has_no_line(self):
-        self.end(self.RUNNING)
-        for scored in (False, True):
-            with self.subTest(scored=scored):
-                if scored:
-                    self.scored()
-                html = self.html()
-                self.assertNotIn("essai", html)
-                self.assertIn(EMPTY, html)
-
-    @override_settings(BETA=False)
-    def test_without_a_date_there_is_no_line(self):
-        self.end(None)
-        self.assertNotIn("essai", self.html())
-        self.assertIn(EMPTY, self.html())
-
-    @override_settings(BETA=True)
-    def test_in_beta_a_past_date_is_not_read(self):
-        for scored in (False, True):
-            with self.subTest(scored=scored):
-                if scored:
-                    self.scored()
-                html = self.html()
-                self.assertNotIn("essai", html)
-                self.assertIn(EMPTY, html)
-
-    @override_settings(BETA=False)
-    def test_an_opinion_is_still_taken_and_undone_after_the_end(self):
-        offer = self.scored()
-        response = self.verdict(offer, YES, json_mode=True)
-        self.assertEqual((response.status_code, response.json()), (200, {"ok": True}))
-        self.assertEqual(self.rows().count(), 1)
-        response = self.post(UNDO, {"offer": offer.pk}, json_mode=True)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(self.rows().filter(cancelled=False).count(), 0)

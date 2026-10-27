@@ -53,7 +53,7 @@ class JournalFileTests(JournalTestMixin, SimpleTestCase):
         self.assertNotIn("example.fr", self.journal_path.read_text())
 
     def test_kinds(self):
-        self.assertEqual(journal.KINDS, ("suppression", "desinscription", "reabonnement"))
+        self.assertEqual(journal.KINDS, ("suppression", "desinscription", "reabonnement", "deconnexion_openrouter"))
 
     def test_lines_are_appended_in_order(self):
         journal.record(journal.UNSUBSCRIPTION, 1, EMAIL, now=NOW)

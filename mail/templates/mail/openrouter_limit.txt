@@ -1,0 +1,9 @@
+{% autoescape off %}La limite de dépense que vous avez posée sur votre clé OpenRouter est atteinte : tri-offres ne peut plus faire noter vos offres, et le mail du matin est suspendu.
+
+Relevez la limite, ou retirez-la, sur la page de votre clé (elle ne s’ouvre que connecté à votre compte OpenRouter) :
+{{ key_url }}
+
+Nous réessayons chaque nuit. Vous recevez ce message une seule fois tant que le problème dure.
+
+tri-offres
+{% endautoescape %}

@@ -1,0 +1,14 @@
+{% include "mail/_layout_top.html" with title="Connectez OpenRouter pour continuer sur tri-offres" %}
+<p style="margin:0 0 12px;">tri-offres change de fonctionnement : chaque personne branche son propre compte
+OpenRouter, et l’IA qui note vos offres consomme ce compte. Le service reste gratuit : vous réglez seulement ce que
+l’IA consomme pour vous.</p>
+<p style="margin:0 0 12px;">Une inscription coûte environ {{ signup_cost }}, un mois de mails {{ month_cost }} au plus.
+Conseil : ajoutez {{ advised_credit }} et posez une limite sur la clé.</p>
+<p style="margin:0 0 20px;">Tant qu’OpenRouter n’est pas connecté, vos offres ne sont plus notées et le mail du matin
+ne part pas. Vos réponses et vos avis sont gardés.</p>
+<p style="margin:0 0 28px;"><a href="{{ connect_url }}"
+  style="display:inline-block;padding:13px 22px;background-color:#1f3cc4;border-radius:2px;color:#ffffff;
+  font-weight:700;text-decoration:none;">Connecter OpenRouter</a></p>
+<p style="margin:0;font-size:14px;color:#465166;">Pour ne plus recevoir ces mails :
+<a href="{{ unsubscribe_url }}" style="color:#1f3cc4;">arrêter les mails</a>.</p>
+{% include "mail/_layout_bottom.html" %}

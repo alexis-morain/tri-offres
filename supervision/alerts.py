@@ -102,6 +102,20 @@ def send_not_started(slot, day):
         return False
 
 
+def send_key_unreadable(day=None):
+    """A person's OpenRouter key could not be opened (llm/api.py): the Fernet keys changed or a row is corrupt. One mail
+    a day at most, whoever hits it first. Never raises."""
+    try:
+        problem = _problem("key_unreadable", "clé OpenRouter illisible",
+                           "Une clé OpenRouter enregistrée ne s’ouvre pas : OPENROUTER_KEYS_FERNET a changé, ou la "
+                           "ligne est abîmée. Les appels faits pour les personnes sont arrêtés cette nuit ; rien n’est "
+                           "effacé. Rendre la bonne clé de chiffrement (Bitwarden) suffit à tout relancer.")
+        return _deliver("clé", day or timezone.localdate(), [problem])
+    except Exception as exc:
+        logger.error("alert of the unreadable key not sent (%s)", type(exc).__name__)
+        return False
+
+
 def _deliver(slot, day, problems):
     """One mail for the reasons not yet sent for (slot, day), unless the site cap is reached (S5)."""
     done = set(AlertSent.objects.filter(slot=slot, day=day).values_list("reason", flat=True))

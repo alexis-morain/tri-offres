@@ -1,19 +1,16 @@
 """Each business morning at 07:00 Paris time (step 10), after the night: one mail per active person with their best
 unsent offers, or an empty one (the design plan). At most one mail per person and day.
 
-Outside the beta, a person whose trial is over is not selected (User.objects.mailable). That gate follows the real
-time, not `--date`: asking for yesterday does not bring back a trial that ended at midnight (a trial option only)."""
+Only the mailable people are selected (User.objects.mailable), as of the real time, not `--date`."""
 import datetime as dt
 import logging
 
-from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
-from django.urls import reverse
 from django.utils import timezone
 
 import mail
-from accounts import trial, unsubscribe
+from accounts import unsubscribe
 from accounts.models import User
 from matching import delivery
 from matching.models import Delivery, Score
@@ -31,8 +28,7 @@ class Command(BaseCommand):
                             help="Compte les offres par section sans rien envoyer ni écrire.")
         parser.add_argument("--user", metavar="ADRESSE", help="Cette personne seulement.")
         parser.add_argument("--date", metavar="AAAA-MM-JJ", type=dt.date.fromisoformat,
-                            help="Le jour de l’envoi (par défaut aujourd’hui, heure de Paris). La fin d’essai suit "
-                                 "l’heure réelle, pas ce jour.")
+                            help="Le jour de l’envoi (par défaut aujourd’hui, heure de Paris).")
 
     def handle(self, *args, dry_run=False, user=None, date=None, **options):
         now = timezone.now()
@@ -40,7 +36,7 @@ class Command(BaseCommand):
         if not schedule.is_business_day(day):
             self.stdout.write(f"{day:%d/%m/%Y} n’est pas ouvré : rien à envoyer.")
             return
-        profiles = active_profiles(now)
+        profiles = active_profiles()
         if user is not None:
             profiles = profiles.filter(user__email__iexact=user)
             if not profiles.exists():
@@ -58,7 +54,7 @@ class Command(BaseCommand):
                 empty += not delivery.all_picked(picked)
                 sent += bool(delivery.all_picked(picked))
                 continue
-            outcome = self._send(profile.user, picked, day, now)
+            outcome = self._send(profile.user, picked, day)
             sent += outcome == "sent"
             empty += outcome == "empty"
             failed += outcome == "failed"
@@ -68,7 +64,7 @@ class Command(BaseCommand):
         if failed:
             raise CommandError(f"Envoi incomplet ({line})")
 
-    def _send(self, user, picked, day, now):
+    def _send(self, user, picked, day):
         """"sent", "empty", "failed" or "skipped" (already sent that day). The Delivery line is the reservation, as
         send_welcome's event is: given back when the mail did not go out."""
         with transaction.atomic():  # the check and the reservation in one lock: the account cannot go in between
@@ -79,14 +75,10 @@ class Command(BaseCommand):
         if not created:
             return "skipped"
         try:
-            # The last mail before the end of the trial says so (follows `day`, as the gate follows the real time).
-            trial_last = trial.is_last_mail(user, day)
             context = {**delivery.context(picked, delivery.read_tonight(user)),
-                       "unsubscribe_url": unsubscribe.unsubscribe_url(user), "trial_last": trial_last,
-                       "trial_end_day": trial.end_label(user) if trial_last else None,
-                       "my_data_url": settings.SITE_URL + reverse("onboarding:my_data")}
+                       "unsubscribe_url": unsubscribe.unsubscribe_url(user)}
             # Last look before the mail leaves (E10): the person may have unsubscribed or left since the reservation.
-            if not User.objects.mailable(now).filter(pk=user.pk).exists():
+            if not User.objects.mailable().filter(pk=user.pk).exists():
                 reservation.delete()
                 logger.warning("Morning mail of account %s skipped: no longer mailable.", user.pk)
                 return "skipped"

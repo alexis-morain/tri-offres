@@ -21,21 +21,24 @@ Claude pour les seules adresses de `DEV_EMAILS` (pas de clé API). Aucune autre 
 site, et la base ainsi écrite ne passe jamais en `api` : en production, repartir d’une base neuve.
 site, et la base ainsi écrite ne passe jamais en `api` : la bêta externe repart d'une base neuve.
 
-## 1. Avant tout : clé Anthropic, base neuve, moteur `api`
+## 1. Avant tout : clés OpenRouter, base neuve, moteur `api`
 
 Qui : l’opérateur.
 
-1. Dans la console Anthropic, créer une clé API réservée à l’hôte et lui poser un plafond de dépense mensuel.
+1. Chez OpenRouter, créer une clé API réservée à l’hôte (appels communs : la pré-passe) et lui poser un plafond de
+   dépense. Les appels faits pour une personne passent par la clé OpenRouter de cette personne, jamais par celle-ci.
 2. L’ajouter au `.env` (le chemin est celui du dépôt, la valeur se colle au clavier, jamais dans une commande
-   gardée dans l’historique du shell) :
+   gardée dans l’historique du shell), puis ajouter la clé Fernet qui chiffre les clés des personnes (la sauvegarder
+   dans Bitwarden : perdue, tout le monde se reconnecte) :
    ```bash
-   read -rs CLE && printf 'ANTHROPIC_API_KEY=%s\n' "$CLE" >> <chemin du dépôt>/.env; unset CLE
+   read -rs CLE && printf 'OPENROUTER_API_KEY=%s\n' "$CLE" >> <chemin du dépôt>/.env; unset CLE
+   printf 'OPENROUTER_KEYS_FERNET=%s\n' "$(.venv/bin/python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())')" >> <chemin du dépôt>/.env
    ```
 3. La base de l’hôte part neuve. Ne jamais y copier une base locale : une base où le moteur `oauth` a écrit des
    résumés ne passe jamais en production (règle du jeton d’un abonnement Claude : il ne sert jamais d’autres personnes). L’hôte tourne en `CLAUDE_ENGINE=api`,
    rien d’autre : le script le pose lui-même et ignore ce que dit le `.env` (il prévient s’il diffère).
 
-Contrôle : `cut -d= -f1 <chemin du dépôt>/.env | grep -x ANTHROPIC_API_KEY` affiche le nom.
+Contrôle : `cut -d= -f1 <chemin du dépôt>/.env | grep -xE 'OPENROUTER_(API_KEY|KEYS_FERNET)'` affiche les deux noms.
 
 ## 2. R2 : le bucket de sauvegarde
 

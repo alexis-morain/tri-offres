@@ -1,9 +1,7 @@
 {% include "mail/_layout_top.html" with title="Bienvenue sur tri-offres" %}
-{% if first_sort %}<p style="margin:0 0 20px;font-size:18px;line-height:1.4;">Votre premier tri arrive {{ day }},
+<p style="margin:0 0 20px;font-size:18px;line-height:1.4;">Votre premier tri arrive {{ day }},
 vers 7&nbsp;h, depuis {{ sender }}.</p>
-{% if trial_end_day %}<p style="margin:0 0 20px;">Votre essai dure {{ trial_days }}&nbsp;jours : le mail du matin
-s’arrête le {{ trial_end_day }}.</p>
-{% endif %}<p style="margin:0 0 8px;">Pour qu’il arrive dans votre boîte principale :</p>
+<p style="margin:0 0 8px;">Pour qu’il arrive dans votre boîte principale :</p>
 <ul style="margin:0 0 24px;padding-left:20px;">{% for provider, tip in tips %}
 <li style="margin:0 0 6px;">{{ provider }} : {{ tip }}</li>{% endfor %}
 </ul>
@@ -11,6 +9,6 @@ s’arrête le {{ trial_end_day }}.</p>
   border-radius:2px;">Une question, si vous avez
 trente secondes : qu’est-ce qui vous ferait dire que ce premier mail était réussi ?
 Répondez simplement à ce message.</p>
-{% endif %}<p style="margin:0;font-size:14px;color:#465166;">Pour modifier vos filtres ou vos préférences, ouvrez
+<p style="margin:0;font-size:14px;color:#465166;">Pour modifier vos filtres ou vos préférences, ouvrez
 <a href="{{ my_search_url }}" style="color:#1f3cc4;">Ma recherche</a>.</p>
 {% include "mail/_layout_bottom.html" %}

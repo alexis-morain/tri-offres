@@ -1,0 +1,4 @@
+<form class="question__actions" method="post" action="{% url 'accounts:openrouter_start' %}">
+  {% csrf_token %}
+  <button class="button" type="submit">Connecter OpenRouter</button>
+</form>

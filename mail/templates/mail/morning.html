@@ -19,9 +19,6 @@ Je cherche à nouveau demain.</p>
 <p style="margin:0 0 24px;font-size:14px;color:#465166;">Pour élargir ou changer vos critères, ouvrez
 <a href="{{ my_search_url }}" style="color:#1f3cc4;">Ma recherche</a>.</p>
 {% endif %}
-{% if trial_last %}<p style="margin:0 0 16px;font-size:14px;color:#465166;">C’est votre dernier mail du matin :
-votre essai se termine le {{ trial_end_day }}. Vos réponses et vos avis restent dans «&nbsp;Mes données&nbsp;»
-jusqu’à ce que vous supprimiez votre compte : <a href="{{ my_data_url }}" style="color:#1f3cc4;">Mes données</a>.</p>
-{% endif %}<p style="margin:0;font-size:14px;color:#465166;">Pour ne plus recevoir ces mails :
+<p style="margin:0;font-size:14px;color:#465166;">Pour ne plus recevoir ces mails :
 <a href="{{ unsubscribe_url }}" style="color:#1f3cc4;">arrêter les mails</a>.</p>
 {% include "mail/_layout_bottom.html" %}

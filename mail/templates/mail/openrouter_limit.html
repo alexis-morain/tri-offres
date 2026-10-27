@@ -1,0 +1,11 @@
+{% include "mail/_layout_top.html" with title="La limite de votre clé OpenRouter est atteinte" %}
+<p style="margin:0 0 12px;">La limite de dépense que vous avez posée sur votre clé OpenRouter est atteinte :
+tri-offres ne peut plus faire noter vos offres, et le mail du matin est suspendu.</p>
+<p style="margin:0 0 20px;">Relevez la limite, ou retirez-la, sur la page de votre clé. Elle ne s’ouvre que connecté
+à votre compte OpenRouter.</p>
+<p style="margin:0 0 28px;"><a href="{{ key_url }}"
+  style="display:inline-block;padding:13px 22px;background-color:#1f3cc4;border-radius:2px;color:#ffffff;
+  font-weight:700;text-decoration:none;">Ouvrir la page de ma clé</a></p>
+<p style="margin:0;font-size:14px;color:#465166;">Nous réessayons chaque nuit. Vous recevez ce message une seule
+fois tant que le problème dure.</p>
+{% include "mail/_layout_bottom.html" %}

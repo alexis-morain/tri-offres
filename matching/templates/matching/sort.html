@@ -8,9 +8,6 @@
   <p class="sort__count"><span class="typed" data-sort-count>{{ count }} offre{{ count|pluralize }}</span></p>
   {% endif %}
   <p class="sort__ai small muted">Notes générées par IA, la décision vous appartient.</p>
-  {% if trial_over %}
-  <p class="notice sort__trial small">Votre essai est terminé : aucune nouvelle offre n’arrive. Vos avis restent possibles sur les offres déjà là.</p>
-  {% endif %}
   {% if learned %}
   <article class="card card--green sort__learned" aria-labelledby="learned-title">
     <header class="card__head">
@@ -47,7 +44,7 @@
   <p class="visually-hidden" aria-live="polite" aria-atomic="true" data-sort-live></p>
   <div class="sort__end" tabindex="-1" data-sort-end{% if card %} hidden{% endif %}>
     <p class="sort__recap" data-sort-recap hidden></p>
-    <p data-sort-done>Tout est trié.{% if not trial_over %} Les prochaines offres arrivent avec le mail de demain matin.{% endif %}</p>
+    <p data-sort-done>Tout est trié. Les prochaines offres arrivent avec le mail de demain matin.</p>
     <p data-sort-more hidden>
       <button class="button" type="button" data-sort-reload>Voir les offres suivantes</button>
     </p>

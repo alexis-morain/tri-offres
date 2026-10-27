@@ -1,6 +1,6 @@
 {% include "mail/_layout_top.html" with title="Il vous reste quelques minutes sur tri-offres" %}
 <p style="margin:0 0 20px;">Il vous reste {{ minutes }} minute{{ minutes|pluralize }} pour finir votre questionnaire
-tri-offres. Vous reprenez à l’écran où vous en étiez.</p>
+tri-offres. Vous reprenez à l’écran où vous en étiez.{% if needs_openrouter %} Une étape de plus au début : connecter votre compte OpenRouter, qui note vos offres.{% endif %}</p>
 <p style="margin:0 0 8px;">Votre code :</p>
 <p style="margin:0 0 28px;font-family:'Courier New',Courier,monospace;font-size:36px;line-height:1.2;
   font-weight:700;letter-spacing:2px;color:#18202e;">{{ code }}</p>

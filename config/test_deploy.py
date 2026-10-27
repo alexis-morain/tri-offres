@@ -35,6 +35,10 @@ SECRETS = {
     "DJANGO_SECRET_KEY": "k3y-" + "x7Qp2LmZ9vRt4WnB8cYd6HsJ1aFg5UeO3iKb0TqXr2NwMz-fictive",
     "DJANGO_SECRET_KEY_FALLBACKS": "old-fictive-key-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     "RESEND_API_KEY": "mail-key-fictive-0000111122223333",
+    "OPENROUTER_API_KEY": "sk-or-fictive-0000111122223333",
+    "OPENROUTER_KEYS_FERNET": ("dGVzdC1vbmx5LWZlcm5ldC1rZXktMDEyMzQ1Njc4OWE=,"
+                               "Zm9ydC1hbnRoLWZlcm5ldC1rZXktMDEyMzQ1Njc4OWE="),
+    # Read by no engine any more: never forwarded.
     "ANTHROPIC_API_KEY": "api-key-fictive-0000111122223333",
     "ADMIN_ACCESS_AUD": "aud-fictive-0123456789abcdef0123456789abcdef",
     "SCRAPER_PROXY_URL": "http://proxyuser:proxypass-fictive@192.0.2.20:8888",
@@ -67,11 +71,11 @@ ENV_VALUES = {**SECRETS, **PLAIN}
 SEARCHABLE = {key: value for key, value in ENV_VALUES.items() if len(value) >= 8}
 
 REQUIRED = (
-    "DJANGO_SECRET_KEY", "RESEND_API_KEY", "ANTHROPIC_API_KEY", "LEGAL_ADDRESS", "LEGAL_SIRET", "LEGAL_NAME",
-    "DEFAULT_FROM_EMAIL", "MAIL_REPLY_TO", "SCRAPER_PROXY_URL",
+    "DJANGO_SECRET_KEY", "RESEND_API_KEY", "OPENROUTER_API_KEY", "OPENROUTER_KEYS_FERNET", "LEGAL_ADDRESS",
+    "LEGAL_SIRET", "LEGAL_NAME", "DEFAULT_FROM_EMAIL", "MAIL_REPLY_TO", "SCRAPER_PROXY_URL",
     "LITESTREAM_ACCESS_KEY_ID", "LITESTREAM_SECRET_ACCESS_KEY", "LITESTREAM_R2_BUCKET", "LITESTREAM_R2_ENDPOINT",
 )
-NEVER = ("CLAUDE_CODE_OAUTH_TOKEN", "APIFY_TOKEN", "UNKNOWN_EXTRA_KEY")
+NEVER = ("CLAUDE_CODE_OAUTH_TOKEN", "APIFY_TOKEN", "UNKNOWN_EXTRA_KEY", "ANTHROPIC_API_KEY")
 WEB_ONLY_ABSENT = ("SCRAPER_PROXY_URL", "HEALTHCHECKS_PING_URL", "ALERT_EMAIL")
 FIXED = {
     "DJANGO_DEBUG": "0",
@@ -288,7 +292,7 @@ class DryRunTests(DeployCase):
         for name in ("web", "scheduler", "litestream"):
             self.assertIn(f"{name}.env", text)
         # The names of the kept keys are shown.
-        for key in ("DJANGO_SECRET_KEY", "ANTHROPIC_API_KEY", "LITESTREAM_R2_BUCKET"):
+        for key in ("DJANGO_SECRET_KEY", "OPENROUTER_API_KEY", "OPENROUTER_KEYS_FERNET", "LITESTREAM_R2_BUCKET"):
             self.assertIn(key, text)
         self.assertIn("docker compose -f", text)
 
@@ -318,14 +322,16 @@ class DryRunTests(DeployCase):
     def test_files_are_a_whitelist_with_the_expected_split(self):
         self.dry_run()
         web, scheduler, litestream = self.kept("web"), self.kept("scheduler"), self.kept("litestream")
-        for key in ("DJANGO_SECRET_KEY", "DJANGO_SECRET_KEY_FALLBACKS", "RESEND_API_KEY", "ANTHROPIC_API_KEY",
+        for key in ("DJANGO_SECRET_KEY", "DJANGO_SECRET_KEY_FALLBACKS", "RESEND_API_KEY", "OPENROUTER_API_KEY",
+                    "OPENROUTER_KEYS_FERNET",
                     "LEGAL_ADDRESS", "LEGAL_SIRET", "LEGAL_NAME", "DEFAULT_FROM_EMAIL", "MAIL_REPLY_TO",
                     "ADMIN_ACCESS_TEAM_DOMAIN", "ADMIN_ACCESS_AUD", "HSTS_SECONDS"):
             self.assertIn(key, web)
         for key in WEB_ONLY_ABSENT:
             self.assertNotIn(key, web)
             self.assertIn(key, scheduler)
-        for key in ("DJANGO_SECRET_KEY", "RESEND_API_KEY", "ANTHROPIC_API_KEY", "LEGAL_NAME", "DEFAULT_FROM_EMAIL",
+        for key in ("DJANGO_SECRET_KEY", "RESEND_API_KEY", "OPENROUTER_API_KEY", "OPENROUTER_KEYS_FERNET",
+                    "LEGAL_NAME", "DEFAULT_FROM_EMAIL",
                     "MAIL_REPLY_TO"):
             self.assertIn(key, scheduler)
         self.assertNotIn("ADMIN_ACCESS_AUD", scheduler)
@@ -388,6 +394,8 @@ class DryRunTests(DeployCase):
             self.assertEqual(values["CLAUDE_CODE_OAUTH_TOKEN"], SECRETS["CLAUDE_CODE_OAUTH_TOKEN"])
             self.assertEqual(values["BETA_CAPACITY"], "2")
             self.assertNotIn("ANTHROPIC_API_KEY", values)
+            self.assertNotIn("OPENROUTER_API_KEY", values)
+            self.assertNotIn("OPENROUTER_KEYS_FERNET", values)
         self.assertNotIn("CLAUDE_CODE_OAUTH_TOKEN", self.kept("litestream"))
         self.assertNotIn(SECRETS["CLAUDE_CODE_OAUTH_TOKEN"], self.output(result))
 
@@ -398,15 +406,27 @@ class DryRunTests(DeployCase):
                                          env_file=self.write_env(drop=(key,)))
                 self.assertRefused(result, key)
 
-    def test_openrouter_key_replaces_the_anthropic_key(self):
-        result = self.dry_run(env_file=self.write_env(override={"ANTHROPIC_API_KEY": "",
-                                                                "OPENROUTER_API_KEY": "sk-or-fictive-0000"}))
+    def test_the_openrouter_keys_go_to_the_site_and_the_scheduler_never_to_litestream(self):
+        result = self.dry_run()
         for name in ("web", "scheduler"):
             values = self.kept(name)
-            self.assertEqual(values["OPENROUTER_API_KEY"], "sk-or-fictive-0000")
+            self.assertEqual(values["OPENROUTER_API_KEY"], SECRETS["OPENROUTER_API_KEY"])
+            self.assertEqual(values["OPENROUTER_KEYS_FERNET"], SECRETS["OPENROUTER_KEYS_FERNET"])
             self.assertNotIn("ANTHROPIC_API_KEY", values)
-        self.assertNotIn("OPENROUTER_API_KEY", self.kept("litestream"))
-        self.assertNotIn("sk-or-fictive-0000", self.output(result))
+        litestream = self.kept("litestream")
+        for key in ("OPENROUTER_API_KEY", "OPENROUTER_KEYS_FERNET", "ANTHROPIC_API_KEY"):
+            self.assertNotIn(key, litestream)
+        for key in ("OPENROUTER_API_KEY", "OPENROUTER_KEYS_FERNET", "ANTHROPIC_API_KEY"):
+            self.assertNotIn(SECRETS[key], self.output(result))
+            self.assertNotIn(SECRETS[key], self.compose_out.read_text())
+
+    def test_the_fernet_keys_are_checked_and_the_error_never_repeats_them(self):
+        for value in ("pas-une-cle", "dGVzdA==", SECRETS["OPENROUTER_KEYS_FERNET"] + ",pas-une-cle"):
+            with self.subTest(value=value):
+                env_file = self.write_env(override={"OPENROUTER_KEYS_FERNET": value})
+                result = self.run_script("--dry-run", env_file=env_file)
+                self.assertRefused(result, "OPENROUTER_KEYS_FERNET")
+                self.assertNotIn(value, self.output(result))
 
     def test_unknown_engine_is_refused(self):
         self.assertRefused(self.run_script("--dry-run", extra={"TRI_DEPLOY_ENGINE": "max"}), "TRI_DEPLOY_ENGINE")
@@ -456,8 +476,8 @@ class EnvGuardTests(DeployCase):
                 self.assertRefused(result, key)
 
     def test_empty_required_key_stops_the_script(self):
-        result = self.run_script("--dry-run", env_file=self.write_env(override={"ANTHROPIC_API_KEY": ""}))
-        self.assertRefused(result, "ANTHROPIC_API_KEY")
+        result = self.run_script("--dry-run", env_file=self.write_env(override={"OPENROUTER_API_KEY": ""}))
+        self.assertRefused(result, "OPENROUTER_API_KEY")
 
     def test_all_missing_keys_are_named_at_once(self):
         result = self.run_script("--dry-run", env_file=self.write_env(drop=("RESEND_API_KEY", "LEGAL_SIRET")))

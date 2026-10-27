@@ -5,13 +5,12 @@ from html import unescape
 from unittest import mock
 
 from django.core import mail as django_mail
-from django.test import TestCase, override_settings
+from django.test import override_settings
 from django.utils import timezone
 
 import mail
 from accounts import events
 from accounts.models import OnboardingEvent, Profile, User
-from accounts.testing import make_profile
 from accounts.views import after_login_url
 from config.testing import assert_french_copy, assert_unique_ids, visible_text
 from jobs.testing import make_offer, make_source
@@ -424,97 +423,3 @@ class EventsTests(EndTestCase):
         self.finish()
         self.assertTrue(OnboardingEvent.objects.filter(user=self.user, name=events.ONBOARDING_COMPLETED).exists())
 
-
-@override_settings(EMAIL_BACKEND=LOCMEM, DEV_EMAILS=[], SITE_URL="https://tri.example.fr")
-class TrialDateTests(TestCase):
-    """finish.complete() sets the end of the trial with the end of the questionnaire, outside the beta only (8.1)."""
-
-    NOW = dt.datetime(2026, 10, 20, 13, 0, tzinfo=dt.timezone.utc)  # Tue 20 Oct, 15:00 in Paris
-    END = dt.datetime(2026, 10, 26, 23, 0, tzinfo=dt.timezone.utc)  # Tue 27 Oct, 00:00 in Paris (UTC+1 by then)
-
-    def setUp(self):
-        self.profile = make_profile("nora@example.fr", onboarding_completed_at=None)
-        self.user = self.profile.user
-
-    def complete(self, now=None):
-        with at(now or self.NOW):
-            return finish.complete(self.profile)
-
-    def trial_ends_at(self):
-        return User.objects.get(pk=self.user.pk).trial_ends_at
-
-    @override_settings(BETA=False)
-    def test_the_date_is_set_at_the_end_of_the_questionnaire(self):
-        self.complete()
-        self.assertEqual(self.trial_ends_at(), self.END)
-        self.assertEqual(self.profile.onboarding_completed_at, self.NOW)
-        self.assertEqual(self.user.trial_ends_at, self.END)  # the instance the welcome mail reads (8.2)
-
-    @override_settings(BETA=True)
-    def test_in_beta_nothing_is_written_on_the_account(self):
-        self.complete()
-        self.assertIsNone(self.trial_ends_at())
-        self.assertEqual(self.profile.onboarding_completed_at, self.NOW)
-        self.assertEqual(len(django_mail.outbox), 1)  # the welcome mail goes out as before
-
-    @override_settings(BETA=False)
-    def test_the_team_gets_no_date(self):
-        for email, fields in (("staff@example.fr", {"is_staff": True}), ("root@example.fr", {"is_superuser": True})):
-            with self.subTest(fields=fields):
-                profile = make_profile(email, onboarding_completed_at=None)
-                User.objects.filter(pk=profile.user_id).update(**fields)
-                with at(self.NOW):
-                    finish.complete(profile)
-                profile.refresh_from_db()
-                self.assertIsNotNone(profile.onboarding_completed_at)
-                self.assertIsNone(User.objects.get(pk=profile.user_id).trial_ends_at)
-
-    @override_settings(BETA=False, DEV_EMAILS=["nora@example.fr"])
-    def test_a_dev_account_gets_a_date_like_anyone(self):
-        self.complete()
-        self.assertEqual(self.trial_ends_at(), self.END)
-
-    @override_settings(BETA=False)
-    def test_a_second_visit_does_not_move_the_date(self):
-        self.complete()
-        self.complete(self.NOW + dt.timedelta(days=3))
-        self.assertEqual(self.trial_ends_at(), self.END)
-        self.assertEqual(self.profile.onboarding_completed_at, self.NOW)
-
-    @override_settings(BETA=False)
-    def test_a_date_set_by_hand_is_not_overwritten(self):
-        by_hand = self.NOW + dt.timedelta(days=30)
-        User.objects.filter(pk=self.user.pk).update(trial_ends_at=by_hand)
-        self.complete()
-        self.assertEqual(self.trial_ends_at(), by_hand)
-        self.assertEqual(self.profile.onboarding_completed_at, self.NOW)
-
-    def test_a_questionnaire_finished_in_beta_never_gets_a_date_afterwards(self):
-        with override_settings(BETA=True):
-            self.complete()
-        with override_settings(BETA=False):
-            self.complete(self.NOW + dt.timedelta(days=9))
-            self.assertIsNone(self.trial_ends_at())
-
-    @override_settings(BETA=False)
-    def test_a_failing_write_on_the_account_leaves_the_end_unrecorded(self):
-        with mock.patch.object(finish, "User") as users:
-            users.objects.filter.return_value.update.side_effect = RuntimeError("boom")
-            with self.assertRaises(RuntimeError):
-                self.complete()
-        self.profile.refresh_from_db()
-        self.assertIsNone(self.profile.onboarding_completed_at)
-        self.assertFalse(OnboardingEvent.objects.filter(user=self.user, name=events.ONBOARDING_COMPLETED).exists())
-        self.assertIsNone(self.trial_ends_at())
-        self.assertEqual(django_mail.outbox, [])
-        self.complete()  # the next visit records both
-        self.assertEqual(self.trial_ends_at(), self.END)
-        self.assertEqual(self.profile.onboarding_completed_at, self.NOW)
-
-    @override_settings(BETA=False)
-    def test_the_account_write_is_conditional_on_the_questionnaire_write(self):
-        Profile.objects.filter(pk=self.profile.pk).update(onboarding_completed_at=self.NOW)  # already recorded
-        self.profile.refresh_from_db()
-        with mock.patch.object(finish, "User") as users:
-            self.complete(self.NOW + dt.timedelta(days=1))
-        users.objects.filter.assert_not_called()

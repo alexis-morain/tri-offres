@@ -17,7 +17,6 @@ from django.db import connections, transaction
 from django.utils import timezone
 
 import llm
-from accounts import trial
 from accounts.models import Profile, SummaryStatus
 from jobs import summaries
 from jobs.filters import passing_offers
@@ -37,7 +36,6 @@ ACCOUNT_WINDOW = timedelta(hours=24)
 ACCOUNT_RUNS = 1
 BONUS_RUNS = 1
 STARTED, RUNNING, ACCOUNT_CAP, SITE_CAP, NOT_READY = "started", "running", "account_cap", "site_cap", "not_ready"
-TRIAL_OVER = "trial_over"  # outside the beta, the person's trial has ended: no run (accounts/trial.py)
 
 logger = logging.getLogger(__name__)
 State, Error = ScoringRun.State, ScoringRun.Error
@@ -64,13 +62,11 @@ def _ready(profile):
 
 def request_run(user, *, after_change=False):
     """Start an on-demand run for `user` unless a cap or the profile says otherwise. Returns STARTED, RUNNING,
-    ACCOUNT_CAP, SITE_CAP, NOT_READY or TRIAL_OVER (checked before any cap: no run, no score dropped).
+    ACCOUNT_CAP, SITE_CAP or NOT_READY.
     `after_change`: the person changed their search, which allows BONUS_RUNS more in ACCOUNT_WINDOW
     and drops their scores neither sent nor judged once the run starts (decision 14)."""
     with transaction.atomic():
         now = timezone.now()
-        if trial.is_over(user, now):
-            return TRIAL_OVER
         profile = Profile.objects.filter(user=user).first()
         if profile is None or not _ready(profile):
             return NOT_READY
@@ -101,7 +97,8 @@ def request_run(user, *, after_change=False):
 
 def _run_batches(run, items, size, call):
     """`call(batch)` for each batch of `items`, one after the other, without retry (decision 15): an LLMError fails
-    its batch only, what it leaves stays for the night. Then the final state of `run`; an unexpected error fails it
+    its batch only, what it leaves stays for the night; a refusal of the person's key (EngineKeyError) stops the run,
+    the next batches would be refused the same. Then the final state of `run`; an unexpected error fails it
     (crash) and goes up."""
     failed = total = 0
     errors = set()
@@ -113,6 +110,8 @@ def _run_batches(run, items, size, call):
             except llm.LLMError as error:
                 failed += 1
                 errors.add(Error.of(error))
+                if isinstance(error, llm.EngineKeyError):
+                    break
     except Exception:
         run.finish(State.FAILED, Error.CRASH)
         raise
@@ -152,10 +151,6 @@ def execute(run_id):
         logger.warning("on_demand: run %s is gone, its account was deleted", run_id)
         return
     now = timezone.now()
-    # The trial may have ended since the request (run.user was just read): no call to Claude then.
-    if trial.is_over(run.user, now):
-        run.finish(State.FAILED, Error.TRIAL_OVER)
-        return
     try:
         _score(run, now)
     except Exception as error:  # noqa: BLE001 - the run must end, whatever happened
