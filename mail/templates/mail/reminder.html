@@ -2,15 +2,15 @@
 <p style="margin:0 0 20px;">Il vous reste {{ minutes }} minute{{ minutes|pluralize }} pour finir votre questionnaire
 tri-offres. Vous reprenez à l’écran où vous en étiez.{% if needs_openrouter %} Une étape de plus au début : connecter votre compte OpenRouter, qui note vos offres.{% endif %}</p>
 <p style="margin:0 0 8px;">Votre code :</p>
-<p style="margin:0 0 28px;font-family:'Courier New',Courier,monospace;font-size:36px;line-height:1.2;
-  font-weight:700;letter-spacing:2px;color:#18202e;">{{ code }}</p>
+<p style="margin:0 0 24px;padding:16px 20px;background-color:#f7f7f5;border:1px solid #e9e9e7;border-radius:10px;
+  font-variant-numeric:tabular-nums;font-size:32px;line-height:1.2;font-weight:600;letter-spacing:6px;color:#37352f;">{{ code }}</p>
 <p style="margin:0 0 28px;"><a href="{{ link }}"
-  style="display:inline-block;padding:13px 22px;background-color:#1f3cc4;border-radius:2px;color:#ffffff;
-  font-weight:700;text-decoration:none;">Me connecter sur cet appareil</a></p>
+  style="display:inline-block;padding:12px 22px;background-color:#191918;border-radius:6px;color:#ffffff;
+  font-weight:600;text-decoration:none;">Me connecter sur cet appareil</a></p>
 <p style="margin:0 0 12px;">Ce code et ce lien restent valables {{ code_minutes }} minutes.
-Plus tard, demandez un nouveau code sur <a href="{{ home_url }}" style="color:#1f3cc4;">tri-offres</a>.</p>
-<p style="margin:0 0 12px;font-size:14px;color:#465166;">Vous ne souhaitez plus ce rappel ? Ignorez ce message :
+Plus tard, demandez un nouveau code sur <a href="{{ home_url }}" style="color:#1d63c9;">tri-offres</a>.</p>
+<p style="margin:0 0 12px;font-size:14px;color:#6b6a65;">Vous ne souhaitez plus ce rappel ? Ignorez ce message :
 nous ne vous relancerons pas.</p>
-<p style="margin:0;font-size:14px;color:#465166;">Pour ne plus recevoir ces mails :
-<a href="{{ unsubscribe_url }}" style="color:#1f3cc4;">arrêter les mails</a>.</p>
+<p style="margin:24px 0 0;padding-top:16px;border-top:1px solid #e9e9e7;font-size:13px;color:#6b6a65;">Pour ne plus recevoir ces mails :
+<a href="{{ unsubscribe_url }}" style="color:#1d63c9;">arrêter les mails</a>.</p>
 {% include "mail/_layout_bottom.html" %}

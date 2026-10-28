@@ -3,7 +3,6 @@ from pathlib import Path
 from unittest import mock
 
 from django.conf import settings
-from django.contrib.staticfiles import finders
 from django.test import SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
 
@@ -23,29 +22,30 @@ CONTRAST_PAIRS = [
     ("ink-muted", "ground", 4.5),
     ("ink", "surface", 4.5),
     ("ink-muted", "surface", 4.5),
-    ("action", "ground", 4.5),
-    ("action", "surface", 4.5),
+    ("ink-muted", "wash", 4.5),  # notices, the folded file band, the date block
+    ("ink-muted", "action-tint", 4.5),
+    ("ink", "action-tint", 4.5),  # the selected option row, the armed secondary sort button
+    ("link", "ground", 4.5),
+    ("link", "surface", 4.5),
+    ("link", "wash", 4.5),
     ("on-action", "action", 4.5),
     ("on-action", "action-hover", 4.5),
-    ("stamp", "ground", 4.5),
-    ("stamp", "surface", 4.5),
-    ("on-action", "stamp", 4.5),
     ("error", "ground", 4.5),
     ("error", "surface", 4.5),
+    ("error", "error-tint", 4.5),  # the error summary and the danger button on hover
     ("field-border", "surface", 3),  # also the switch's track, off; its knob is ink on surface, on-action on action
     ("field-border", "ground", 3),
     ("focus", "ground", 3),
-    ("action-hover", "action-tint", 4.5),  # the secondary button on hover, or armed by a swipe
-    ("action", "action-tint", 4.5),
-    ("green-ink", "surface", 4.5),  # « Une piste à côté » on the sheet
+    ("action", "ground", 3),  # the checked radio and checkbox
+    ("green-ink", "surface", 4.5),  # the AI label and « Une piste à côté » on a white panel
 ]
-for card in ("pink", "blue", "yellow", "green"):
+for tag in ("pink", "blue", "yellow", "green"):
     CONTRAST_PAIRS += [
-        ("ink", card, 4.5),
-        (f"{card}-ink", card, 4.5),
-        ("action", card, 4.5),
-        (f"{card}-rule", card, 3),
-        (f"{card}-rule", "ground", 3),
+        ("ink", tag, 4.5),  # text in a callout
+        (f"{tag}-ink", tag, 4.5),  # the tag itself
+        ("link", tag, 4.5),
+        (f"{tag}-rule", tag, 3),  # a checked chip's border
+        (f"{tag}-rule", "ground", 3),  # the progress dot and the brand mark
     ]
 
 
@@ -86,18 +86,11 @@ class GaugeTests(SimpleTestCase):
 
 
 class StaticAssetsTests(SimpleTestCase):
-    def test_fonts_are_served_from_the_project(self):
-        for name in ("Luciole-Regular", "Luciole-Bold", "CourierPrime-Regular"):
-            with self.subTest(font=name):
-                self.assertIsNotNone(finders.find(f"ui/fonts/{name}.woff2"))
-
-    def test_font_licences_ship_with_the_fonts(self):
-        self.assertIsNotNone(finders.find("ui/fonts/LICENCES.md"))
-
-    def test_stylesheet_never_loads_a_hosted_font(self):
+    def test_stylesheet_loads_no_font(self):
         css = STYLESHEET.read_text()
-        self.assertNotIn("googleapis", css)
-        self.assertNotIn("@import", css)
+        for marker in ("@font-face", "@import", "googleapis", ".woff"):
+            with self.subTest(marker=marker):
+                self.assertNotIn(marker, css)
 
     def test_motion_is_cut_by_reduced_motion(self):
         self.assertIn("prefers-reduced-motion", STYLESHEET.read_text())

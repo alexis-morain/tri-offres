@@ -224,7 +224,6 @@ version as a network service, you must offer its source to its users.
 
 Third-party material shipped in this repository keeps its own license:
 
-- Luciole fonts: CC BY 4.0; Courier Prime fonts: SIL Open Font License 1.1 ([details](ui/static/ui/fonts/LICENCES.md)).
 - axe-core, used by the end-to-end tests only: MPL-2.0 ([details](e2e/vendor/LICENCES.md)).
 - `jobs/data/rome-titles.json.gz`: built from the ROME of France Travail, Licence Ouverte; `jobs/data/communes.json.gz`:
   built from the API Découpage administratif (geo.api.gouv.fr), Licence Ouverte Etalab 2.0. Build scripts in

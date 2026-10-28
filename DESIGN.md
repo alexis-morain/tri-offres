@@ -1,96 +1,96 @@
 ---
 name: tri-offres
-description: Job offers sorted like coloured index cards filed in a small, visible drawer.
+description: A quiet white page, like a well-kept notebook, where four pale tags say what each answer is.
 colors:
-  ground: "#f3f5f9"
-  surface: "#fcfdfe"
-  line: "#d3d9e4"
-  ink: "#18202e"
-  ink-muted: "#465166"
-  field-border: "#6a7489"
-  disabled: "#c9cfdb"
-  action: "#1f3cc4"
-  action-hover: "#172e9a"
-  action-tint: "#e4e9fb"
+  ground: "#ffffff"
+  surface: "#ffffff"
+  wash: "#f7f7f5"
+  line: "#e9e9e7"
+  ink: "#37352f"
+  ink-muted: "#6b6a65"
+  field-border: "#8e8c86"
+  disabled: "#e9e9e7"
+  action: "#191918"
+  action-hover: "#3b3a36"
+  action-tint: "#efefed"
   on-action: "#ffffff"
-  stamp: "#b8262b"
-  stamp-tint: "#fbe9e9"
-  error: "#a3271f"
-  pink: "#f6d4de"
-  pink-ink: "#6b2c40"
-  pink-rule: "#b9476a"
-  blue: "#cfe1f4"
-  blue-ink: "#1f4468"
-  blue-rule: "#3b72b0"
-  yellow: "#f7ec9f"
-  yellow-ink: "#5a4a06"
-  yellow-rule: "#8a7408"
-  green: "#d2ead0"
-  green-ink: "#2a5326"
-  green-rule: "#3f8a3a"
+  link: "#1d63c9"
+  focus: "#1d63c9"
+  error: "#c4332b"
+  error-tint: "#fbeceb"
+  pink: "#f8e4ec"
+  pink-ink: "#6e2a48"
+  pink-rule: "#c0477f"
+  blue: "#e1edf6"
+  blue-ink: "#1d4466"
+  blue-rule: "#3a78ad"
+  yellow: "#fbf0d4"
+  yellow-ink: "#5c4210"
+  yellow-rule: "#a87316"
+  green: "#e3f0e4"
+  green-ink: "#245133"
+  green-rule: "#3f8458"
 typography:
   display:
-    fontFamily: "Luciole, Atkinson Hyperlegible, system-ui, sans-serif"
-    fontSize: "1.875rem"
+    fontFamily: "ui-sans-serif, -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif"
+    fontSize: "2rem"
     fontWeight: 700
     lineHeight: 1.2
-    letterSpacing: "-0.01em"
+    letterSpacing: "-0.015em"
   headline:
-    fontFamily: "Luciole, Atkinson Hyperlegible, system-ui, sans-serif"
+    fontFamily: "{typography.display.fontFamily}"
     fontSize: "1.25rem"
-    fontWeight: 700
-    lineHeight: 1.2
+    fontWeight: 600
+    lineHeight: 1.3
   title:
-    fontFamily: "Luciole, Atkinson Hyperlegible, system-ui, sans-serif"
-    fontSize: "1.0625rem"
-    fontWeight: 700
-    lineHeight: 1.2
+    fontFamily: "{typography.display.fontFamily}"
+    fontSize: "1rem"
+    fontWeight: 600
+    lineHeight: 1.3
   lede:
-    fontFamily: "Luciole, Atkinson Hyperlegible, system-ui, sans-serif"
+    fontFamily: "{typography.display.fontFamily}"
     fontSize: "1.25rem"
     fontWeight: 400
     lineHeight: 1.45
   body:
-    fontFamily: "Luciole, Atkinson Hyperlegible, system-ui, sans-serif"
-    fontSize: "1.0625rem"
+    fontFamily: "{typography.display.fontFamily}"
+    fontSize: "1rem"
     fontWeight: 400
-    lineHeight: 1.55
+    lineHeight: 1.5
   body-small:
-    fontFamily: "Luciole, Atkinson Hyperlegible, system-ui, sans-serif"
-    fontSize: "0.9375rem"
+    fontFamily: "{typography.display.fontFamily}"
+    fontSize: "0.875rem"
     fontWeight: 400
-    lineHeight: 1.55
+    lineHeight: 1.5
   label:
-    fontFamily: "Luciole, Atkinson Hyperlegible, system-ui, sans-serif"
-    fontSize: "1.0625rem"
-    fontWeight: 700
-    lineHeight: 1.55
+    fontFamily: "{typography.display.fontFamily}"
+    fontSize: "1rem"
+    fontWeight: 600
+    lineHeight: 1.4
   caption:
-    fontFamily: "Luciole, Atkinson Hyperlegible, system-ui, sans-serif"
+    fontFamily: "{typography.display.fontFamily}"
     fontSize: "0.8125rem"
     fontWeight: 400
-    lineHeight: 1.55
-  typed:
-    fontFamily: "Courier Prime, ui-monospace, SF Mono, Menlo, monospace"
-    fontSize: "0.9375rem"
-    fontWeight: 400
-    lineHeight: 1.4
-    letterSpacing: "0"
-    fontFeature: "tnum"
-  stamp:
-    fontFamily: "Courier Prime, ui-monospace, SF Mono, Menlo, monospace"
-    fontSize: "1.0625rem"
-    fontWeight: 700
-    lineHeight: 1.25
+    lineHeight: 1.45
+  tag:
+    fontFamily: "{typography.display.fontFamily}"
+    fontSize: "0.8125rem"
+    fontWeight: 600
+    lineHeight: 1.3
+  figures:
+    fontFamily: "{typography.display.fontFamily}"
     fontFeature: "tnum"
   code-entry:
-    fontFamily: "Luciole, Atkinson Hyperlegible, system-ui, sans-serif"
+    fontFamily: "{typography.display.fontFamily}"
     fontSize: "1.5rem"
-    fontWeight: 700
+    fontWeight: 600
     letterSpacing: "0.15em"
     fontFeature: "tnum"
 rounded:
-  corner: "2px"
+  small: "4px"
+  control: "6px"
+  panel: "10px"
+  pill: "999px"
 spacing:
   space-1: "0.25rem"
   space-2: "0.5rem"
@@ -105,292 +105,241 @@ components:
     backgroundColor: "{colors.action}"
     textColor: "{colors.on-action}"
     typography: "{typography.label}"
-    rounded: "{rounded.corner}"
-    padding: "0 1.5rem"
-    height: "3rem"
+    rounded: "{rounded.control}"
+    padding: "0 1.25rem"
+    height: "2.75rem"
   button-primary-hover:
     backgroundColor: "{colors.action-hover}"
-    textColor: "{colors.on-action}"
   button-secondary:
-    backgroundColor: "transparent"
-    textColor: "{colors.action}"
-    rounded: "{rounded.corner}"
-    padding: "0 1.5rem"
-    height: "3rem"
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.control}"
+    height: "2.75rem"
   button-secondary-hover:
-    backgroundColor: "{colors.action-tint}"
-    textColor: "{colors.action-hover}"
+    backgroundColor: "{colors.wash}"
   button-danger:
-    backgroundColor: "transparent"
-    textColor: "{colors.stamp}"
-    rounded: "{rounded.corner}"
-    padding: "0 1.5rem"
-    height: "3rem"
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.error}"
+    rounded: "{rounded.control}"
+    height: "2.75rem"
   button-danger-hover:
-    backgroundColor: "{colors.stamp-tint}"
-    textColor: "{colors.stamp}"
-  button-disabled:
-    backgroundColor: "{colors.disabled}"
-    textColor: "{colors.ink-muted}"
+    backgroundColor: "{colors.error-tint}"
   input:
     backgroundColor: "{colors.surface}"
     textColor: "{colors.ink}"
     typography: "{typography.body}"
-    rounded: "{rounded.corner}"
-    padding: "0.625rem 0.75rem"
-    height: "3rem"
-  input-code:
+    rounded: "{rounded.control}"
+    padding: "0.5rem 0.75rem"
+    height: "2.75rem"
+  tag-pink:
+    backgroundColor: "{colors.pink}"
+    textColor: "{colors.pink-ink}"
+    typography: "{typography.tag}"
+    rounded: "{rounded.small}"
+    padding: "0.125rem 0.5rem"
+  tag-blue:
+    backgroundColor: "{colors.blue}"
+    textColor: "{colors.blue-ink}"
+  tag-yellow:
+    backgroundColor: "{colors.yellow}"
+    textColor: "{colors.yellow-ink}"
+  tag-green:
+    backgroundColor: "{colors.green}"
+    textColor: "{colors.green-ink}"
+  panel:
     backgroundColor: "{colors.surface}"
     textColor: "{colors.ink}"
-    typography: "{typography.code-entry}"
-    width: "12rem"
+    rounded: "{rounded.panel}"
+    padding: "1rem 1.25rem 1.25rem"
+  callout-ai:
+    backgroundColor: "{colors.green}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.control}"
+    padding: "0.5rem 0.75rem"
   chip:
     backgroundColor: "{colors.surface}"
     textColor: "{colors.ink}"
-    rounded: "{rounded.corner}"
-    padding: "0.5rem 1rem"
-    height: "2.75rem"
-  chip-selected-pink:
-    backgroundColor: "{colors.pink}"
-  chip-selected-blue:
-    backgroundColor: "{colors.blue}"
-  chip-selected-yellow:
-    backgroundColor: "{colors.yellow}"
-  chip-selected-green:
-    backgroundColor: "{colors.green}"
-  option:
-    backgroundColor: "{colors.surface}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.corner}"
-    padding: "0.5rem 1rem"
-    height: "3rem"
+    rounded: "{rounded.control}"
+    height: "2.5rem"
   option-selected:
     backgroundColor: "{colors.action-tint}"
-  card-pink:
-    backgroundColor: "{colors.pink}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.corner}"
-    padding: "0.75rem 1rem 1rem"
-  card-blue:
-    backgroundColor: "{colors.blue}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.corner}"
-    padding: "0.75rem 1rem 1rem"
-  card-yellow:
-    backgroundColor: "{colors.yellow}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.corner}"
-    padding: "0.75rem 1rem 1rem"
-  card-green:
-    backgroundColor: "{colors.green}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.corner}"
-    padding: "0.75rem 1rem 1rem"
-  card-sheet:
-    backgroundColor: "{colors.surface}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.corner}"
-    padding: "0.75rem 1rem 1rem"
-  stamp:
-    backgroundColor: "transparent"
-    textColor: "{colors.stamp}"
-    typography: "{typography.stamp}"
-    rounded: "{rounded.corner}"
-    padding: "0.5rem 1rem"
 ---
 
 # Design System: tri-offres
 
 ## Overview
 
-**Creative North Star: "The Card File"**
+**North Star: "The Quiet Page"**
 
-Sorting job offers is filing bristol index cards. Every answer the person gives becomes a card of one colour, filed in a small drawer that stays in view: pink for what they exclude, blue for what they prefer, yellow for what they say in their own words, green for what Claude understood. The drawer fills as the questionnaire goes; at the check screen the cards spread open into editable lines; at the end a date stamp prints the day of the first mail, once.
+tri-offres looks like a well-kept notebook page: white, wide margins, warm grey ink, nothing that asks for attention except the one decision on screen. The references are Notion (page, properties, coloured tags, callouts), Twenty (dense lists that stay calm) and OpenSEO (near-black actions, a plain sans set with care). The interface is a working screen: people come once to answer a few questions, then a few minutes a day to sort offers. Calm and legible beat clever.
 
-The ground is a cold, faintly blue white, never cream. Cards are flat colour with no texture and no shadow, 2px corners, a printed rule under their title and a tab that sticks out of the top edge like a drawer divider. One saturated school-ink blue carries every action. A rubber-stamp red is held back for the first-send date and for destructive actions. Text is set in Luciole, a face drawn for low vision; data the machine types back (counters, dates, seconds, scores) is set small in Courier Prime with tabular figures.
-
-The screens are working screens, not posters: a fixed rem scale at a ratio of about 1.2, one decision in front of the person, standard web controls built on native inputs, and every page usable without JavaScript. The visual rejection is confirmed in the direction contract: no grey SaaS form with a percentage progress bar, no numbered "step 1-2-3" wizard.
+What carries the product's meaning is kept from the previous system and only redressed: four kinds of information, four colours, now shown as pale **tags** the way Notion labels a property. Pink is what you exclude, blue what you prefer, yellow what you say in your own words, green what Claude wrote. Everything else is grey.
 
 **Key Characteristics:**
-- Four card colours, one per kind of information, held across every surface.
-- Flat bristol cards with a top tab, a 2px printed rule and 2px corners; no shadows anywhere.
-- One action colour (school ink) for buttons, links, focus, selection and the caret.
-- Stamp red and error red are separate tokens with separate jobs.
-- Luciole for all text; Courier Prime only for small typed data.
+- White ground, warm grey ink (`#37352f`), one hairline colour (`#e9e9e7`).
+- Near-black buttons; blue only for links and the focus ring.
+- Four tag colours, one per kind of information, never decorative.
+- The platform's own sans (San Francisco, Segoe UI), no webfont at all.
+- Panels with a 1px hairline and 10px corners; no shadow except on what floats.
 - Progress named by block with the time left in minutes, never step numbers or percentages.
-- Motion limited to two moments (a card filed, the stamp pressed) and short control transitions.
 
 ## Colors
 
-A cold paper ground, one saturated ink for action, one stamp red, and four pale bristol fills, each with its own darker ink and rule.
+Neutral, warm, low-contrast surfaces; contrast is spent on text and on the single primary action.
 
-### Primary
-- **School Ink Blue** (`action`): every button fill, every link, the focus ring (`focus` is the same value), the selected radio row's border, the switch when on, the caret and the account menu's current underline. Hover deepens it to **Night Ink** (`action-hover`). **Ink Wash** (`action-tint`) is its pale tint: selected option rows, the secondary button's hover, suggestion rows, text selection, the CV drop zone while a file is over it. **Paper White** (`on-action`) is text on ink.
+### Neutrals
+- **Page White** (`ground`, `surface`): page, fields, panels. Also the `theme-color`. Both tokens stay so a future tint of the ground costs one line.
+- **Wash** (`wash`): the quiet second surface. Notices, the folded file band on phones, the source excerpts under Claude's sentences, hovered secondary buttons, the date block of the end screen.
+- **Hairline** (`line`): every 1px divider and panel border, the masthead and footer rules, resting option rows.
+- **Ink** (`ink`): body text, headings, the switch knob when off, gauge notches that are on. A warm grey-black, never pure black.
+- **Muted ink** (`ink-muted`): the "pourquoi" line under a question, hints, row labels, footer, inactive tabs.
+- **Field border** (`field-border`): the 1px border of fields, chips and the switch track, the dashed drop zone; it holds 3:1 on white so a field reads as a field.
+- **Spent** (`disabled`): disabled button fill, with muted ink text.
 
-### Secondary
-- **Stamp Red** (`stamp`): the date stamp on the end screen and destructive actions (the danger button, the "Supprimer" checkbox on a CV line via `accent-color`). **Stamp Wash** (`stamp-tint`) is the danger button's hover.
+### Action
+- **Near Black** (`action`): the primary button's fill, the checked radio and checkbox (`accent-color`), the switch when on, the current tab's underline. Hover lightens to `action-hover`. `action-tint` is the selected option row and the armed secondary sort button. `on-action` is white text on black.
+- **Link Blue** (`link`, `focus`): links in running text and the 2px focus ring. Nothing else is blue.
 
-### Tertiary (the bristol cards)
-Each card has three tokens: a pale fill, an ink for secondary text on the card (row labels, meta, empty states), and a rule for its header line, its tab in the progress bar and the dashed counter divider.
-- **Bristol Pink** (`pink`, `pink-ink`, `pink-rule`): « Ce que vous excluez », the filters. Carries the live offer counter.
-- **Bristol Blue** (`blue`, `blue-ink`, `blue-rule`): « Ce que vous préférez », the preferences.
-- **Bristol Yellow** (`yellow`, `yellow-ink`, `yellow-rule`): « En vos mots », free text and the CV. The CV list on the CV screen opens under a yellow rule.
-- **Bristol Green** (`green`, `green-ink`, `green-rule`): « Ce que j’ai compris », text Claude wrote. Also the reason strips in the sample mail on the home page, and the colour of the « Synthèse rédigée par IA » label.
+### Error
+- **Red** (`error`, `error-tint`): field errors, the error summary, the danger button and the "Supprimer" checkbox of a CV line. One red only: errors always add the alert icon and bold weight, so a destructive button and an error never get confused.
 
-### Neutral
-- **Cold Paper** (`ground`): page background, also the `theme-color`.
-- **Sheet White** (`surface`): fields, chips, option rows, notices, the white "sheet" card, source excerpts inside the green card.
-- **Pencil Line** (`line`): hairlines (1px) between rows, masthead and footer borders, resting option-row borders.
-- **Ink Black** (`ink`): body text, headings, the switch's knob when off, gauge notches that are on.
-- **Pencil Grey** (`ink-muted`): the "pourquoi" line under a question, hints, footer, inactive block names.
-- **Field Grey** (`field-border`): 2px borders of fields, chips, the switch track, the file drop zone (dashed); tested at 3:1.
-- **Spent Grey** (`disabled`): disabled button fill.
-- **Error Red** (`error`): field errors, the error summary's border and links, the summary failure line. Always with the alert icon and bold text.
+### Tags (the four kinds)
+Each kind has a pale fill, a dark ink for text on that fill, and a mid "rule" for small marks on white (the progress dot, the chip's checked border, the brand mark).
+- **Pink** (`pink`, `pink-ink`, `pink-rule`): « Ce que vous excluez », the filters. The live offer counter sits on its panel.
+- **Blue** (`blue`, `blue-ink`, `blue-rule`): « Ce que vous préférez ».
+- **Yellow** (`yellow`, `yellow-ink`, `yellow-rule`): « En vos mots », free text and the CV.
+- **Green** (`green`, `green-ink`, `green-rule`): « Ce que j’ai compris » and every text Claude wrote. The reason under an offer sits in a green callout; the « rédigée par IA » label is green ink.
 
 ### Named Rules
-**The One Card Per Kind Rule.** Pink, blue, yellow and green each mean exactly one kind of information (exclusions, preferences, own words, Claude’s text) and keep that meaning on every surface: drawer, progress tabs, chips selected in that block, the summary, « Ma recherche ». A new surface reuses a colour only for the same kind of information, never as decoration.
+**The One Tag Per Kind Rule.** Pink, blue, yellow and green each mean one kind of information and keep it on every surface. A new surface reuses a colour only for the same kind, never as decoration.
 
-**The Card Ink Rule.** Text on a card takes the card’s own ink (`*-ink`), never the page’s Pencil Grey. Primary text on a card stays Ink Black; links on a card stay School Ink.
+**The Grey By Default Rule.** A panel is white with a hairline; only its title tag carries the colour. Fills are reserved for tags, checked chips and Claude's callouts.
 
-**The Two Reds Rule.** Stamp red marks the first-send date and destructive actions; error red marks errors. They are separate tokens and are never swapped. Because the two hues sit close, an error is always also carried by the alert icon and bold weight, and the stamp by its double rule and typed face.
-
-**The Tested Pair Rule.** Every text and boundary pairing is held to RGAA AA by `ui/tests.py`: 4.5:1 for text (ink, muted ink, action, stamp and error on ground and surface; ink, card ink and action on each card), 3:1 for boundaries (field border, focus, each card rule on its card and on the ground). A new pairing is added to the test before it ships.
+**The Tested Pair Rule.** Every text and boundary pairing is held to RGAA AA by `ui/tests.py`: 4.5:1 for text, 3:1 for boundaries. A new pairing is added to the test before it ships.
 
 ## Typography
 
-**Display Font:** Luciole (with Atkinson Hyperlegible, system-ui, sans-serif), self-hosted in regular, italic and bold.
-**Body Font:** Luciole, the same family.
-**Label/Mono Font:** Courier Prime (with ui-monospace, SF Mono, Menlo), self-hosted in regular and bold.
+**Family:** the platform's sans, `ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif`. Nothing is downloaded: the page looks native on each device, like Notion.
 
-**Character:** A legibility face built for low vision, used plainly at a working size, beside a typewriter face that reads as data typed onto a card. No webfont CDN, no `@import`.
+**Character:** plain and exact. Hierarchy comes from size and weight steps, not from a second family. Figures that the system gives back (counters, dates, scores, page numbers) use tabular figures through the `.typed` class, in the same family.
 
 ### Hierarchy
-- **Display** (700, 1.875rem, 1.2, -0.01em): the one `h1` per screen, the question itself. Balanced wrapping; verb-pronoun inversions (« voulez-vous ») never break at the hyphen.
-- **Headline** (700, 1.25rem, 1.2): `h2` section titles, block titles on « Ma recherche ».
-- **Title** (700, 1.0625rem, 1.2): card titles and `h3`.
-- **Lede** (400, 1.25rem, 1.45): the opening promise on the home page and the arrival sentence on the end screen; capped at 34rem.
-- **Body** (400, 1.0625rem, 1.55): running text, field values, option rows; prose blocks capped at 38rem.
-- **Body small** (400, 0.9375rem): hints, "pourquoi" lines in dense views, card rows, footer, progress names; capped at 34rem when it is a hint.
-- **Label** (700, 1.0625rem): field labels and legends, buttons, back links, « Modifier » links.
-- **Caption** (400, 0.8125rem): row labels (`dt`) on cards, card meta, the AI label, drawer note.
-- **Typed** (Courier Prime 400, 0.9375rem, 1.4, tabular figures): the offer counter on the pink card and in the folded drawer, countdown seconds, the gauge value.
-- **Stamp** (Courier Prime 700, 1.0625rem, 1.25, tabular): the date stamp; its second line drops to 400 at 0.9375rem.
-- **Code entry** (Luciole 700, 1.5rem, 0.15em tracking, tabular): the six-digit sign-in code field.
+- **Display** (700, 2rem, 1.2, -0.015em): the one `h1` per screen, the question itself. Balanced wrapping; « voulez-vous » never breaks at the hyphen.
+- **Headline** (600, 1.25rem): `h2` section titles.
+- **Title** (600, 1rem): panel titles outside tags, `h3`, offer titles.
+- **Lede** (400, 1.25rem, 1.45): the opening promise on the home page and the arrival sentence; capped at 34rem.
+- **Body** (400, 1rem, 1.5): running text, field values, option rows; prose capped at 38rem.
+- **Body small** (400, 0.875rem): hints, "pourquoi" lines in dense views, panel rows, footer, tabs.
+- **Label** (600, 1rem): field labels and legends, buttons.
+- **Caption** (400, 0.8125rem): row labels, meta lines, the AI label. Never smaller.
+- **Tag** (600, 0.8125rem): the coloured tag that names a panel.
+- **Code entry** (600, 1.5rem, 0.15em tracking, tabular): the six-digit sign-in code.
 
 ### Named Rules
-**The One Family Rule.** Everything a person reads is Luciole. The scale is fixed rem steps (0.8125, 0.9375, 1.0625, 1.25, 1.5, 1.875rem); there is no fluid display size.
+**The Native Type Rule.** No `@font-face`, no CDN, no `@import`. Weights used: 400, 600, and 700 for the display title and error messages only.
 
-**The Typed Data Rule.** Courier Prime appears only for data the system types back to the person (counts, dates, seconds, scores), small and with tabular figures. It never sets a heading, a label or a sentence of prose.
+**The Figures Rule.** Numbers the system reports are tabular (`.typed`), never in a monospace face.
 
 ## Layout
 
-A single centred column, 72rem wide at most with 1rem side padding, shared by masthead, page and footer. Pages open with 2rem above and 4.5rem below. Spacing follows an eight-step scale (0.25 to 4.5rem); 2rem separates fields, 3rem separates the question from its actions.
+A single centred column, 72rem at most with 1rem side padding, shared by masthead, page and footer. Pages open with 2rem above and 4.5rem below. Spacing follows an eight-step scale (0.25 to 4.5rem); 2rem between fields, 3rem between the question and its actions. White space does the separating; rules are the exception.
 
-The question screen is the canonical layout. Below 60rem it is one column, and the drawer comes first in the source so it sits above the question as a folded band (« Votre fichier », the card count, the typed counter). From 60rem it becomes two tracks, the question at up to 37rem on the left and the drawer at 19rem on the right, pushed apart, the drawer sticky 1.5rem from the top. The primary button sits bottom left with the back link beside it.
+The question screen is the canonical layout. Below 60rem it is one column, the file comes first as a folded band on a wash ground (« Votre fichier », the count, the counter). From 60rem it is two tracks: the question at up to 37rem on the left, the file at 19rem on the right, sticky 1.5rem from the top. The primary button sits bottom left, the back link beside it.
 
-The block progress sits above every questionnaire screen: three named blocks with a small coloured tab each and the time left in minutes at the right. Below 30rem the three blocks become three equal cells, each tab above its name.
+The block progress sits above every questionnaire screen: three block names in small text, each with a dot in its tag rule colour, the current one in ink with a 2px ink underline; the time left in minutes on the right. Below 30rem the three blocks become three equal cells.
 
-The summary spans both tracks: from 48rem the cards sit in two columns, pink spanning two rows, green across the full width with its text capped at 44rem. The home page pairs the intro (36rem) with a sample mail sheet (25rem) from 60rem. The end screen shows the whole drawer beside the stamp on wide screens and drops it on phones. « Mes données » is a two-column definition list from 40rem (11rem labels).
+The summary spans both tracks: from 48rem the panels sit in two columns, pink spanning two rows, green across the full width with its text capped at 44rem. The home page pairs the intro (36rem) with a sample mail panel (25rem) from 60rem. « Mes données » is a two-column property list from 40rem (11rem labels), like Notion's page properties.
 
 **The One Decision Rule.** A screen asks one question with its "pourquoi" line directly under it; the file beside it is the only other thing in view.
 
 ## Elevation & Depth
 
-Flat. There is no `box-shadow` anywhere in the system. Depth reads from the filing metaphor instead: a card’s tab rising 0.5rem above its top edge, the card’s square top-left corner where the tab joins, the 2px printed rule under each card title, and the colour of the fill against the cold ground. Separation between rows is a 1px hairline in Pencil Line or in the card’s rule colour. The stamp gets its weight from a 2px border plus a 1px outline offset by 3px, a printed double frame, not a shadow.
+Flat by default. Separation comes from white space first, a 1px hairline second, a wash ground third. One shadow exists, `--shadow-float`, the layered menu shadow of Notion, and only on what floats above the page: the suggestions list under a field and the offer being dragged on the sort page.
 
-**The Flat Bristol Rule.** Cards are flat colour, without texture, gradient or shadow. If something needs to stand apart, give it a rule, a tab or a colour, never a lift.
+**The Float Only Rule.** A shadow means "this is above the page and will go away". Panels, cards and buttons never get one.
 
 ## Shapes
 
-One corner: 2px, on every card, field, chip, option row, button, notice, swatch and the stamp. Cards square their top-left corner (`0 2px 2px 2px`) where the tab, 3.5rem wide and 0.5rem tall with 2px top corners, sits. Tabs step right by 4rem per block (pink 0, blue 4rem, yellow 8rem, green 12rem) so a stack of cards reads as a drawer. The switch knob is square (1px corners). The only circles are native radio buttons and the busy spinner inside a button.
+Three corners, each with one job: 4px for small marks (tags, the chip's check box), 6px for controls (buttons, fields, chips, option rows), 10px for panels (cards, notices, the error summary, the sort sheet, suggestions). The switch is a pill with a round knob; radios are native circles. Borders are 1px everywhere; the only 2px lines are the current tab's underline, the focus ring and a hovered link's underline. The tiniest marks (brand squares, gauge notches) take 2px corners.
 
-Borders are 2px for anything interactive (fields, chips, buttons, option rows) and for printed rules, 1px for hairlines and container outlines. The brand mark is three card tabs in filing order (pink, blue, yellow) at decreasing heights beside the wordmark.
+The brand mark is three small squares (pink, blue, yellow rule colours, 2px corners) beside the wordmark in 600 weight: the product's tags, not a logo drawing.
 
-Icons are authored inline SVG on a 20px grid, 2px stroke, square caps and mitred joins, the same drawing hand as the corners, always decorative (`aria-hidden`): check, alert, back, next, close, file, mail, edit.
+Icons are inline SVG on a 20px grid, stroke in currentColor, always decorative (`aria-hidden`).
 
 ## Components
 
 ### Buttons
-Solid and plain, one weight.
-- **Shape:** 2px corners, 2px border, 3rem minimum height, 1.5rem side padding, Luciole bold.
-- **Primary:** School Ink fill, white text. One per screen, bottom left of the form.
-- **Hover / Active / Focus:** fill and border deepen to Night Ink in 160ms; pressed moves down 1px; focus is a 3px School Ink outline offset 2px.
-- **Sort page exception:** three equal columns, 1rem apart, « Pas pour moi » left, « Peut-être » centre, the primary « Ça m’intéresse » right, because the swipe to the right says yes.
-- **Secondary:** transparent with an ink border and ink text; hover fills with Ink Wash.
-- **Danger:** transparent with a stamp-red border and text; hover fills with Stamp Wash. Lives only in a danger zone, under a hairline 4.5rem below the content, away from any primary button.
-- **Disabled:** Spent Grey fill, Pencil Grey text. **Busy:** keeps its label and adds a small spinning ring, real work only.
-- **Back link:** a bold underlined link with the back icon, never a button. Links underline at 1px and thicken to 2px on hover.
+- **Primary:** Near Black fill, white 600 label, 6px corners, 2.75rem tall, 1.25rem side padding. One per screen, bottom left of the form. Hover lightens to `action-hover` in 160ms; pressed moves down 1px.
+- **Secondary:** white with a 1px field border and ink text; hover fills with Wash.
+- **Danger:** white with a 1px red border and red text; hover fills with `error-tint`. Lives only in the danger zone, under a hairline, far from any primary button.
+- **Disabled:** Spent fill, muted text. **Busy:** keeps its label and adds a small spinning ring, real work only.
+- **Sort page:** three equal columns, « Pas pour moi » left, « Peut-être » centre, the primary « Ça m’intéresse » right, because the swipe to the right says yes.
+- **Back link:** muted ink with the back icon, ink on hover, underlined.
+
+### Tags
+The colour of the product. A tag is a 4px-cornered pill of pale fill and dark ink, 600 weight, 0.8125rem: it names a panel (« Ce que vous excluez »), never a value.
+
+### Panels (cards)
+- White, 1px hairline, 10px corners, padding 1rem 1.25rem 1.25rem.
+- Head: the tag on the left, meta or « Modifier » on the right; no rule under it.
+- Rows: label (caption, muted) over value. Missing answers read « Non renseigné » in italic muted ink.
+- The pink panel carries the offer counter under a hairline, in tabular figures.
+- **Callout:** a panel without border on a tag fill (`card--strip`), for Claude's reason under an offer.
+- **Sort sheet:** a white panel for one offer: title, employer, meta line, gauge, the reason in a green callout, summary, source. The next offer waits behind, offset by 0.5rem. While dragged, the top sheet gets the float shadow.
+
+### Fields
+White, 1px field border, 6px corners, 2.75rem tall; textareas from 7.5rem. Label 600 above, hint in small muted text under it. Focus: border and 2px ring in Link Blue. Error: border red, message above the control in bold red with the alert icon; a form back with errors opens on an error summary (red border, `error-tint` ground) that takes focus.
 
 ### Chips
-Checkboxes drawn as chips, for choices with a cap.
-- **Style:** Sheet White, 2px Field Grey border, 2.75rem tall, a 1rem check box always in the layout so a chip never changes width.
-- **State:** hover borders in ink; checked fills with the block’s card colour and borders with its rule (tone set per field); at the cap, the unchecked ones turn dashed and muted. A "1 sur 3" count sits under the group.
-- **Groups:** a long list (the jobs of block 2) splits into groups, each a `role="group"` named by its small bold Ink Muted title, 1.5rem between groups; one cap and one count for the whole field.
+Checkboxes drawn as chips for capped choices: white, 1px field border, 6px corners, 2.5rem tall, a 1rem check box always in the layout. Checked: the block's tag fill and rule border. At the cap the unchecked ones turn dashed and muted; a "1 sur 3" count sits under the group.
 
 ### Options
-One row per choice for a single or short multiple choice, with the native radio or checkbox in School Ink. Resting border Pencil Line, hover Field Grey, checked School Ink border on Ink Wash.
+One row per choice, native radio or checkbox in Near Black. Resting border Hairline, hover Field border, checked Field border on `action-tint`: the control itself carries the state.
 
 ### Switch
-« Plutôt une préférence »: a 2.75 by 1.5rem square track with a square knob. Off is an ink knob on white, never a greyed-out control; on is a white knob on School Ink. Announced as `role="switch"`.
-
-### Cards / Containers
-- **Corner Style:** 2px, top-left square under the tab.
-- **Background:** one of the four bristol fills, or Sheet White for the "sheet" (the morning mail sample, with a 1px line border and a line-coloured tab).
-- **Shadow Strategy:** none (see Elevation & Depth).
-- **Border:** none on bristol cards; a 2px rule in the card’s rule colour under the title.
-- **Internal Padding:** 0.75rem top, 1rem sides and bottom. Rows are label (caption, card ink) over value. A "strip" is a tabless card used inside a sheet.
-- **Sort card:** a Sheet White "sheet" for one offer on the sort page: title, employer in body weight right under it, meta line, gauge, the reason in a green strip, summary, source. The next offer waits behind it, offset by 0.5rem, no shadow, out of reach.
-- **Notice:** Sheet White with a 1px line border, for guidance that is not an error.
-
-### Inputs / Fields
-- **Style:** Sheet White, 2px Field Grey border, 2px corners, 3rem tall; textareas from 7.5rem, vertical resize. Label bold above, hint in small muted text under it, then the control.
-- **Focus:** border turns School Ink plus the 3px focus outline.
-- **Error / Disabled:** the field’s border turns Error Red, the message sits above the control in bold error red with the alert icon. A form returned with errors opens with an error summary (2px error border) that takes focus and links to each field.
-- **Consequence line:** under a filter, a small sentence says what it costs, kept current as the person types.
-- **City suggestions:** a listbox under the field, Sheet White, 2px Field Grey border, the active row in Ink Wash.
-- **File field:** the native control without JavaScript; with it, a secondary button labelled in French and, on computers, a dashed drop zone that turns ink on drag-over.
+« Plutôt une préférence »: a 2.75 by 1.5rem pill. Off is an ink knob on white with a field border, never a greyed-out control; on is a white knob on Near Black. Announced as `role="switch"`.
 
 ### Navigation
-- **Block progress:** three block names in small text, each with a 0.75 by 0.5rem tab in its rule colour; the current one in ink and bold with a 2px underline in its rule colour; done ones with a check icon. Time left in minutes at the right.
-- **Account menu** (« Ma recherche », « Mes données »): small muted links, hover to ink with a line underline, current page bold with a 2px School Ink underline.
-- **Masthead:** the tab mark and wordmark left, one action right; a 1px line underneath.
+- **Masthead:** white, wordmark left, one action right, a hairline under it.
+- **Account tabs** (« Mes offres », « Ma recherche », « Mes données »): small muted text, current one in ink, 600, with a 2px ink underline, like Notion's view tabs.
 
-### The Drawer (signature)
-« Votre fichier » with its card count, then the cards in block order, 1.5rem apart. Rendered open so it works without JavaScript; on phones the script folds it into a band that still shows the typed counter. A card filed on this request drops in from 0.75rem above over 320ms (starting visible, never fading in). The pink card carries the counter below a dashed rule in its rule colour.
+### The File (signature)
+« Votre fichier » with its count, then the panels in block order, 1.5rem apart, each named by its tag. Open on wide screens, a folded band on phones that still shows the counter. A panel filed on this request drops in from 0.75rem above over 320ms.
 
 ### The Answer Lines
-At the summary and in « Ma recherche » the cards spread open: one line per answer, label over value, a bold « Modifier » link on the right with a hidden suffix naming the answer. Missing answers read « Non renseigné » in italic card ink. Claude’s sentences on the green card open on the answers they come from, each sentence a disclosure underlined in a dotted card rule.
+At the summary and in « Ma recherche » each panel lists one line per answer, label over value, a « Modifier » link on the right. Claude's sentences on the green panel each open on the answers they come from, as a disclosure with a dotted underline; the excerpt sits on Wash.
 
-### The Date Stamp (signature)
-The first-send date in uppercase typed bold, stamp red, 2px border plus a 1px outline 3px out, tilted -2.5 degrees, with « vers 7 h » under it. Pressed once on arrival: 300ms from 118% scale and zero opacity to rest, transform and opacity only. Never pressed again for a date already gone.
+### The Date
+The first-send date on a Wash block with a hairline and 10px corners, 600 weight, tabular, « vers 7 h » under it in muted ink. It rises in once on arrival (240ms, opacity and transform), never again for a date already gone. Class names stay `stamp` for the tests.
 
 ### The Gauge
-A score is always ten notches, 0.5 by 1rem, ink when on and white with a Field Grey border when off, followed by « 7 sur 10 » in typed bold.
+A score is always ten notches, 0.5 by 1rem with 2px corners, ink when on and white with a field border when off, followed by « 7 sur 10 » in tabular 600.
 
 ### Motion
-Controls ease over 160ms on `cubic-bezier(0.16, 1, 0.3, 1)` (colour, border, the drawer chevron). The two signature moments are the filed card (320ms) and the stamp (300ms). Under `prefers-reduced-motion`, every animation and transition collapses to 1ms and lands on its final state.
+Controls ease over 160ms on `cubic-bezier(0.16, 1, 0.3, 1)`. Two moments only: a panel filed (320ms) and the date rising (240ms). Under `prefers-reduced-motion`, everything collapses to 1ms.
+
+### Mails
+Same world, inline styles only, no image. On a Wash ground: the brand mark and wordmark above, then one white panel (1px hairline, 10px corners). In the morning mail each offer is its own bordered panel: title 600, employer and place muted, « 8 sur 10 » in tabular 600, Claude's reason in a green callout under « Raison rédigée par IA », source and « Voir l’offre » on one small muted line. The sign-in code sits on a Wash block. The near-black button (6px corners), then « Notes générées par IA »; the unsubscribe line closes the panel under a hairline.
 
 ## Do's and Don'ts
 
 ### Do:
-- **Do** give each kind of information its card colour and keep it: pink excludes, blue prefers, yellow is the person’s own words, green is Claude’s text.
-- **Do** set text on a card in the card’s own ink for secondary lines, and keep primary text in Ink Black.
-- **Do** use School Ink Blue for every action and only for actions: buttons, links, focus, selection.
-- **Do** keep stamp red for the first-send date and destructive actions, and error red for errors, each with its own token.
-- **Do** use 2px corners and 2px borders on every control and container.
-- **Do** set counts, dates, seconds and scores small in Courier Prime with tabular figures.
+- **Do** keep the page white and the text warm grey; let space separate things.
+- **Do** name each panel with its tag and keep the four colours to their four kinds.
+- **Do** use Near Black for the one primary action and blue for links and focus only.
+- **Do** use 1px borders, and the three corners for their three jobs.
+- **Do** set reported numbers in tabular figures (`.typed`).
 - **Do** name progress by block and give the time left in minutes.
-- **Do** build every control on a native input and make the page work without JavaScript first.
-- **Do** add every new colour pairing to the contrast test (4.5:1 text, 3:1 boundaries).
-- **Do** write French copy in the vouvoiement with curly apostrophes (’) and French quotes (« »), and keep CSS class names in English BEM.
+- **Do** build every control on a native input and make every page work without JavaScript.
+- **Do** add every new colour pairing to the contrast test.
+- **Do** write French copy in the vouvoiement with curly apostrophes (’) and French quotes (« »); CSS classes stay English BEM.
 
 ### Don't:
-- **Don't** add a `box-shadow`, gradient or paper texture to anything.
-- **Don't** use a cream or warm ground; the ground stays cold, blue-tinted white.
+- **Don't** load a font, from a CDN or from the project.
+- **Don't** fill a whole panel with a tag colour; only tags, checked chips and Claude's callouts get a fill.
+- **Don't** put a shadow on anything that does not float.
+- **Don't** add a coloured border on one side of a panel.
+- **Don't** use purple, gradients, glassmorphism or a second accent colour.
 - **Don't** show step numbers or a percentage progress bar.
-- **Don't** use a card colour as decoration or for a kind of information it does not hold.
-- **Don't** set headings, labels or prose in Courier Prime.
 - **Don't** put a destructive action next to a primary button.
-- **Don't** round anything past 2px; native radios and the busy spinner are the only circles.
 - **Don't** use an em dash anywhere in the interface copy.
-- **Don't** load fonts from a CDN or through `@import`.

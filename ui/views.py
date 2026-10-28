@@ -6,9 +6,9 @@ from django.shortcuts import render
 from ui.widgets import CappedMultipleChoiceField, CheckOptionsWidget, OptionsWidget, SwitchWidget
 
 PALETTE = [
-    ("ground", "Fond"), ("surface", "Champ"), ("ink", "Encre"), ("ink-muted", "Encre secondaire"),
-    ("action", "Encre d’action"), ("stamp", "Tampon"), ("error", "Erreur"), ("pink", "Fiche rose"),
-    ("blue", "Fiche bleue"), ("yellow", "Fiche jaune"), ("green", "Fiche verte"),
+    ("ground", "Fond"), ("surface", "Champ"), ("ink", "Encre"), ("ink-muted", "Encre secondaire"), ("wash", "Fond lavé"),
+    ("action", "Action"), ("link", "Lien"), ("error", "Erreur"), ("pink", "Étiquette rose"),
+    ("blue", "Étiquette bleue"), ("yellow", "Étiquette jaune"), ("green", "Étiquette verte"),
 ]
 
 
