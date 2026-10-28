@@ -212,6 +212,21 @@ class SortEndToEnd(StaticLiveServerTestCase):
         page.mouse.up()
         page.wait_for_timeout(400)
         self.title(OFFERS[3][0])
+        self.assertEqual(card.evaluate("el => el.style.transform"), "")
+        self.assertEqual(page.evaluate("String(getSelection())"), "", "the drag selected the text")
+
+        # A lost pointerup (a native drag swallows it, in Safari): the next move without a button brings it back.
+        page.mouse.move(box["x"] + 60, y)
+        page.mouse.down()
+        page.mouse.move(box["x"] + 60 + box["width"] * 0.1, y, steps=4)
+        self.assertTrue(card.evaluate("el => !el.dispatchEvent(new DragEvent('dragstart', "
+                                      "{bubbles: true, cancelable: true}))"), "a native drag can start")
+        card.evaluate("el => el.dispatchEvent(new PointerEvent('pointermove', {bubbles: true, pointerId: 1, "
+                      "pointerType: 'mouse', buttons: 0, clientX: 0}))")
+        page.wait_for_timeout(400)
+        self.assertEqual(card.evaluate("el => el.style.transform"), "", "the card stayed off-centre")
+        page.mouse.up()
+        self.title(OFFERS[3][0])
 
         # Offline: the verdict waits in the queue, the deck ends, and back online it is sent.
         self.context.set_offline(True)

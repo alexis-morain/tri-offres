@@ -1,6 +1,6 @@
 from django.test import SimpleTestCase
 
-from jobs.text import fold, strip_marks
+from jobs.text import fold, job_words, strip_marks
 
 
 class StripMarksTests(SimpleTestCase):
@@ -35,3 +35,19 @@ class StripMarksTests(SimpleTestCase):
     def test_empty(self):
         self.assertEqual(strip_marks(""), "")
         self.assertEqual(strip_marks(None), "")
+
+
+class JobWordsTests(SimpleTestCase):
+    def test_feminine_meets_masculine(self):
+        for feminine, masculine in [("Infirmière", "infirmier"), ("Conseillères", "conseiller"),
+                                    ("Vendeuses", "vendeur"), ("Directrice", "directeur"), ("Technicienne", "technicien"),
+                                    ("Programmatrices", "programmateur")]:
+            with self.subTest(feminine=feminine):
+                self.assertEqual(job_words(feminine), job_words(masculine))
+
+    def test_marks_give_no_word(self):
+        self.assertEqual(job_words("Administrateur.rice (H/F)"), {"administrateur"})
+        self.assertEqual(job_words("Régisseur.se principal.e"), {"regisseur", "principal"})
+
+    def test_plural_and_short_words(self):
+        self.assertEqual(job_words("Les régisseurs du lieu"), {"regisseur"})

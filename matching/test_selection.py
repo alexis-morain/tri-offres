@@ -183,6 +183,8 @@ class CandidatesOrderTests(SelectionTestCase):
 
     def setUp(self):
         super().setUp()
+        # Its offers without code need a shared word; its coded ones are E codes, the profile's domain.
+        self.source = make_source(name="Généraliste", domains=[])
         self.profile = make_profile("nora@example.fr", previous_job="Programmatrice de festival",
                                     weighted_preferences={"version": 1, "jobs": [{"custom": "Régisseur lumière"}]})
 
@@ -193,8 +195,8 @@ class CandidatesOrderTests(SelectionTestCase):
         nothing = self.offer(ago=timedelta(hours=1), title="Comptable")
         summary_only = self.offer(ago=timedelta(hours=2), title="Chargée d’accueil", summary="Accueil d’un festival.")
         title = self.offer(ago=timedelta(hours=3), title="Régisseuse lumière")
-        coded_old = self.offer(ago=timedelta(hours=40), title="Développeur", rome_code="M1805")
-        coded_new = self.offer(ago=timedelta(hours=20), title="Comptable", rome_code="M1203")
+        coded_old = self.offer(ago=timedelta(hours=40), title="Développeur", rome_code="E1205")
+        coded_new = self.offer(ago=timedelta(hours=20), title="Comptable", rome_code="E1101")
         self.assertEqual(self.candidates(), [coded_new, coded_old, title, summary_only])
         self.assertNotIn(nothing, self.candidates())
 
@@ -237,8 +239,26 @@ class CandidatesOrderTests(SelectionTestCase):
         self.assertEqual(self.candidates(), [close, in_summary])
         self.assertEqual(self.candidates(limit=1), [close])
 
+    def test_offer_of_a_source_of_the_domain_without_shared_word_stays_last(self):
+        """A source serving the person's domain vouches for its offers without code (plan of 28/10, chantier 2)."""
+        niche = make_source(name="Profilculture", domains=["E", "K", "L"])
+        self.offer(ago=timedelta(hours=1), title="Comptable")
+        niche_old = self.offer(ago=timedelta(hours=5), title="Administrateur", source=niche)
+        niche_new = self.offer(ago=timedelta(hours=1), title="Assistant technique", source=niche)
+        close = self.offer(ago=timedelta(hours=30), title="Régisseur")
+        coded = self.offer(ago=timedelta(hours=40), title="Comptable", rome_code="E1107")
+        self.assertEqual(self.candidates(), [coded, close, niche_new, niche_old])
+        self.assertEqual(self.candidates(limit=3), [coded, close, niche_new])
+
+    def test_feminine_and_masculine_share_a_word(self):
+        self.profile.weighted_preferences = {"version": 1, "jobs": [{"custom": "Infirmière"}]}
+        self.profile.previous_job = ""
+        self.offer(ago=timedelta(hours=1), title="Comptable")
+        kept = self.offer(ago=timedelta(hours=2), title="INFIRMIER (F/H) - CMP")
+        self.assertEqual(self.candidates(), [kept])
+
     def test_coded_offer_without_shared_word_stays(self):
-        coded = self.offer(title="Comptable", rome_code="M1203")
+        coded = self.offer(title="Comptable", rome_code="E1101")
         self.assertEqual(self.candidates(), [coded])
 
     def test_words_of_seek_text_do_not_count(self):
@@ -281,7 +301,7 @@ class CandidatesOrderTests(SelectionTestCase):
         self.assertEqual(self.candidates(), [close, newest])
 
     def test_one_offer_per_match_key_across_both_groups(self):
-        coded = self.offer(ago=timedelta(hours=5), title="Régisseur", rome_code="L1508", match_key="cle-a")
+        coded = self.offer(ago=timedelta(hours=5), title="Régisseur", rome_code="E1107", match_key="cle-a")
         self.offer(ago=timedelta(hours=1), title="Régisseur", match_key="cle-a")
         other = self.offer(ago=timedelta(hours=2), title="Festival", match_key="cle-b")
         self.assertEqual(self.candidates(), [coded, other])
@@ -297,7 +317,7 @@ class CandidatesOrderTests(SelectionTestCase):
 
     def test_offers_come_with_their_source(self):
         self.offer(title="Régisseur")
-        self.offer(title="Comptable", rome_code="M1203")
+        self.offer(title="Comptable", rome_code="E1101")
         picked = self.candidates()
         with self.assertNumQueries(0):
             sources = [offer.source.name for offer in picked]

@@ -83,9 +83,9 @@ def candidates(profile, now, window, limit):
     on-demand one), passing the person's filters, not expired, not scored for them yet. Offers with a ROME code come
     first, newest first: they are already in the person's domains (decision 12). Then the others, the closest to the
     person's words first, the newest at equal closeness; one sharing no word is dropped, unless the person gave no
-    word at all (step 6 plan, decision 2). One offer per non-empty match_key (the first in this
-    order), none whose match_key is already scored for them on another offer (decision 6). Raises one of
-    BROKEN_CRITERIA for criteria that do not read."""
+    word at all (step 6 plan, decision 2) or its source serves the person's domains (plan of 28/10, chantier 2).
+    One offer per non-empty match_key (the first in this order), none whose match_key is already scored for them on
+    another offer (decision 6). Raises one of BROKEN_CRITERIA for criteria that do not read."""
     scored = Score.objects.filter(user_id=profile.user_id)
     alive = Q(expires_at__isnull=True) | Q(expires_at__gt=now)
     normalized = profile_criteria(profile)
@@ -111,12 +111,15 @@ def candidates(profile, now, window, limit):
         if take(offer.match_key):
             picked.append(offer)
     # The rest is ranked in Python on its title and summary only; sorted() keeps the newest first at equal closeness.
-    rows = sorted(offers.exclude(coded).values_list("pk", "match_key", "title", "summary"),
-                  key=lambda row: -closeness(words, row[2], row[3]))
+    # An offer of a source serving the person's domains (passing_offers let it in for that) needs no shared word.
+    rows = sorted(((pk, match_key, closeness(words, title, summary), source_domains)
+                   for pk, match_key, title, summary, source_domains
+                   in offers.exclude(coded).values_list("pk", "match_key", "title", "summary", "source__domains")),
+                  key=lambda row: -row[2])
     chosen = []
-    for pk, match_key, title, summary in rows:
-        if words and not closeness(words, title, summary):
-            break  # sorted by closeness: nothing after this one shares a word
+    for pk, match_key, close, source_domains in rows:
+        if words and not close and not source_domains:
+            continue
         if len(picked) + len(chosen) == limit:
             break
         if take(match_key):

@@ -115,7 +115,7 @@ def judge_claude_code(appellation, rome_code):
     fiche = fiche_words().get(rome_code) if isinstance(rome_code, str) else None
     if not fiche:
         return UNKNOWN, None
-    if fiche & job_words(strip_marks(appellation)) - GENERIC_JOB_WORDS:
+    if fiche & job_words(appellation) - GENERIC_JOB_WORDS:
         return ACCEPTED, rome_code
     return REFUSED, None
 

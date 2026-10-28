@@ -634,9 +634,13 @@
       var el = top();
       if (busy || !el || event.button !== 0 || !el.contains(event.target) || event.target.closest("a, button")) return;
       drag = { el: el, id: event.pointerId, x: event.clientX, dx: 0, moved: false };
+      // A mouse would select the text, then drag that selection natively, which swallows pointerup.
+      if (event.pointerType === "mouse") event.preventDefault();
     });
+    stage.addEventListener("dragstart", function (event) { event.preventDefault(); });
     stage.addEventListener("pointermove", function (event) {
       if (!drag || event.pointerId !== drag.id) return;
+      if (event.pointerType === "mouse" && !event.buttons) return endDrag(event, false);  // its pointerup was lost
       var dx = event.clientX - drag.x;
       if (!drag.moved) {
         if (Math.abs(dx) < 6) return;
@@ -670,6 +674,7 @@
     }
     stage.addEventListener("pointerup", function (event) { endDrag(event, true); });
     stage.addEventListener("pointercancel", function (event) { endDrag(event, false); });
+    stage.addEventListener("lostpointercapture", function (event) { endDrag(event, false); });
 
     render();
   }

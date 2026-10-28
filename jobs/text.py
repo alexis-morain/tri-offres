@@ -43,13 +43,19 @@ def strip_marks(text):
     return _MARKS.sub("", text or "")
 
 
+# Feminine endings read as the masculine: « infirmière » meets « infirmier » (plan of 28/10, chantier 2).
+_FEMININE = re.compile(r"(?:(ere)|(euse)|(trice)|(ienne))$")
+_MASCULINE = {1: "er", 2: "eur", 3: "teur", 4: "ien"}
+
+
 def job_words(text):
-    """Folded words of `text` that may tell a job apart: 4 letters at least, not in STOP_WORDS, a final s or x
-    dropped so a plural meets its singular."""
+    """Folded words of `text` that may tell a job apart: gender marks dropped, 4 letters at least, not in
+    STOP_WORDS, a final s or x dropped so a plural meets its singular, a feminine ending read as the masculine."""
     words = set()
-    for word in fold(text).split():
+    for word in fold(strip_marks(text)).split():
         if len(word) >= MIN_WORD_LETTERS and word.isalpha() and word not in STOP_WORDS:
-            words.add(word[:-1] if word[-1] in "sx" else word)
+            word = word[:-1] if word[-1] in "sx" else word
+            words.add(_FEMININE.sub(lambda match: _MASCULINE[match.lastindex], word))
     return words
 
 

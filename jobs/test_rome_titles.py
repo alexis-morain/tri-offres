@@ -303,6 +303,10 @@ class CodeForClaudeTests(SimpleTestCase):
                 self.assertIsNone(rome_titles.code_for_claude(appellation, "M1507"))
         self.assertEqual(rome_titles.code_for_claude("Gestionnaire de paie", "M1507"), "M1507")
         self.assertEqual(rome_titles.code_for_claude("Chargé de production", "L1311"), "L1311")
+        self.assertIsNone(rome_titles.code_for_claude("Directrice zorglub", "M1507"))  # read as « directeur »
+
+    def test_a_feminine_appellation_meets_the_fiche(self):
+        self.assertEqual(rome_titles.code_for_claude("Infirmière zorglub", "J1506"), "J1506")
 
     def test_code_refused_when_unknown_malformed_or_empty(self):
         for code in ["Z9999", "J9999", "j1506", " J1506", "J15", "infirmier", "", None, 1506]:
@@ -326,8 +330,7 @@ class CodeForClaudeTests(SimpleTestCase):
 
     def test_fiche_words(self):
         words = rome_titles.fiche_words()
-        self.assertIn("infirmier", words["J1506"])
-        self.assertIn("infirmiere", words["J1506"])
+        self.assertIn("infirmier", words["J1506"])  # « infirmière » too: the feminine reads as the masculine
         self.assertNotIn("dans", set().union(*words.values()))
         self.assertTrue(all(code for code in words))
 
