@@ -19,6 +19,7 @@ from django.db import transaction
 from django.db.models import Count, Q
 
 from jobs import geo, keys, rome_titles
+from jobs.actor_sources import ATS_PLATFORMS
 from jobs.actor_stats import RUN_STATS_COUNTS
 from jobs.domains import offer_domains
 from jobs.models import JobOffer, Source
@@ -161,6 +162,9 @@ def requested_sources(sources):
 def parse_item(item, sources):
     """The unsaved offer of an item of the actor's dataset, or the reason it is rejected."""
     source_key = _text(item.get("source"), Source._meta.get_field("actor_source").max_length)
+    platform = source_key if source_key in ATS_PLATFORMS else ""
+    if platform:
+        source_key = "ats"
     source = sources.get(source_key)
     if source is None:
         return Parsed(source_key, None, "unknown_source")
@@ -180,6 +184,8 @@ def parse_item(item, sources):
     if not _LETTER.search(title):  # « $1 », a placeholder the site left
         return Parsed(source_key, None, "title_letter")
     external_id = _identifier(item)
+    if external_id and platform:  # an ATS job id is unique on its platform only
+        external_id = _text(f"{platform}:{external_id}", _max_length("external_id"))
     if not external_id:
         return Parsed(source_key, None, "id")
 

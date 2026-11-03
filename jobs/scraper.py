@@ -24,6 +24,8 @@ from supervision.redaction import redact_text
 
 REGISTRY_KEY = "tri-offres"  # fixed: derived from the input, cutting a source would make every offer new again
 MODES = ("new-only", "all")
+# The ATS boards of the actor's directory that serve France ("greenhouse:doctolib"), from scripts/build_ats_france.py.
+ATS_BOARDS = Path(settings.BASE_DIR) / "jobs" / "data" / "ats-france.txt"
 # The statistics by source the actor writes at the end of its run (spec 4.7, section 1); format in actor_stats.
 RUN_STATS_KEY = "RUN_STATS"
 MAX_STATS_BYTES = 1024 * 1024
@@ -54,6 +56,9 @@ def build_input(sources, posted_within_days=None, max_results=None, mode="new-on
     (plan of step 4, decision 13). The import of 4.4 drops VIE and VIA itself.
     """
     sources = list(dict.fromkeys(sources))
+    boards = _ats_boards() if "ats" in sources else []
+    if not boards and "ats" in sources:
+        sources.remove("ats")  # the actor refuses `ats` without companies: the other sources still run
     # Without sources the actor reads all of them, African and Canadian ones included.
     if not sources or not all(isinstance(key, str) and key for key in sources):
         raise ValueError("At least one actor source key is needed.")
@@ -65,9 +70,18 @@ def build_input(sources, posted_within_days=None, max_results=None, mode="new-on
         "maxResultsPerSource": settings.SCRAPER_MAX_RESULTS_PER_SOURCE if max_results is None else max_results,
         "maxMinutesPerSource": settings.SCRAPER_MAX_MINUTES_PER_SOURCE,
     }
+    if boards:
+        actor_input["companies"] = boards
     if posted_within_days is not None:
         actor_input["postedWithinDays"] = posted_within_days
     return actor_input
+
+
+def _ats_boards():
+    try:
+        return [line.strip() for line in ATS_BOARDS.read_text(encoding="utf-8").splitlines() if line.strip()]
+    except FileNotFoundError:
+        return []
 
 
 def storage():

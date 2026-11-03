@@ -1,5 +1,5 @@
 {% extends "onboarding/account.html" %}
-{% block title %}Vos offres à trier, tri-offres{% endblock %}
+{% block title %}Vos offres à trier, The Good Job{% endblock %}
 {% block page %}
 <div class="sort" data-sort data-queue-key="{{ queue_key }}" data-count="{{ count }}"
      data-verdict-url="{% url 'matching:verdict' %}" data-undo-url="{% url 'matching:undo' %}">
@@ -8,6 +8,7 @@
   <p class="sort__count"><span class="typed" data-sort-count>{{ count }} offre{{ count|pluralize }}</span></p>
   {% endif %}
   <p class="sort__ai small muted">Notes générées par IA, la décision vous appartient.</p>
+  <p class="small muted">Vos avis comptent dès la nuit prochaine : les offres de demain en tiennent compte.</p>
   {% if learned %}
   <article class="card card--green sort__learned" aria-labelledby="learned-title">
     <header class="card__head">

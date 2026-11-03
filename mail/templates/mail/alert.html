@@ -1,4 +1,4 @@
-{% include "mail/_layout_top.html" with title="Alerte tri-offres" %}
+{% include "mail/_layout_top.html" with title="Alerte The Good Job" %}
 <p style="margin:0 0 20px;">Alerte technique : créneau {{ slot }} du {{ day|date:"d/m/Y" }}.</p>
 {% for problem in problems %}
 <h2 style="margin:0 0 8px;font-size:16px;font-weight:600;">{{ problem.title }}</h2>

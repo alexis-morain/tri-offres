@@ -218,6 +218,16 @@ class BaseTemplateTests(TestCase):
         self.assertIn('href="#contenu"', self.html)
         self.assertIn('id="contenu"', self.html)
 
+    def test_favicons_are_linked_and_shipped(self):
+        self.assertIn('<link rel="icon" href="/static/ui/favicon.svg" type="image/svg+xml">', self.html)
+        self.assertIn('<link rel="apple-touch-icon" href="/static/ui/apple-touch-icon.png">', self.html)
+        for name in ("favicon.svg", "apple-touch-icon.png"):
+            self.assertTrue((Path(settings.BASE_DIR) / "ui/static/ui" / name).is_file(), name)
+
+    def test_favicon_ico_points_at_the_png(self):
+        self.assertRedirects(self.client.get("/favicon.ico"), "/static/ui/apple-touch-icon.png",
+                             status_code=301, fetch_redirect_response=False)
+
     def test_no_third_party_requests(self):
         for host in ("googleapis", "gstatic", "cdn.", "unpkg", "jsdelivr"):
             self.assertNotIn(host, self.html)
@@ -264,7 +274,7 @@ class SwitchKnobTests(SimpleTestCase):
 class BetaWordingTests(TestCase):
     """The words « bêta gratuite » are shown during the beta only (sub-step 8.2, decision 10)."""
 
-    FOOTER = "tri-offres, bêta gratuite"
+    FOOTER = "The Good Job, bêta gratuite"
 
     def footer(self, path="/confidentialite/"):
         html = self.client.get(path).content.decode()
@@ -274,7 +284,7 @@ class BetaWordingTests(TestCase):
     def test_the_context_processor_reads_the_setting(self):
         for value in (True, False):
             with self.subTest(beta=value), override_settings(BETA=value):
-                self.assertEqual(beta(None), {"beta": value})
+                self.assertEqual(beta(None)["beta"], value)
 
     def test_the_processor_is_registered(self):
         processors = settings.TEMPLATES[0]["OPTIONS"]["context_processors"]
@@ -288,7 +298,7 @@ class BetaWordingTests(TestCase):
 
     @override_settings(BETA=False)
     def test_outside_the_beta_nothing_says_free(self):
-        self.assertTrue(self.footer().startswith("tri-offres Confidentialité"))
+        self.assertTrue(self.footer().startswith("The Good Job Confidentialité"))
         for path in ("/", "/confidentialite/", "/mentions-legales/"):
             with self.subTest(path=path):
                 html = self.client.get(path).content.decode()

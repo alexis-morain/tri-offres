@@ -1,4 +1,4 @@
-{% autoescape off %}Il vous reste {{ minutes }} minute{{ minutes|pluralize }} pour finir votre questionnaire tri-offres. Vous reprenez à l’écran où vous en étiez.{% if needs_openrouter %} Une étape de plus au début : connecter votre compte OpenRouter, qui note vos offres.{% endif %}
+{% autoescape off %}Il vous reste {{ minutes }} minute{{ minutes|pluralize }} pour finir votre questionnaire The Good Job. Vous reprenez à l’écran où vous en étiez.{% if needs_openrouter %} Une étape de plus au début : connecter votre compte OpenRouter, qui note vos offres.{% endif %}
 
 Votre code :
 
@@ -14,5 +14,5 @@ Vous ne souhaitez plus ce rappel ? Ignorez ce message : nous ne vous relancerons
 Pour ne plus recevoir ces mails :
 {{ unsubscribe_url }}
 
-tri-offres
+The Good Job
 {% endautoescape %}

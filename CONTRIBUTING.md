@@ -1,6 +1,6 @@
-# Contributing to tri-offres
+# Contributing to The Good Job
 
-Thanks for your interest. tri-offres is a small side project run by one person: answers may take a few days, and a
+Thanks for your interest. The Good Job is a small side project run by one person: answers may take a few days, and a
 change that does not fit the project may be declined even if it is good work. For anything larger than a fix, open
 an issue first and describe what you want to change.
 

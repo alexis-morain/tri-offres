@@ -15,14 +15,14 @@ partent avec les retours de swipe qu’elles portent.
 
 ## Modèle de réponse
 
-> Objet : Retrait de vos offres de tri-offres
+> Objet : Retrait de vos offres de The Good Job
 >
 > Bonjour,
 >
-> Merci pour votre message. Vos offres ne sont plus reprises par tri-offres depuis le [date] : la source est coupée
+> Merci pour votre message. Vos offres ne sont plus reprises par The Good Job depuis le [date] : la source est coupée
 > et les [nombre] offres que nous avions collectées ont été supprimées.
 >
 > Si une offre de votre site réapparaissait chez nous, répondez simplement à ce message et nous la retirerons.
 >
 > Bien cordialement,
-> Le mainteneur de tri-offres
+> Le mainteneur de The Good Job

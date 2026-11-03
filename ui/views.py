@@ -1,6 +1,7 @@
 from django import forms
 from django.conf import settings
-from django.http import Http404
+from django.http import Http404, HttpResponsePermanentRedirect
+from django.templatetags.static import static
 from django.shortcuts import render
 
 from ui.widgets import CappedMultipleChoiceField, CheckOptionsWidget, OptionsWidget, SwitchWidget
@@ -10,6 +11,11 @@ PALETTE = [
     ("action", "Action"), ("link", "Lien"), ("error", "Erreur"), ("pink", "Étiquette rose"),
     ("blue", "Étiquette bleue"), ("yellow", "Étiquette jaune"), ("green", "Étiquette verte"),
 ]
+
+
+def favicon(request):
+    """Browsers and crawlers ask /favicon.ico whatever the page links: send them to the hashed PNG."""
+    return HttpResponsePermanentRedirect(static("ui/apple-touch-icon.png"))
 
 
 class SpecimenForm(forms.Form):

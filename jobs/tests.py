@@ -51,10 +51,10 @@ class SourceTests(TestCase):
 
 
 class ActorSourcesTests(TestCase):
-    def test_twenty_two_unique_keys(self):
+    def test_twenty_six_unique_keys(self):
         keys = [source.key for source in ACTOR_SOURCES]
-        self.assertEqual(len(keys), 22)
-        self.assertEqual(len(set(keys)), 22)
+        self.assertEqual(len(keys), 26)
+        self.assertEqual(len(set(keys)), 26)
 
     def test_domains_normalized(self):
         for source in ACTOR_SOURCES:
@@ -66,6 +66,10 @@ class ActorSourcesTests(TestCase):
         self.assertEqual(set(seeded), {source.key for source in ACTOR_SOURCES})
         self.assertEqual(seeded["free_work"].domains, ["M18"])
         self.assertEqual(seeded["fhf"].domains, ["J"])
+        self.assertEqual(seeded["freelance_informatique"].domains, ["M18"])
+        self.assertEqual(seeded["beetween"].domains, [])
+        self.assertEqual(seeded["editis"].domains, ["E", "K", "L"])
+        self.assertEqual(seeded["ats"].domains, [])
         self.assertEqual(seeded["softy"].domains, [])
         self.assertEqual(seeded["wttj"].state, Source.State.ACTIVE)
 

@@ -272,7 +272,7 @@ class SearchScreenTests(QuestionnaireTestCase):
 
     def test_title_three_postes_with_suggestions_and_the_families_folded(self):
         html = self.html("recherche")
-        self.assertIn("<title>Quel poste cherchez-vous ?, tri-offres</title>", html)
+        self.assertIn("<title>Quel poste cherchez-vous ?, The Good Job</title>", html)
         self.assertRegex(html, r'<h1[^>]*>Quel poste <span class="nowrap">cherchez-vous</span> \?</h1>')
         for name, label in (("job_1", "Poste"), ("job_2", "Deuxième poste (facultatif)"),
                             ("job_3", "Troisième poste (facultatif)")):
@@ -794,7 +794,7 @@ class HouseStyleTests(QuestionnaireTestCase):
         self.walk(CULTURE_FULL)
         for path in [url(slug) for slug in CULTURE_FULL] + [SUMMARY]:
             title = re.search(r"<title>(.*?)</title>", self.client.get(path).content.decode()).group(1)
-            self.assertTrue(title.endswith(", tri-offres"), title)
+            self.assertTrue(title.endswith(", The Good Job"), title)
 
     def check(self, html):
         assert_french_copy(self, html)

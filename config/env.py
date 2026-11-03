@@ -134,7 +134,7 @@ def publisher_identity(debug, resend_api_key, environ=None):
         missing = [name for name, value in values.items() if not value]
         if missing:
             raise ImproperlyConfigured(f"{', '.join(missing)} must be set when mail is sent and DJANGO_DEBUG is off.")
-    return (values["DEFAULT_FROM_EMAIL"] or "tri-offres <noreply@example.org>",
+    return (values["DEFAULT_FROM_EMAIL"] or "The Good Job <noreply@example.org>",
             values["MAIL_REPLY_TO"] or "contact@example.org", values["LEGAL_NAME"] or "Nom de l’éditeur")
 
 

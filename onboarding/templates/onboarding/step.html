@@ -1,5 +1,5 @@
 {% extends "onboarding/layout.html" %}{% load ui %}
-{% block title %}{{ title }}, tri-offres{% endblock %}
+{% block title %}{{ title }}, The Good Job{% endblock %}
 {% block question %}
 <form class="question" method="post" action="{% url 'onboarding:step' step.slug %}{{ return_query }}" novalidate
       {% if live_counter %}data-counter-url="{% url 'onboarding:counter' %}?step={{ step.slug }}"{% endif %}>

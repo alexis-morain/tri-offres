@@ -237,7 +237,7 @@ class LinkPageTests(LoginTestCase):
         self.request_code()
         message = django_mail.outbox[0]
         response = self.client.get(self.link_in(message))
-        self.assertContains(response, "Connexion à tri-offres")
+        self.assertContains(response, "Connexion à The Good Job")
         self.assertContains(response, "en tant que <strong>nora@example.fr</strong>", html=False)
         self.assertContains(response, "Me connecter")
         code = self.code_in(message)
@@ -560,11 +560,11 @@ class SameAnswerTests(LoginTestCase):
         pages = []
         known, sent = self.request_from_fresh_client("known@example.fr")
         self.assertEqual(sent, 1)
-        self.assertIn("est votre code tri-offres", django_mail.outbox[-1].subject)
+        self.assertIn("est votre code The Good Job", django_mail.outbox[-1].subject)
         pages.append(self.normalized(known.get(CODE_URL), "known@example.fr"))
         stranger, sent = self.request_from_fresh_client("stranger@example.fr")
         self.assertEqual(sent, 1)
-        self.assertEqual(django_mail.outbox[-1].subject, "Vous êtes sur la liste d’attente de tri-offres")
+        self.assertEqual(django_mail.outbox[-1].subject, "Vous êtes sur la liste d’attente de The Good Job")
         self.assertTrue(WaitlistEntry.objects.filter(email="stranger@example.fr").exists())
         self.assertTrue(LoginCode.objects.filter(email="stranger@example.fr").exists())
         pages.append(self.normalized(stranger.get(CODE_URL), "stranger@example.fr"))
@@ -600,7 +600,7 @@ class SameAnswerTests(LoginTestCase):
     def test_staff_accounts_do_not_fill_the_beta(self):
         User.objects.create_user("staff@example.fr", is_staff=True)
         self.request_code("new@example.fr")
-        self.assertIn("est votre code tri-offres", django_mail.outbox[0].subject)
+        self.assertIn("est votre code The Good Job", django_mail.outbox[0].subject)
 
     def test_beta_filled_between_request_and_sign_in_puts_the_address_on_the_list(self):
         self.request_code("new@example.fr")
@@ -830,7 +830,7 @@ class HomePageTests(LoginTestCase):
         self.assertEqual(response.status_code, 200)
         html = self.text_of(response)
         for text in ("Les offres du jour, déjà triées, dans votre boîte à 7 h",
-                     "tri-offres lit chaque nuit des sites d’emploi et des pages carrières, dans tous les domaines.",
+                     "The Good Job lit chaque nuit des sites d’emploi et des pages carrières, dans tous les domaines.",
                      "Il ne postule jamais à votre place.", "Votre adresse mail",
                      "Pas de mot de passe : un code à six chiffres vous attend dans votre boîte.",
                      "Recevoir mon code", "Bêta gratuite, 80 places. Environ 4 minutes, 3 étapes.",
@@ -840,6 +840,9 @@ class HomePageTests(LoginTestCase):
             with self.subTest(text=text):
                 self.assertIn(text, html)
         self.assertNotIn("du growth", html)
+        self.assertIn('id="inscription"', html)
+        self.assertIn('<meta name="description"', html)
+        self.assertIn('property="og:title"', html)
         self.assertIn('type="email"', html)
         self.assertIn('autocomplete="email"', html)
         self.assertIn('href="/confidentialite/"', html)
@@ -847,6 +850,27 @@ class HomePageTests(LoginTestCase):
         self.assertIn('class="gauge', html)
         assert_french_copy(self, html)
         assert_unique_ids(self, html)
+
+    def test_landing_explains_the_day_the_cost_and_the_limits(self):
+        html = self.text_of(self.client.get(HOME))
+        for text in ("Une journée avec The Good Job", "Pendant la nuit", "7 h", "Le samedi",
+                     "Ce que vous excluez", "Ce que vous préférez", "En vos mots", "Ce que j’ai compris",
+                     "Ce que ça coûte", "0,05 $", "2 $", "Ce qu’il ne fera jamais", "Postuler à votre place",
+                     "Questions", "Pour quels métiers ?", "Ça m’intéresse", 'href="#inscription"',
+                     'href="/openrouter/tuto/"'):
+            with self.subTest(text=text):
+                self.assertIn(text, html)
+        self.assertEqual(html.count("<h1"), 1)
+
+    @override_settings(SOURCE_CODE_URL="https://code.example.org/tri-offres")
+    def test_landing_links_the_source_code_when_set(self):
+        self.assertContains(self.client.get(HOME), 'href="https://code.example.org/tri-offres"', count=2)
+
+    @override_settings(SOURCE_CODE_URL="")
+    def test_landing_without_source_code_url_still_names_the_licence(self):
+        html = self.text_of(self.client.get(HOME))
+        self.assertIn("AGPL-3.0", html)
+        self.assertNotIn("Lire le code source", html)
 
     @override_settings(BETA_CAPACITY=1)
     def test_full_beta_note_keeps_the_same_form(self):
@@ -920,7 +944,7 @@ class CodePageTests(LoginTestCase):
                      "Un code à six chiffres vient de partir vers <strong>nora@example.fr</strong>.",
                      "Ce n’est pas la bonne adresse ?", "Code reçu", "Me connecter",
                      "Rien reçu ? Regardez dans les indésirables : l’expéditeur est "
-                     "tri-offres &lt;noreply@example.org&gt;. Le code reste valable 15 minutes.",
+                     "The Good Job &lt;noreply@example.org&gt;. Le code reste valable 15 minutes.",
                      "Renvoyer le code"):
             with self.subTest(text=text):
                 self.assertIn(text, html)

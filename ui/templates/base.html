@@ -3,8 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}tri-offres{% endblock %}</title>
+  <title>{% block title %}The Good Job{% endblock %}</title>
   <meta name="theme-color" content="#ffffff">
+  <link rel="icon" href="{% static 'ui/favicon.svg' %}" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="{% static 'ui/apple-touch-icon.png' %}">
   {% block head %}{% endblock %}
   <link rel="stylesheet" href="{% static 'ui/css/tri.css' %}">
   <script src="{% static 'ui/js/tri.js' %}" defer></script>
@@ -13,7 +15,7 @@
   <a class="skip-link" href="#contenu">Aller au contenu</a>
   <header class="masthead">
     <div class="masthead__inner">
-      <a class="wordmark" href="/"><span class="wordmark__tabs" aria-hidden="true"><span></span><span></span><span></span></span>tri-offres</a>
+      <a class="wordmark" href="/"><span class="wordmark__tabs" aria-hidden="true"><span></span><span></span><span></span></span>The Good Job</a>
       <div class="masthead__aside">{% block masthead_aside %}{% endblock %}</div>
     </div>
   </header>
@@ -22,9 +24,10 @@
   </main>
   <footer class="footer">
     <div class="footer__inner">
-      <span>tri-offres{% if beta %}, bêta gratuite{% endif %}</span>
+      <span>The Good Job{% if beta %}, bêta gratuite{% endif %}</span>
       <a href="{% url 'accounts:privacy' %}">Confidentialité</a>
       <a href="{% url 'accounts:legal' %}">Mentions légales</a>
+      {% if source_code_url %}<a href="{{ source_code_url }}" rel="noopener noreferrer">Code source</a>{% endif %}
     </div>
   </footer>
 </body>

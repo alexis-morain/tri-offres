@@ -64,6 +64,15 @@ class ParseItemTests(SourcesMixin, TestCase):
         self.assertEqual(offer.title_folded, "comptable")
         self.assertEqual(offer.summary, "")
 
+    def test_ats_platforms_land_on_the_ats_source(self):
+        # The actor asked for `ats` writes the platform as source; ids are unique per platform only.
+        greenhouse = self.parse(source="greenhouse", job_id="doctolib:42")
+        lever = self.parse(source="lever", job_id="doctolib:42")
+        self.assertEqual(greenhouse.source_key, "ats")
+        self.assertEqual(greenhouse.offer.source, self.sources["ats"])
+        self.assertEqual(greenhouse.offer.external_id, "greenhouse:doctolib:42")
+        self.assertEqual(lever.offer.external_id, "lever:doctolib:42")
+
     def test_rejection_reasons(self):
         self.assertRejected("unknown_source", source="jeveuxaider")
         self.assertRejected("unknown_source", source=None)

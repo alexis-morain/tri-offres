@@ -15,7 +15,7 @@ People who chose one of these domains: `E` Communication / Multimédia (communic
 personne / à la collectivité (personal and community services); `L` Spectacle (performing arts). An offer whose title
 gives a ROME code also goes to that code's domain.
 
-## What tri-offres keeps
+## What The Good Job keeps
 
 The common fields of every source: title, employer, place, contract type, part time and remote work when given,
 salary or daily rate when given, publication and expiry dates, the link to the offer's page at the source, and a
@@ -28,7 +28,7 @@ source site, never to a direct application link.
 
 ## Attribution
 
-tri-offres knows of no reuse licence nor attribution requirement published by this source. If the collector ever sends
+The Good Job knows of no reuse licence nor attribution requirement published by this source. If the collector ever sends
 one (`source_license`), it is shown next to the offer.
 
 ## Cutting the source

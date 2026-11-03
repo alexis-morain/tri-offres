@@ -22,6 +22,7 @@ JSON = {"HTTP_ACCEPT": "application/json"}
 PARIS = ZoneInfo("Europe/Paris")
 ATTRIBUTION = "Données Source fictive, licence ouverte"
 EMPTY = "Tout est trié. Les prochaines offres arrivent avec le mail de demain matin."
+VERDICTS_COUNT = "Vos avis comptent dès la nuit prochaine : les offres de demain en tiennent compte."
 YES, NO, MAYBE = Feedback.Verdict.YES, Feedback.Verdict.NO, Feedback.Verdict.MAYBE
 CARD_KEYS = {"id", "title", "employer", "location", "contract", "date", "score", "reason", "summary", "exploration",
              "source", "attribution", "url"}
@@ -339,6 +340,11 @@ class PageTests(SortTestCase):
     def test_a_single_offer_is_singular(self):
         self.scored()
         self.assertContains(self.client.get(SORT), ">1 offre<")
+
+    def test_says_verdicts_count_from_the_next_night_with_or_without_cards(self):
+        self.assertContains(self.client.get(SORT), VERDICTS_COUNT)
+        self.scored()
+        self.assertContains(self.client.get(SORT), VERDICTS_COUNT)
 
     def test_empty_deck(self):
         response = self.client.get(SORT)

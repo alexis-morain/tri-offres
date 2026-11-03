@@ -82,7 +82,7 @@ class EndScreenTests(EndTestCase):
         self.assertEqual(name, f"Il arrive {day}, vers 7 h, depuis noreply@example.org.")
         self.assertEqual(printed, schedule.stamp_text(delivery))
         self.assertIn('class="stamp__small">vers 7 h</span>', html)
-        self.assertIn("<title>Votre premier tri arrive, tri-offres</title>", html)
+        self.assertIn("<title>Votre premier tri arrive, The Good Job</title>", html)
         self.assertNotIn("confetti", html.lower())
 
     def test_stamp_is_pressed_on_the_first_visit_only(self):
@@ -225,7 +225,7 @@ class FirstSortTests(EndTestCase):
         html = self.sort_end(ScoringRun.State.DONE, scored=3)
         page = text(html)
         self.assertIn("<h1 class=\"question__title\">Vos premières offres sont prêtes</h1>", html)
-        self.assertIn("<title>Vos premières offres sont prêtes, tri-offres</title>", html)
+        self.assertIn("<title>Vos premières offres sont prêtes, The Good Job</title>", html)
         self.assertIn("J’ai noté 3 offres assez proches de votre recherche.", page)
         self.assertRegex(html, r'<a class="button" href="/tri/">Trier mes 3 premières offres</a>')
         self.assertNotIn(self.REFRESH, html)

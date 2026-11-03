@@ -1,8 +1,8 @@
-# tri-offres Individual Contributor License Agreement
+# The Good Job Individual Contributor License Agreement
 
 Version 1.0 (draft, not yet in force)
 
-This agreement is between you and Alexis Morain, the maintainer of tri-offres (the "Maintainer"). It applies to
+This agreement is between you and Alexis Morain, the maintainer of The Good Job (the "Maintainer"). It applies to
 every Contribution you submit to the project, now or later. Signing it through CLA Assistant with your GitHub
 account means you accept it.
 
@@ -10,10 +10,10 @@ account means you accept it.
 
 - "You" means the person who signs this agreement.
 - "Contribution" means any original work of authorship, including changes or additions to existing work, that You
-  submit to the Maintainer for inclusion in tri-offres, in any form: pull request, patch, issue comment containing
+  submit to the Maintainer for inclusion in The Good Job, in any form: pull request, patch, issue comment containing
   code, or anything else sent on purpose for inclusion. Something You mark in writing as "not a Contribution" is not
   one.
-- "Project" means tri-offres and any work the Maintainer makes or distributes that is based on it.
+- "Project" means The Good Job and any work the Maintainer makes or distributes that is based on it.
 
 ## 2. You keep your copyright
 

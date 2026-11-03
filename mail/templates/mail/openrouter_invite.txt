@@ -1,4 +1,4 @@
-{% autoescape off %}tri-offres change de fonctionnement : chaque personne branche son propre compte OpenRouter, et l’IA qui note vos offres consomme ce compte. Le service reste gratuit : vous réglez seulement ce que l’IA consomme pour vous.
+{% autoescape off %}The Good Job change de fonctionnement : chaque personne branche son propre compte OpenRouter, et l’IA qui note vos offres consomme ce compte. Le service reste gratuit : vous réglez seulement ce que l’IA consomme pour vous.
 
 Une inscription coûte environ {{ signup_cost }}, un mois de mails {{ month_cost }} au plus. Conseil : ajoutez {{ advised_credit }} et posez une limite sur la clé.
 
@@ -10,5 +10,5 @@ Pour connecter OpenRouter (un écran explique tout, et un tuto pas à pas) :
 Pour ne plus recevoir ces mails :
 {{ unsubscribe_url }}
 
-tri-offres
+The Good Job
 {% endautoescape %}

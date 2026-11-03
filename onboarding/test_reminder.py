@@ -106,7 +106,7 @@ class SendTests(ReminderTestCase):
         self.assertEqual(len(django_mail.outbox), 1)
         message = django_mail.outbox[0]
         minutes = flow.minutes_left("structures", user.profile)
-        self.assertRegex(message.subject, rf"^\d{{3}} \d{{3}} : il vous reste {minutes} minutes sur tri-offres$")
+        self.assertRegex(message.subject, rf"^\d{{3}} \d{{3}} : il vous reste {minutes} minutes sur The Good Job$")
         code = message.subject[:7]
         self.assertEqual(message.to, ["nora@example.fr"])
         html = message.alternatives[0][0]
@@ -198,7 +198,7 @@ class SendTests(ReminderTestCase):
         self.person()
         with mock.patch("onboarding.reminder.minutes_left", return_value=1), self.due_now():
             self.run_command()
-        self.assertTrue(django_mail.outbox[0].subject.endswith(" : il vous reste 1 minute sur tri-offres"))
+        self.assertTrue(django_mail.outbox[0].subject.endswith(" : il vous reste 1 minute sur The Good Job"))
 
     def test_never_a_second_reminder(self):
         self.person()

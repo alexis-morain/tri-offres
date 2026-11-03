@@ -1,11 +1,19 @@
 {% extends "base.html" %}
-{% block title %}tri-offres, les offres du jour déjà triées{% endblock %}
+{% block title %}The Good Job, les offres du jour déjà triées{% endblock %}
+{% block head %}
+  <meta name="description" content="Chaque matin à 7 h, les offres d’emploi de la veille qui vous correspondent, notées sur 10 avec une phrase qui dit pourquoi. Tous les métiers, sans candidature automatique.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="The Good Job, les offres du jour déjà triées">
+  <meta property="og:description" content="Chaque matin à 7 h, les offres de la veille qui vous correspondent, notées sur 10 avec une raison. Vous triez d’un geste, les notes apprennent de vos choix.">
+  <meta property="og:url" content="{{ site_url }}/">
+  <meta property="og:locale" content="fr_FR">
+{% endblock %}
 {% block content %}
-<div class="home">
+<div class="home" id="inscription">
   <div class="home__intro">
     <h1 class="home__title">Les offres du jour, déjà triées, dans votre boîte à 7 h</h1>
     <p class="lede">
-      tri-offres lit chaque nuit des sites d’emploi et des pages carrières, dans tous les domaines.
+      The Good Job lit chaque nuit des sites d’emploi et des pages carrières, dans tous les domaines.
       Chaque matin, un mail court : les offres qui vous correspondent, notées sur 10,
       avec une phrase qui dit pourquoi.
     </p>
@@ -57,4 +65,161 @@
     </figcaption>
   </figure>
 </div>
+
+<section class="landing" aria-labelledby="journee">
+  <h2 class="landing__title" id="journee">Une journée avec The Good Job</h2>
+  <div class="landing__body">
+    <ol class="day">
+      <li class="day__moment">
+        <p class="day__time">Pendant la nuit</p>
+        <div class="day__text">
+          <h3 class="day__heading">Il lit les offres publiées la veille</h3>
+          <p>Des sites d’emploi, des sites publics et les pages carrières de plus de 1&nbsp;300 entreprises :
+            Welcome to the Jungle, HelloWork, Choisir le service public, Emploi territorial, EURES, ProfilCulture,
+            Service Civique, la FHF et une vingtaine d’autres. Claude résume chaque offre, puis la note pour vous
+            de 0 à 10, en relisant vos réponses.</p>
+        </div>
+      </li>
+      <li class="day__moment">
+        <p class="day__time typed">7 h</p>
+        <div class="day__text">
+          <h3 class="day__heading">Un mail court, les jours ouvrés</h3>
+          <p>Quinze offres au plus, les mieux notées d’abord. Sous chacune, une phrase dit ce qui vous correspond
+            ou ce qui coince. Le lien mène à l’annonce d’origine : vous postulez chez l’employeur, comme
+            d’habitude.</p>
+        </div>
+      </li>
+      <li class="day__moment">
+        <p class="day__time">Quand vous avez deux minutes</p>
+        <div class="day__text">
+          <h3 class="day__heading">Vous triez d’un geste</h3>
+          <p>Sur la page de tri, chaque offre va dans «&nbsp;Ça m’intéresse&nbsp;», «&nbsp;Peut-être&nbsp;» ou
+            «&nbsp;Pas pour moi&nbsp;», au doigt, à la souris ou au clavier. Les offres gardées restent dans
+            «&nbsp;Mes offres&nbsp;», avec où vous en êtes de votre candidature.</p>
+        </div>
+      </li>
+      <li class="day__moment">
+        <p class="day__time">Le samedi</p>
+        <div class="day__text">
+          <h3 class="day__heading">Ce qu’il a appris de vos choix</h3>
+          <p>Une fois par semaine, Claude relit vos derniers tris et écrit en quelques phrases ce qu’il en retient.
+            Les notes suivantes en tiennent compte. Une phrase vous paraît fausse ? Vous la corrigez dans
+            «&nbsp;Ma recherche&nbsp;».</p>
+        </div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="landing" aria-labelledby="questionnaire">
+  <h2 class="landing__title" id="questionnaire">Ce que vous lui dites</h2>
+  <div class="landing__body">
+    <p class="landing__lede">Quelques questions, une par écran. Chaque réponse garde sa couleur, du questionnaire
+      jusqu’à la synthèse, pour que vous sachiez toujours ce qui pèse sur la note.</p>
+    <dl class="kinds">
+      <div class="kinds__row">
+        <dt><span class="tag tag--pink">Ce que vous excluez</span></dt>
+        <dd>Le lieu, le télétravail, le contrat, le salaire plancher, des mots à refuser dans le titre. Une offre
+          qui ne passe pas ces filtres ne vous est jamais montrée, sauf si vous en faites une simple préférence.</dd>
+      </div>
+      <div class="kinds__row">
+        <dt><span class="tag tag--blue">Ce que vous préférez</span></dt>
+        <dd>Le secteur de l’employeur, le type de structure, ce qui compte pour vous dans un poste. Ces réponses
+          pèsent sur la note sans rien écarter.</dd>
+      </div>
+      <div class="kinds__row">
+        <dt><span class="tag tag--yellow">En vos mots</span></dt>
+        <dd>Ce que vous cherchez et ce que vous refusez, avec vos phrases. Votre CV si vous le voulez : Claude en
+          tire un profil sans vos coordonnées, et le fichier n’est jamais enregistré.</dd>
+      </div>
+      <div class="kinds__row">
+        <dt><span class="tag tag--green">Ce que j’ai compris</span></dt>
+        <dd>Avant le premier mail, Claude résume votre recherche. Chaque phrase montre de quelles réponses elle
+          vient, et vous la corrigez si elle se trompe. Puis un premier tri des offres de la veille, tout de
+          suite.</dd>
+      </div>
+    </dl>
+  </div>
+</section>
+
+<section class="landing" aria-labelledby="cout">
+  <h2 class="landing__title" id="cout">Ce que ça coûte</h2>
+  <div class="landing__body landing__prose">
+    <p>The Good Job ne vous facture rien. L’IA qui lit les offres a un coût : chaque personne branche son propre compte
+      OpenRouter, le service qui donne accès à Claude, et règle directement ce qu’elle consomme. Personne ne
+      prend de marge au passage.</p>
+    <p class="landing__figures">Comptez <span class="typed">{{ signup_cost }}</span> pour l’inscription,
+      puis <span class="typed">{{ month_cost }}</span> par mois au plus.</p>
+    <p>Vous posez vous-même une limite de dépense. Quand elle est atteinte, la notation s’arrête et vous recevez un
+      mail. <a href="{% url 'accounts:openrouter_tutorial' %}">Créer un compte OpenRouter, pas à pas</a></p>
+  </div>
+</section>
+
+<section class="landing" aria-labelledby="jamais">
+  <h2 class="landing__title" id="jamais">Ce qu’il ne fera jamais</h2>
+  <div class="landing__body">
+    <ul class="nevers">
+      <li><strong class="nevers__head">Postuler à votre place.</strong> Il trie la lecture, la décision reste la
+        vôtre.</li>
+      <li><strong class="nevers__head">Vendre une place dans votre mail.</strong> Aucune entreprise ne paie pour
+        apparaître, aucune offre n’est sponsorisée.</li>
+      <li><strong class="nevers__head">Garder votre CV.</strong> Il est lu en mémoire, puis oublié ; seul le profil
+        sans coordonnées reste, et vous le voyez.</li>
+      <li><strong class="nevers__head">Vous retenir.</strong> Un clic en bas de chaque mail suffit pour vous
+        désabonner, et «&nbsp;Mes données&nbsp;» supprime le compte avec tout ce qu’il contient.</li>
+    </ul>
+    <p class="small"><a href="{% url 'accounts:privacy' %}">Ce que nous gardons, combien de temps et pourquoi</a></p>
+  </div>
+</section>
+
+<section class="landing" aria-labelledby="code">
+  <h2 class="landing__title" id="code">Un code ouvert</h2>
+  <div class="landing__body landing__prose">
+    <p>The Good Job est publié sous licence AGPL-3.0. Chacun peut lire comment les offres sont collectées, notées
+      et envoyées, proposer une correction ou le faire tourner chez soi. Le site tourne sur un serveur personnel,
+      en France.</p>
+    {% if source_code_url %}<p><a href="{{ source_code_url }}" rel="noopener noreferrer">Lire le code source</a></p>{% endif %}
+  </div>
+</section>
+
+<section class="landing" aria-labelledby="questions">
+  <h2 class="landing__title" id="questions">Questions</h2>
+  <div class="landing__body faq">
+    <details class="faq__item">
+      <summary>Pour quels métiers ?</summary>
+      <p>Tous, du soin à l’informatique, en passant par le commerce, le bâtiment ou la fonction publique : les postes
+        suivent le répertoire des métiers de France Travail. La culture et l’édition, la santé et l’informatique ont
+        en plus leurs sources spécialisées.</p>
+    </details>
+    <details class="faq__item">
+      <summary>Combien de temps pour s’inscrire ?</summary>
+      <p>Environ quatre minutes : votre adresse, un code reçu par mail, la connexion à OpenRouter, quelques
+        questions. Vous voyez votre premier tri à la fin, et le premier mail arrive le jour ouvré suivant, à 7 h.</p>
+    </details>
+    <details class="faq__item">
+      <summary>Pourquoi passer par OpenRouter ?</summary>
+      <p>Parce que chaque note coûte un appel à Claude. Sur votre propre compte, vous voyez chaque dépense,
+        vous fixez la limite et vous coupez l’accès quand vous voulez, chez eux ou dans «&nbsp;Mes données&nbsp;».
+        Nous ne voyons jamais vos coordonnées bancaires.</p>
+    </details>
+    <details class="faq__item">
+      <summary>Et si une note se trompe ?</summary>
+      <p>Elle se trompera parfois : les notes sont générées par IA, la décision vous appartient. Rangez l’offre dans
+        «&nbsp;Pas pour moi&nbsp;», et les notes suivantes en tiennent compte. Vos critères se modifient à tout
+        moment dans «&nbsp;Ma recherche&nbsp;».</p>
+    </details>
+    <details class="faq__item">
+      <summary>Qui est derrière ?</summary>
+      <p>Un projet personnel, mené par une seule personne, sans investisseur ni publicité. Une question, un bug :
+        <a href="{% url 'accounts:legal' %}">le contact est dans les mentions légales</a>.</p>
+    </details>
+  </div>
+</section>
+
+<section class="landing landing--last" aria-labelledby="demain">
+  <h2 class="landing__title" id="demain">Votre premier tri, dans quatre minutes</h2>
+  <div class="landing__body">
+    <a class="button button--secondary" href="#inscription">Recevoir mon code</a>
+  </div>
+</section>
 {% endblock %}

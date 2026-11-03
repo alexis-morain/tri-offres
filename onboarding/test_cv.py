@@ -124,7 +124,7 @@ class ScreenTests(CVTestCase):
     def test_comes_after_the_words_with_its_reason_and_promise(self):
         self.assertRedirects(self.post("mots", {}), CV_URL, fetch_redirect_response=False)
         html = self.page()
-        self.assertIn("<title>Votre CV (facultatif), tri-offres</title>", html)
+        self.assertIn("<title>Votre CV (facultatif), The Good Job</title>", html)
         self.assertIn("Aide à repérer les compétences transférables, utile en reconversion.", html)
         self.assertIn("Le fichier est supprimé dès la lecture, en général sous une minute. Nous gardons seulement "
                       "le résumé ci-dessous, que vous pouvez modifier.", " ".join(html.split()))

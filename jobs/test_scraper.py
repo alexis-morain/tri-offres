@@ -104,6 +104,31 @@ class BuildInputTests(SimpleTestCase):
         self.assertEqual(scraper.build_input(["wttj"])["registryKey"], "tri-offres")
         self.assertEqual(scraper.build_input(["wttj", "hellowork"])["registryKey"], "tri-offres")
 
+    def test_ats_gets_the_french_boards(self):
+        with tempfile.TemporaryDirectory() as folder:
+            boards = Path(folder) / "ats-france.txt"
+            boards.write_text("greenhouse:doctolib\n\nlever:qonto\n")
+            with mock.patch.object(scraper, "ATS_BOARDS", boards):
+                actor_input = scraper.build_input(["wttj", "ats"])
+        self.assertEqual(actor_input["sources"], ["wttj", "ats"])
+        self.assertEqual(actor_input["companies"], ["greenhouse:doctolib", "lever:qonto"])
+        self.assertNotIn("companies", scraper.build_input(["wttj"]))
+
+    def test_ats_left_out_without_boards(self):
+        # The actor refuses `ats` without companies: an empty or missing list must not stop the night.
+        with tempfile.TemporaryDirectory() as folder:
+            for content in (None, "", "\n"):
+                boards = Path(folder) / "ats-france.txt"
+                boards.unlink(missing_ok=True)
+                if content is not None:
+                    boards.write_text(content)
+                with self.subTest(content=content), mock.patch.object(scraper, "ATS_BOARDS", boards):
+                    actor_input = scraper.build_input(["wttj", "ats"])
+                    self.assertEqual(actor_input["sources"], ["wttj"])
+                    self.assertNotIn("companies", actor_input)
+                    with self.assertRaises(ValueError):
+                        scraper.build_input(["ats"])
+
     @override_settings(SCRAPER_MAX_RESULTS_PER_SOURCE=40, SCRAPER_MAX_MINUTES_PER_SOURCE=5)
     def test_caps_come_from_settings(self):
         actor_input = scraper.build_input(["wttj"])

@@ -111,12 +111,13 @@ chemin complet du `.env`.
 |---|---|---|
 | `DJANGO_SECRET_KEY` | clé du site | propre à l’hôte, 50 caractères au moins, sans `$` ; ne pas reprendre celle d’un poste de développement |
 | `RESEND_API_KEY` | envoi des mails | clé existante ou clé dédiée |
-| `DEFAULT_FROM_EMAIL` | expéditeur des mails, par exemple `tri-offres <bonjour@<domaine d’envoi>>` | obligatoire : le site refuse de démarrer sans lui dès que `RESEND_API_KEY` est posée |
+| `DEFAULT_FROM_EMAIL` | expéditeur des mails, par exemple `The Good Job <bonjour@<domaine d’envoi>>` | obligatoire : le site refuse de démarrer sans lui dès que `RESEND_API_KEY` est posée |
 | `MAIL_REPLY_TO` | adresse de réponse et contact des pages légales | obligatoire, comme ci-dessus |
 | `LEGAL_NAME`, `LEGAL_ADDRESS`, `LEGAL_SIRET` | éditeur des mentions légales | `LEGAL_NAME` obligatoire, comme ci-dessus |
 | `ADMIN_ACCESS_TEAM_DOMAIN` | domaine d’équipe Cloudflare Access (`<équipe>.cloudflareaccess.com`) | étape 8 |
 | `ADMIN_ACCESS_AUD` | valeur AUD de l’application Access | étape 8 |
 | `HSTS_SECONDS` | durée HSTS | `3600` d’abord, voir étape 8 |
+| `SOURCE_CODE_URL` | dépôt public, lié depuis le pied de page, l’accueil et les mentions légales (AGPL-3.0, article 13) | facultative, vide masque les liens |
 | `ALERT_EMAIL` | adresse qui reçoit les alertes | facultative |
 
 Pour tirer une clé de site propre :

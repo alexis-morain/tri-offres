@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Mentions légales, tri-offres{% endblock %}
+{% block title %}Mentions légales, The Good Job{% endblock %}
 {% block content %}
 <div class="prose legal">
   <h1>Mentions légales</h1>
@@ -18,7 +18,8 @@
     101 Townsend St, San Francisco, CA 94107, États-Unis.</p>
 
   <h2>Code source</h2>
-  <p>Le code de tri-offres est publié sous licence AGPL-3.0.</p>
+  <p>Le code de The Good Job est publié sous licence AGPL-3.0.{% if source_code_url %}
+    <a href="{{ source_code_url }}" rel="noopener noreferrer">Lire le code source</a>.{% endif %}</p>
 
   <p>Ce que le site fait de vos données : <a href="{% url 'accounts:privacy' %}">confidentialité</a>.</p>
 </div>

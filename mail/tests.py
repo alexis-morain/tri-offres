@@ -25,9 +25,9 @@ class SendTests(SimpleTestCase):
         mail.send("login_code", "nora@example.fr", CODE_CONTEXT)
         self.assertEqual(len(django_mail.outbox), 1)
         message = django_mail.outbox[0]
-        self.assertEqual(message.subject, "482 913 est votre code tri-offres")
+        self.assertEqual(message.subject, "482 913 est votre code The Good Job")
         self.assertEqual(message.to, ["nora@example.fr"])
-        self.assertEqual(message.from_email, "tri-offres <noreply@example.org>")
+        self.assertEqual(message.from_email, "The Good Job <noreply@example.org>")
         self.assertEqual(message.reply_to, ["contact@example.org"])
         self.assertEqual(message.cc, [])
         self.assertEqual(message.bcc, [])
@@ -52,11 +52,11 @@ class SendTests(SimpleTestCase):
     def test_waitlist_mail_copy(self):
         mail.send("waitlist", "nora@example.fr", {})
         message = django_mail.outbox[0]
-        self.assertEqual(message.subject, "Vous êtes sur la liste d’attente de tri-offres")
+        self.assertEqual(message.subject, "Vous êtes sur la liste d’attente de The Good Job")
         html = message.alternatives[0][0]
         for part in (message.body, html):
             with self.subTest(part=part[:20]):
-                self.assertIn("La bêta de tri-offres est complète pour le moment.", part)
+                self.assertIn("La bêta de The Good Job est complète pour le moment.", part)
                 self.assertIn("nous vous écrirons dès qu’une place se libère", part)
                 self.assertIn("nous ne vous écrirons pas d’autre mail sans place libre", part)
                 assert_french_copy(self, part)
@@ -166,8 +166,8 @@ def redirecting_opener(location):
 
 class ResendBackendTests(SimpleTestCase):
     def message(self, **kwargs):
-        fields = {"subject": "482 913 est votre code tri-offres", "body": "texte",
-                  "from_email": "tri-offres <noreply@example.org>", "to": ["nora@example.fr"],
+        fields = {"subject": "482 913 est votre code The Good Job", "body": "texte",
+                  "from_email": "The Good Job <noreply@example.org>", "to": ["nora@example.fr"],
                   "reply_to": ["contact@example.org"], **kwargs}
         message = EmailMultiAlternatives(**fields)
         message.attach_alternative("<p>html</p>", "text/html")
@@ -186,8 +186,8 @@ class ResendBackendTests(SimpleTestCase):
         self.assertEqual(request.get_header("Content-type"), "application/json")
         payload = json.loads(request.data)
         self.assertEqual(payload, {
-            "from": "tri-offres <noreply@example.org>", "to": ["nora@example.fr"],
-            "subject": "482 913 est votre code tri-offres", "text": "texte", "html": "<p>html</p>",
+            "from": "The Good Job <noreply@example.org>", "to": ["nora@example.fr"],
+            "subject": "482 913 est votre code The Good Job", "text": "texte", "html": "<p>html</p>",
             "reply_to": ["contact@example.org"],
         })
 
@@ -278,7 +278,7 @@ class ResendBackendTests(SimpleTestCase):
 
 class ConsoleBackendTests(SimpleTestCase):
     def message(self):
-        return EmailMultiAlternatives("482 913 est votre code tri-offres", "corps secret", "f@example.fr",
+        return EmailMultiAlternatives("482 913 est votre code The Good Job", "corps secret", "f@example.fr",
                                       ["nora@example.fr"])
 
     @override_settings(DEBUG=False)
@@ -306,7 +306,7 @@ class ConsoleBackendTests(SimpleTestCase):
         self.assertIn("nora@example.fr", stream.getvalue())
         # The last line sums the mail up, so the sign-in code is found without reading the MIME dump.
         self.assertEqual(stream.getvalue().rstrip().splitlines()[-1],
-                         ">>> Mail pour nora@example.fr : 482 913 est votre code tri-offres")
+                         ">>> Mail pour nora@example.fr : 482 913 est votre code The Good Job")
 
 
 UNSUBSCRIBE_URL = "https://tri.example.fr/desinscription/abc:1:sig/"

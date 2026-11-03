@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 SLOT = "openrouter_pkce"
 AUTH_URL = "https://openrouter.ai/auth"
 EXCHANGE_URL = "https://openrouter.ai/api/v1/auth/keys"
-KEY_LABEL = "tri-offres"
+KEY_LABEL = "The Good Job"
 TTL = timedelta(minutes=10)  # what OpenRouter gives a code
 EXCHANGE_TIMEOUT = 10
 MAX_CODE = 512

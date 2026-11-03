@@ -4,10 +4,12 @@ import json
 from collections import Counter
 from io import StringIO
 from pathlib import Path
+from unittest import mock
 
 from django.core.management import CommandError, call_command
 from django.test import TestCase, override_settings
 
+from jobs import scraper
 from jobs.actor_sources import ACTOR_SOURCES
 from jobs.models import JobOffer, Source
 from jobs.test_scraper import FakeActorMixin, run_stats_record, stats_line
@@ -30,6 +32,15 @@ def night_record():
 
 
 class CollecteCommandTests(FakeActorMixin, TestCase):
+    def setUp(self):
+        super().setUp()
+        # A list of ATS boards of the test's own: `ats` is asked for whatever jobs/data holds today.
+        boards = self.storage / "ats-france.txt"
+        boards.write_text("greenhouse:exemple\n")
+        patcher = mock.patch.object(scraper, "ATS_BOARDS", boards)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
     def night(self, items=ITEMS, exit=0, args=(), run_stats=None, **behaviour):
         """Run the command on a night of the fake actor; (output, input the actor received, error or None).
         RUN_STATS is night_record() unless `run_stats` gives another record, raw text, or ABSENT."""
@@ -195,9 +206,9 @@ class CollecteCommandTests(FakeActorMixin, TestCase):
                       "HTTP 503", output)
         self.assertIn("taleez (Taleez) : 0 lue, 0 nouvelle, 0 déjà connue, 0 écartée ; actor : 0 poussée, "
                       "0 filtrée, 0 doublon, 0 doublon entre sources, 12 déjà vues", output)
-        self.assertIn("Demandées sans offre lue : agences_livre, breezy, choisir_service_public, codeur, collective, "
-                      "digitalrecruiters, emploi_territorial, fhf, flatchr, join, livreshebdo, meteojob, softy, "
-                      "taleez, teamtailor.", output)
+        self.assertIn("Demandées sans offre lue : agences_livre, ats, beetween, breezy, choisir_service_public, "
+                      "codeur, collective, digitalrecruiters, editis, emploi_territorial, fhf, flatchr, "
+                      "freelance_informatique, join, livreshebdo, meteojob, softy, taleez, teamtailor.", output)
         self.assertIn("Ensemble : 7 sur 19 (37 %).", output)
         self.assertIn("hellowork : 3 sur 5 (60 %).", output)
         # The hellowork accountant was already on wttj.

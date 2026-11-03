@@ -322,7 +322,7 @@ class ManualTextTests(SummaryTestCase):
 class WaitingScreenTests(SummaryTestCase):
     def test_after_the_cv_the_waiting_screen_lists_what_claude_reads(self):
         html = self.page()
-        self.assertIn("<title>Je rédige ce que j’ai compris, tri-offres</title>", html)
+        self.assertIn("<title>Je rédige ce que j’ai compris, The Good Job</title>", html)
         self.assertIn('action="/synthese/rediger/"', html)
         self.assertIn("data-auto-submit", html)
         self.assertIn(">Rédiger la synthèse</button>", html)
@@ -388,7 +388,7 @@ class SummaryScreenTests(SummaryTestCase):
 
     def test_cards_spread_open_with_every_answer_word_for_word(self):
         html = self.page()
-        self.assertIn("<title>Voici ce que j’ai compris, tri-offres</title>", html)
+        self.assertIn("<title>Voici ce que j’ai compris, The Good Job</title>", html)
         self.assertNotIn("data-drawer", html)
         pink = self.card(html, "pink")
         rows = re.findall(r"<dt>(.*?)</dt><dd[^>]*>(.*?)</dd>"
@@ -710,7 +710,7 @@ class HouseStyleTests(SummaryTestCase):
         assert_french_copy(self, html)
         assert_unique_ids(self, html)
         title = re.search(r"<title>(.*?)</title>", html).group(1)
-        self.assertTrue(title.endswith(", tri-offres"), title)
+        self.assertTrue(title.endswith(", The Good Job"), title)
 
     def test_every_state(self):
         self.check(self.page())  # waiting

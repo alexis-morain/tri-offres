@@ -56,7 +56,7 @@ class ValuesScreenTests(QuestionnaireTestCase):
 
     def test_blue_capped_chips_with_their_reason(self):
         html = self.html("valeurs")
-        self.assertIn("Ce qui compte le plus dans votre prochain poste, tri-offres", html)
+        self.assertIn("Ce qui compte le plus dans votre prochain poste, The Good Job", html)
         self.assertIn("Règle le ton de la notation. Ne retire aucune offre.", html)
         self.assertRegex(html, r'class="chips" data-tone="blue"[^>]*data-max-choices="3"')
         self.assertIn("Jusqu’à 3.", html)
@@ -143,7 +143,7 @@ class JobsScreenTests(QuestionnaireTestCase):
     def test_career_change_rewords_the_screen(self):
         self.post("recherche", {**CULTURE["recherche"], "career_change": "yes", "previous_job": "Comptable"})
         html = self.html("metiers")
-        self.assertIn("<title>Les métiers qui vous attirent, même sans expérience directe, tri-offres</title>", html)
+        self.assertIn("<title>Les métiers qui vous attirent, même sans expérience directe, The Good Job</title>", html)
         self.assertRegex(html, r"<h1[^>]*>Les métiers qui vous attirent, même sans expérience directe</h1>")
         self.assertIn("Je garderai aussi une ou deux offres d’exploration par mail.", html)
         self.assertNotIn("Les offres de ces métiers remontent en tête.", html)
@@ -156,7 +156,7 @@ class StructuresScreenTests(QuestionnaireTestCase):
 
     def test_optional(self):
         html = self.html("structures")
-        self.assertIn("<title>Où aimeriez-vous travailler ?, tri-offres</title>", html)
+        self.assertIn("<title>Où aimeriez-vous travailler ?, The Good Job</title>", html)
         self.assertIn("Ces préférences font monter la note des offres qui y correspondent. Elles n’en écartent "
                       "aucune.", html)
         self.assertRedirects(self.post("structures", {}), url("mots"), fetch_redirect_response=False)

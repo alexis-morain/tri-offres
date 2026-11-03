@@ -189,7 +189,7 @@ class ConfirmationMailTests(DeletionTestCase):
         callbacks[0]()
         message, = django_mail.outbox
         self.assertEqual(message.to, [EMAIL])
-        self.assertEqual(message.subject, "Votre compte tri-offres est supprimé")
+        self.assertEqual(message.subject, "Votre compte The Good Job est supprimé")
         body = message.body + message.alternatives[0][0]
         self.assertNotIn("http", body)
         self.assertNotIn("/connexion/", body)
@@ -257,7 +257,7 @@ class ConfirmPageTests(DeletionTestCase):
         self.assertEqual(response.status_code, 200)
         html = response.content.decode()
         page = text(html)
-        self.assertIn("<title>Supprimer mon compte, tri-offres</title>", html)
+        self.assertIn("<title>Supprimer mon compte, The Good Job</title>", html)
         self.assertIn("définitif", page)
         self.assertIn("immédiat", page)
         self.assertIn("30 jours", page)
@@ -339,7 +339,7 @@ class LastPageTests(TestCase):
         self.assertIn("no-store", response["Cache-Control"])
         self.assertEqual(response["X-Robots-Tag"], "noindex")
         self.assertEqual(response["Referrer-Policy"], "strict-origin")
-        self.assertIn("<title>Compte supprimé, tri-offres</title>", html)
+        self.assertIn("<title>Compte supprimé, The Good Job</title>", html)
         self.assertIn("<h1", html)
         self.assertNotIn("@", html.split("<main")[1].split("</main>")[0])
         assert_french_copy(self, html)

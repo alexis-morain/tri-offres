@@ -57,7 +57,7 @@ class FailedStepTests(AlertCase):
         self.assertEqual(len(self.sent()), 1)
         message = self.sent()[0]
         self.assertEqual(message.to, ["alerte@example.fr"])
-        self.assertEqual(message.subject, "tri-offres · alerte (nuit du 19/10)")
+        self.assertEqual(message.subject, "The Good Job · alerte (nuit du 19/10)")
         self.assertIn("notation", message.body)
         self.assertIn("CommandError: Notation incomplète (1 en échec)", message.body)
         self.assertIn("ligne 60", message.body)
@@ -302,7 +302,7 @@ class KilledTests(AlertCase):
     def test_send_killed_mails_the_reason(self):
         self.assertTrue(alerts.send_killed("nuit", dt.date(2026, 10, 19), "durée maximale dépassée (2 h 50)"))
         message = self.sent()[0]
-        self.assertEqual(message.subject, "tri-offres · alerte (nuit du 19/10)")
+        self.assertEqual(message.subject, "The Good Job · alerte (nuit du 19/10)")
         self.assertIn("durée maximale dépassée (2 h 50)", message.body)
         self.assertIn("interrompu", message.body)
 
@@ -323,7 +323,7 @@ class KilledTests(AlertCase):
         day = dt.date(2026, 10, 19)
         self.assertTrue(alerts.send_not_started("matin", day))
         message = self.sent()[0]
-        self.assertEqual(message.subject, "tri-offres · alerte (matin du 19/10)")
+        self.assertEqual(message.subject, "The Good Job · alerte (matin du 19/10)")
         self.assertIn("Créneau matin non lancé", message.body)
         self.assertFalse(alerts.send_not_started("matin", day))
         self.assertEqual(len(self.sent()), 1)

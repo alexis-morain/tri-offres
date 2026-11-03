@@ -281,6 +281,7 @@ build_env_files() {
   take web ADMIN_ACCESS_TEAM_DOMAIN opt v_host
   take web ADMIN_ACCESS_AUD opt
   take web HSTS_SECONDS opt v_int
+  take web SOURCE_CODE_URL opt v_https
   for key in $CAPS; do [ "$ENGINE:$key" = oauth:BETA_CAPACITY ] || take web "$key" opt v_int; done
 
   # scheduler: what the night needs, with the proxy, the ping URL and the alert address.

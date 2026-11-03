@@ -53,7 +53,7 @@ class NotFinishedTests(EndTestCase):
 class MySearchTests(FinishedTestCase):
     def test_cards_rows_and_their_edit_links(self):
         html = self.page(MY_SEARCH)
-        self.assertIn("<title>Ma recherche, tri-offres</title>", html)
+        self.assertIn("<title>Ma recherche, The Good Job</title>", html)
         pink, blue, yellow = (self.card(html, tone) for tone in ("pink", "blue", "yellow"))
         self.assertIn("Lyon, jusqu’à 30 km, télétravail : hybride", pink)
         self.assertIn(f'href="{url("lieu")}?retour=ma-recherche"', pink)
@@ -168,7 +168,7 @@ class BlockPageTests(FinishedTestCase):
 
     def test_titles(self):
         html = self.page(block_url("exclude"))
-        self.assertIn("<title>Ce que vous excluez, tri-offres</title>", html)
+        self.assertIn("<title>Ce que vous excluez, The Good Job</title>", html)
         self.assertIn('<h1 class="question__title">Ce que vous excluez</h1>', html)
         self.assertIn('>Où <span class="nowrap">voulez-vous</span> travailler ?</h2>', html)
 
@@ -245,7 +245,7 @@ class MyDataTests(FinishedTestCase):
     def test_what_is_kept(self):
         html = self.page(MY_DATA)
         page = text(html)
-        self.assertIn("<title>Mes données, tri-offres</title>", html)
+        self.assertIn("<title>Mes données, The Good Job</title>", html)
         self.assertIn("nora@example.fr", page)
         self.assertIn(f"Le {timezone.localtime(self.user.date_joined).day} ", page)
         self.assertIn(f'href="{MY_SEARCH}"', html)

@@ -1,5 +1,5 @@
 {% extends "onboarding/layout.html" %}
-{% block title %}{% if first_sort.state == "ready" %}Vos premières offres sont prêtes{% else %}Votre premier tri arrive{% endif %}, tri-offres{% endblock %}
+{% block title %}{% if first_sort.state == "ready" %}Vos premières offres sont prêtes{% else %}Votre premier tri arrive{% endif %}, The Good Job{% endblock %}
 {% block head %}{% if first_sort.state == "running" %}<meta http-equiv="refresh" content="10">{% endif %}{% endblock %}
 {% block question %}
 <div class="question end">

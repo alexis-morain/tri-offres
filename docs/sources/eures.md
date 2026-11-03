@@ -5,7 +5,7 @@
 - Kind: Public sector site
 - Country: France only
 
-The European job mobility portal of the European Commission; tri-offres takes the public offers located in France,
+The European job mobility portal of the European Commission; The Good Job takes the public offers located in France,
 mostly published by France Travail.
 
 ## Who receives its offers
@@ -13,7 +13,7 @@ mostly published by France Travail.
 Every person. An offer whose title gives a ROME code goes to that code's domain only; an offer without a code stays a
 candidate for everyone, and the scoring decides.
 
-## What tri-offres keeps
+## What The Good Job keeps
 
 The common fields of every source: title, employer, place, contract type, part time and remote work when given,
 salary or daily rate when given, publication and expiry dates, the link to the offer's page at the source, and a
@@ -26,7 +26,7 @@ source site, never to a direct application link.
 
 ## Attribution
 
-tri-offres knows of no reuse licence nor attribution requirement published by this source. If the collector ever sends
+The Good Job knows of no reuse licence nor attribution requirement published by this source. If the collector ever sends
 one (`source_license`), it is shown next to the offer.
 
 ## Cutting the source

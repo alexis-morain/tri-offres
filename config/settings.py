@@ -187,6 +187,9 @@ HEALTHCHECKS_PING_URL = env_https_url("HEALTHCHECKS_PING_URL")
 LEGAL_ADDRESS = env("LEGAL_ADDRESS", "").strip()
 LEGAL_SIRET = env("LEGAL_SIRET", "").strip()
 LEGAL_EMAIL = MAIL_REPLY_TO
+# The public repository, linked from the footer, the home page and the legal notice (AGPL-3.0, section 13). Kept out
+# of the code so a fork links its own; empty hides the links.
+SOURCE_CODE_URL = env_https_url("SOURCE_CODE_URL")
 
 # Sessions: in the database, 30 days fixed from sign-in (the user_logged_in signal sets an absolute expiry,
 # 12 hours for staff). Never signed_cookies.

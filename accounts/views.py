@@ -100,6 +100,7 @@ def home(request):
         form = EmailForm(initial={"email": pending} if pending else None)
     return render(request, "accounts/home.html", {
         "form": form, "capacity": settings.BETA_CAPACITY, "beta_full": auth.beta_is_full(),
+        "site_url": settings.SITE_URL, "signup_cost": openrouter.SIGNUP_COST, "month_cost": openrouter.MONTH_COST_MAX,
     })
 
 

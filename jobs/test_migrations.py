@@ -84,10 +84,11 @@ class ActorSourcesMigrationTests(MigrationTestCase):
 
 
 class ActorSourcesAlignmentTests(SimpleTestCase):
-    def test_module_and_migrations_0005_0009_aligned_today(self):
+    def test_module_and_migrations_aligned_today(self):
         """Adapt when a later migration adds a source to jobs/actor_sources.py."""
         self.assertEqual([tuple(source) for source in ACTOR_SOURCES],
-                         list(MIGRATION_SOURCES) + list(MORE_MIGRATION_SOURCES))
+                         list(MIGRATION_SOURCES) + list(MORE_MIGRATION_SOURCES) + list(FREELANCE_IT_SOURCES)
+                         + list(PUBLISHING_SOURCES) + list(ATS_SOURCES))
 
 
 BEFORE_KIND = [("jobs", "0006_offer_prepass_tracking")]
@@ -163,6 +164,80 @@ class MoreActorSourcesMigrationTests(MigrationTestCase):
         self.assertIn("fhf", kept)
         self.assertNotIn("join", kept)
         self.assertIn("hellowork", kept)
+
+
+FREELANCE_IT = import_module("jobs.migrations.0012_freelance_informatique")
+FREELANCE_IT_SOURCES = FREELANCE_IT.ACTOR_SOURCES
+
+
+class FreelanceInformatiqueMigrationTests(MigrationTestCase):
+    """0012: Freelance-Informatique, IT missions (plan of 29/10, section 2)."""
+    migrate_from = [("jobs", "0011_joboffer_title_folded")]
+    migrate_to = [("jobs", "0012_freelance_informatique")]
+
+    def source(self, apps):
+        return apps.get_model("jobs", "Source").objects.filter(kind="actor", actor_source="freelance_informatique")
+
+    def test_created_active_with_its_domain(self):
+        source = self.source(self.apps).get()
+        self.assertEqual((source.domains, source.state), (["M18"], "active"))
+
+    def test_rerun_creates_nothing(self):
+        FREELANCE_IT.forwards(self.apps, None)
+        self.assertEqual(self.source(self.apps).count(), 1)
+
+    def test_backwards_drops_it_without_offers(self):
+        apps = self.migrate(self.migrate_from)
+        self.assertFalse(self.source(apps).exists())
+
+
+PUBLISHING = import_module("jobs.migrations.0013_beetween_editis")
+PUBLISHING_SOURCES = PUBLISHING.ACTOR_SOURCES
+
+
+class BeetweenEditisMigrationTests(MigrationTestCase):
+    """0013: Beetween career sites and Editis, the publishing sources (plan of 29/10, section 4)."""
+    migrate_from = [("jobs", "0012_freelance_informatique")]
+    migrate_to = [("jobs", "0013_beetween_editis")]
+
+    def sources(self, apps):
+        return apps.get_model("jobs", "Source").objects.filter(kind="actor", actor_source__in=["beetween", "editis"])
+
+    def test_created_active_with_their_domains(self):
+        rows = dict(self.sources(self.apps).values_list("actor_source", "domains"))
+        self.assertEqual(rows, {"beetween": [], "editis": ["E", "K", "L"]})
+        self.assertEqual(set(self.sources(self.apps).values_list("state", flat=True)), {"active"})
+
+    def test_rerun_creates_nothing(self):
+        PUBLISHING.forwards(self.apps, None)
+        self.assertEqual(self.sources(self.apps).count(), 2)
+
+    def test_backwards_drops_them_without_offers(self):
+        apps = self.migrate(self.migrate_from)
+        self.assertFalse(self.sources(apps).exists())
+
+
+ATS_MIGRATION = import_module("jobs.migrations.0014_ats")
+ATS_SOURCES = ATS_MIGRATION.ACTOR_SOURCES
+
+
+class AtsMigrationTests(MigrationTestCase):
+    """0014: the ATS platforms as one source (plan of 29/10, section 2)."""
+    migrate_from = [("jobs", "0013_beetween_editis")]
+    migrate_to = [("jobs", "0014_ats")]
+
+    def source(self, apps):
+        return apps.get_model("jobs", "Source").objects.filter(kind="actor", actor_source="ats")
+
+    def test_created_active_for_everyone(self):
+        self.assertEqual(list(self.source(self.apps).values_list("domains", "state")), [([], "active")])
+
+    def test_rerun_creates_nothing(self):
+        ATS_MIGRATION.forwards(self.apps, None)
+        self.assertEqual(self.source(self.apps).count(), 1)
+
+    def test_backwards_drops_it_without_offers(self):
+        self.assertFalse(self.source(self.migrate(self.migrate_from)).exists())
 
 
 class TitleFoldedMigrationTests(MigrationTestCase):

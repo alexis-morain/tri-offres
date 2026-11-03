@@ -1,7 +1,8 @@
 # Sources
 
-tri-offres reads its offers from 22 French sources, listed in `jobs/actor_sources.py` and created in the database by
-migrations `jobs/migrations/0005_actor_sources.py` and `0009_more_actor_sources.py`. They are collected by an external
+The Good Job reads its offers from 26 French sources, listed in `jobs/actor_sources.py` and created in the database by
+migrations `jobs/migrations/0005_actor_sources.py`, `0009_more_actor_sources.py`,
+`0012_freelance_informatique.py`, `0013_beetween_editis.py` and `0014_ats.py`. They are collected by an external
 program that is not part of this repository (see the README, "The collector is not included").
 
 | Source | Key | Kind | Domains |
@@ -28,6 +29,10 @@ program that is not part of this repository (see the README, "The collector is n
 | [Breezy HR](breezy.md) | `breezy` | Recruiting software: career pages that employers host on it | everyone |
 | [JOIN](join.md) | `join` | Recruiting software: career pages that employers host on it | everyone |
 | [Softy](softy.md) | `softy` | Recruiting software: career pages that employers host on it | everyone |
+| [Freelance-Informatique](freelance_informatique.md) | `freelance_informatique` | Freelance platform | `M18` |
+| [Beetween](beetween.md) | `beetween` | Recruiting software: career pages that employers host on it | everyone |
+| [Editis](editis.md) | `editis` | Employer career site (book publishing group) | `E`, `K`, `L` |
+| [ATS (Greenhouse, Lever, Workday…)](ats.md) | `ats` | Recruiting software: career pages that employers host on it | everyone |
 
 "everyone" means a generalist source: each of its offers goes to the domain of its ROME code when the title gives one,
 otherwise to every person. Domain codes come from `onboarding/rome.py`.

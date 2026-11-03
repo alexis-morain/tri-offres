@@ -599,7 +599,7 @@ def _key_row(user):
 @login_required
 @require_GET
 def my_data(request):
-    """What tri-offres keeps about the person. Open whatever the questionnaire's state."""
+    """What The Good Job keeps about the person. Open whatever the questionnaire's state."""
     profile = _profile(request.user)
     return render(request, "onboarding/my_data.html", {
         "section": "data", "profile": profile, "cv_rows": cv.describe(profile.cv_profile),

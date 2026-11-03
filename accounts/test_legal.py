@@ -96,7 +96,16 @@ class LegalNoticeTests(TestCase):
         self.assertIn("1 rue des Essais, 75001 Paris", page)
         self.assertIn("SIRET 123 456 789 00012", page)
 
+    @override_settings(SOURCE_CODE_URL="https://code.example.org/tri-offres")
+    def test_source_code_link_when_set(self):
+        self.assertContains(self.client.get(LEGAL), 'href="https://code.example.org/tri-offres"')
+
+    @override_settings(SOURCE_CODE_URL="")
+    def test_no_source_code_link_when_unset(self):
+        self.assertNotContains(self.client.get(LEGAL), "Lire le code source")
+
     def test_defaults(self):
+        self.assertEqual(settings.SOURCE_CODE_URL, "")
         self.assertEqual(settings.LEGAL_NAME, "Nom de l’éditeur")
         self.assertEqual(settings.LEGAL_EMAIL, settings.MAIL_REPLY_TO)
         self.assertEqual((settings.LEGAL_ADDRESS, settings.LEGAL_SIRET), ("", ""))
@@ -114,6 +123,12 @@ class FooterTests(TestCase):
                 html = client.get(path).content.decode()
                 self.assertIn(f'href="{PRIVACY}"', html.split("<footer", 1)[1])
                 self.assertIn(f'href="{LEGAL}"', html.split("<footer", 1)[1])
+
+    @override_settings(SOURCE_CODE_URL="https://code.example.org/tri-offres")
+    def test_footer_links_the_source_code_when_set(self):
+        footer = Client().get(PRIVACY).content.decode().split("<footer", 1)[1]
+        self.assertIn('href="https://code.example.org/tri-offres"', footer)
+        self.assertIn("Code source", footer)
 
 
 @override_settings(STORAGES=PLAIN_STATIC)

@@ -16,5 +16,5 @@ Pour élargir ou changer vos critères, ouvrez « Ma recherche » :
 Pour ne plus recevoir ces mails :
 {{ unsubscribe_url }}
 
-tri-offres
+The Good Job
 {% endautoescape %}

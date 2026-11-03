@@ -1,5 +1,5 @@
 ---
-name: tri-offres
+name: The Good Job
 description: A quiet white page, like a well-kept notebook, where four pale tags say what each answer is.
 colors:
   ground: "#ffffff"
@@ -165,13 +165,13 @@ components:
     backgroundColor: "{colors.action-tint}"
 ---
 
-# Design System: tri-offres
+# Design System: The Good Job
 
 ## Overview
 
 **North Star: "The Quiet Page"**
 
-tri-offres looks like a well-kept notebook page: white, wide margins, warm grey ink, nothing that asks for attention except the one decision on screen. The references are Notion (page, properties, coloured tags, callouts), Twenty (dense lists that stay calm) and OpenSEO (near-black actions, a plain sans set with care). The interface is a working screen: people come once to answer a few questions, then a few minutes a day to sort offers. Calm and legible beat clever.
+The Good Job looks like a well-kept notebook page: white, wide margins, warm grey ink, nothing that asks for attention except the one decision on screen. The references are Notion (page, properties, coloured tags, callouts), Twenty (dense lists that stay calm) and OpenSEO (near-black actions, a plain sans set with care). The interface is a working screen: people come once to answer a few questions, then a few minutes a day to sort offers. Calm and legible beat clever.
 
 What carries the product's meaning is kept from the previous system and only redressed: four kinds of information, four colours, now shown as pale **tags** the way Notion labels a property. Pink is what you exclude, blue what you prefer, yellow what you say in your own words, green what Claude wrote. Everything else is grey.
 
@@ -248,7 +248,7 @@ The question screen is the canonical layout. Below 60rem it is one column, the f
 
 The block progress sits above every questionnaire screen: three block names in small text, each with a dot in its tag rule colour, the current one in ink with a 2px ink underline; the time left in minutes on the right. Below 30rem the three blocks become three equal cells.
 
-The summary spans both tracks: from 48rem the panels sit in two columns, pink spanning two rows, green across the full width with its text capped at 44rem. The home page pairs the intro (36rem) with a sample mail panel (25rem) from 60rem. « Mes données » is a two-column property list from 40rem (11rem labels), like Notion's page properties.
+The summary spans both tracks: from 48rem the panels sit in two columns, pink spanning two rows, green across the full width with its text capped at 44rem. The home page pairs the intro (36rem) with a sample mail panel (25rem) from 60rem; below, each section of the landing sets its heading in a 17rem track beside its text (44rem), sections split by a hairline, the questions in native `<details>`. « Mes données » is a two-column property list from 40rem (11rem labels), like Notion's page properties.
 
 **The One Decision Rule.** A screen asks one question with its "pourquoi" line directly under it; the file beside it is the only other thing in view.
 
@@ -277,7 +277,7 @@ Icons are inline SVG on a 20px grid, stroke in currentColor, always decorative (
 - **Back link:** muted ink with the back icon, ink on hover, underlined.
 
 ### Tags
-The colour of the product. A tag is a 4px-cornered pill of pale fill and dark ink, 600 weight, 0.8125rem: it names a panel (« Ce que vous excluez »), never a value.
+The colour of the product. A tag is a 4px-cornered pill of pale fill and dark ink, 600 weight, 0.8125rem: it names a panel (« Ce que vous excluez »), never a value. On the home page, a standalone `.tag` names each kind once, beside what it covers.
 
 ### Panels (cards)
 - White, 1px hairline, 10px corners, padding 1rem 1.25rem 1.25rem.

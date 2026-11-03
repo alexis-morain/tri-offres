@@ -85,7 +85,7 @@ class StartTests(FlowCase):
         self.assertEqual(query["code_challenge"], [challenge])
         self.assertEqual(query["code_challenge_method"], ["S256"])
         self.assertEqual(query["state"], [slot["state"]])
-        self.assertEqual(query["key_label"], ["tri-offres"])
+        self.assertEqual(query["key_label"], ["The Good Job"])
         self.assertEqual(query["callback_url"], [f"{SITE}/openrouter/retour/"])
         self.assertGreaterEqual(len(slot["verifier"]), 86)  # 64 random bytes, urlsafe
         self.assertGreaterEqual(len(slot["state"]), 43)  # 32 random bytes

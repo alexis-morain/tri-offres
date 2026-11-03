@@ -157,7 +157,7 @@ class LoginSettingsTests(SimpleTestCase):
         self.assertEqual(settings.SESSION_COOKIE_SAMESITE, "Lax")
 
     def test_sender_and_reply_to_have_neutral_defaults_in_the_test_environment(self):
-        self.assertEqual(settings.DEFAULT_FROM_EMAIL, "tri-offres <noreply@example.org>")
+        self.assertEqual(settings.DEFAULT_FROM_EMAIL, "The Good Job <noreply@example.org>")
         self.assertEqual(settings.MAIL_REPLY_TO, "contact@example.org")
         self.assertEqual(settings.LEGAL_NAME, "Nom de l’éditeur")
 
@@ -190,7 +190,7 @@ class PublisherIdentityTests(SimpleTestCase):
     def test_development_and_mail_on_the_console_get_neutral_defaults(self):
         for debug, key in ((True, ""), (False, ""), (True, "test-mail-key")):
             self.assertEqual(publisher_identity(debug, key, environ={}),
-                             ("tri-offres <noreply@example.org>", "contact@example.org", "Nom de l’éditeur"))
+                             ("The Good Job <noreply@example.org>", "contact@example.org", "Nom de l’éditeur"))
 
     def test_real_sending_in_production_refuses_a_missing_value(self):
         for name in self.SET:

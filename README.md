@@ -1,8 +1,11 @@
-# tri-offres
+# The Good Job
 
 A daily job alert for people looking for work in France. You create an account, answer a short questionnaire, and
 every weekday morning you get a mail with the offers that fit you, each scored and explained by Claude. A sort page
 lets you swipe through them; your answers refine the next scores. Nothing is ever applied for on your behalf.
+
+The hosted instance runs at https://thegoodjob.fr. The repository and its technical names (containers, database
+file, scripts) keep the code name `tri-offres`.
 
 The interface and the mails are in French only. The code, comments and docs are in English.
 
@@ -60,7 +63,7 @@ manage.py planificateur             the scheduler: starts `nuit <slot>` when a s
 
 ## Sources and safeguards
 
-Offers come from 22 French sources: generalist job boards, public sector sites, culture and book trade sites, and
+Offers come from 26 French sources: generalist job boards, public sector sites, culture and book trade sites, and
 the career pages that employers host on some recruiting software. One sheet per source, with what is kept and how to
 cut it: [docs/sources/](docs/sources/README.md).
 
@@ -138,7 +141,7 @@ its values from your shell, or from a `.env` file next to it, which Compose uses
 | `OPENROUTER_API_KEY` | none | The site's own OpenRouter key, for the shared calls of the `api` engine (never a person's) |
 | `OPENROUTER_KEYS_FERNET` | none | Fernet keys, comma-separated: the first seals the people's OpenRouter keys, all of them open (rotation). **Required** with `CLAUDE_ENGINE=api`. Generate one with `python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"`; lose it and everyone reconnects |
 | `RESEND_API_KEY` | none | Without it, mails go to the log |
-| `DEFAULT_FROM_EMAIL` | `tri-offres <noreply@example.org>` | Sender of every mail. **Required** when `RESEND_API_KEY` is set and `DJANGO_DEBUG` is off: the site refuses to start without it |
+| `DEFAULT_FROM_EMAIL` | `The Good Job <noreply@example.org>` | Sender of every mail. **Required** when `RESEND_API_KEY` is set and `DJANGO_DEBUG` is off: the site refuses to start without it |
 | `MAIL_REPLY_TO` | `contact@example.org` | Reply-to of every mail, and the contact address of the legal pages. Required in the same case |
 | `LEGAL_NAME`, `LEGAL_ADDRESS`, `LEGAL_SIRET` | `Nom de l’éditeur`, empty, empty | The publisher on the legal notice; an empty address or SIRET hides its line. `LEGAL_NAME` is required in the same case as the two above |
 | `ALERT_EMAIL` | `MAIL_REPLY_TO` | Where the scheduler sends its alerts |
@@ -146,6 +149,7 @@ its values from your shell, or from a `.env` file next to it, which Compose uses
 | `BETA` | `1` | While `1`, the site says « bêta gratuite » (wording only) |
 | `ADMIN_ACCESS_TEAM_DOMAIN`, `ADMIN_ACCESS_AUD` | empty | With an `https://` `SITE_URL`, `/admin` answers 404 unless the request carries a valid Cloudflare Access token for this team and audience. Over `http://` (local use) the guard is off and the admin login of Django applies |
 | `HSTS_SECONDS` | empty | Empty means one hour in HTTPS and off in HTTP |
+| `SOURCE_CODE_URL` | empty | https URL of the public code, linked from the footer, the home page and the legal notice (AGPL-3.0, section 13); empty hides the links |
 | `DEV_EMAILS` | empty | Addresses the `oauth` engine may serve (development only) |
 | `BETA_CAPACITY` | `80` | Accounts accepted before new sign-ups go to a waiting list |
 | `LOGIN_MAIL_DAILY_CAP` | `60` | Sign-in mails per day for the whole site |
@@ -219,7 +223,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). Contributions need a signed Contributor 
 
 ## License
 
-tri-offres is free software under the [GNU Affero General Public License v3.0 or later](LICENSE) (`AGPL-3.0-or-later`). If you run a modified
+The Good Job is free software under the [GNU Affero General Public License v3.0 or later](LICENSE) (`AGPL-3.0-or-later`). If you run a modified
 version as a network service, you must offer its source to its users.
 
 Third-party material shipped in this repository keeps its own license:

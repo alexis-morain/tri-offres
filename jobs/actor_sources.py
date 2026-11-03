@@ -1,4 +1,6 @@
-"""Sources of the actor collected for France (plan of step 4, section 3 bis). Migrations 0005 and 0009 copy them."""
+"""Sources of the actor collected for France (plan of step 4, section 3 bis).
+
+Migrations 0005, 0009, 0012, 0013 and 0014 copy them."""
 from typing import NamedTuple
 
 
@@ -8,6 +10,10 @@ class ActorSource(NamedTuple):
     url: str
     domains: list  # codes of onboarding/rome.DOMAINS; [] means every person
 
+
+# Asked for `ats`, the actor writes the platform as the source of each offer: collect files them under `ats`.
+ATS_PLATFORMS = frozenset({"greenhouse", "ashby", "lever", "workday", "smartrecruiters", "workable", "personio",
+                           "rippling", "recruitee"})
 
 ACTOR_SOURCES = [
     ActorSource("wttj", "Welcome to the Jungle", "https://www.welcometothejungle.com", []),
@@ -33,4 +39,11 @@ ACTOR_SOURCES = [
     ActorSource("breezy", "Breezy HR", "https://breezy.hr", []),
     ActorSource("join", "JOIN", "https://join.com", []),
     ActorSource("softy", "Softy", "https://www.softy.pro", []),
+    # 29/10, migration 0012 (plan of 29/10): IT missions, like Free-Work.
+    ActorSource("freelance_informatique", "Freelance-Informatique", "https://www.freelance-informatique.fr", ["M18"]),
+    # 29/10, migration 0013 (plan of 29/10): publishing sources. Beetween hosts employers of every sector.
+    ActorSource("beetween", "Beetween", "https://www.beetween.fr", []),
+    ActorSource("editis", "Editis", "https://editis.gestmax.fr", ["E", "K", "L"]),
+    # 30/10, migration 0014: career sites of the ATS platforms, boards listed in jobs/data/ats-france.txt.
+    ActorSource("ats", "ATS (Greenhouse, Lever, Workday…)", "", []),
 ]
