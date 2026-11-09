@@ -44,4 +44,6 @@ if "run_stats" in behaviour:
     value = behaviour["run_stats"]
     default_store.joinpath("RUN_STATS").write_text(value if isinstance(value, str) else json.dumps(value))
 time.sleep(behaviour.get("sleep", 0))
+if behaviour.get("kill"):  # what the kernel does when the container runs out of memory
+    os.kill(os.getpid(), 9)
 sys.exit(behaviour.get("exit", 0))

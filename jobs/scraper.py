@@ -12,6 +12,7 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 import time
 from pathlib import Path
 from typing import NamedTuple
@@ -44,13 +45,16 @@ class ScraperError(Exception):
 
 class Run(NamedTuple):
     status: str  # SUCCEEDED, FAILED or TIMED-OUT
-    exit_code: int | None  # None when the run was killed at its timeout
+    exit_code: int | None  # None when the run was killed at its timeout; -9 when the kernel killed it (memory)
     duration_s: float
+    peak_mb: int | None = None  # the actor's peak resident memory
 
 
-def build_input(sources, posted_within_days=None, max_results=None, mode="new-only"):
+def build_input(sources, posted_within_days=None, max_results=None, mode="new-only", wttj_professions=None,
+                countries=("FR",), languages=("fr",)):
     """The actor's input for these source keys. Night runs keep the defaults; the measurement run of 4.7 passes
-    posted_within_days, max_results and mode="all".
+    posted_within_days, max_results and mode="all". wttj_professions, countries and languages: those of the
+    targeted WTTJ run (plan of 06/11); every other run stays on France, in French.
 
     No contractTypes: the actor would then drop offers without a contract type or with AUTRE, which must pass
     (plan of step 4, decision 13). The import of 4.4 drops VIE and VIA itself.
@@ -65,7 +69,8 @@ def build_input(sources, posted_within_days=None, max_results=None, mode="new-on
     if mode not in MODES:
         raise ValueError(f"mode must be one of {MODES}.")
     actor_input = {
-        "sources": sources, "countries": ["FR"], "languages": ["fr"], "mode": mode, "registryKey": REGISTRY_KEY,
+        "sources": sources, "countries": list(countries), "languages": list(languages), "mode": mode,
+        "registryKey": REGISTRY_KEY,
         "includeDescription": True,
         "maxResultsPerSource": settings.SCRAPER_MAX_RESULTS_PER_SOURCE if max_results is None else max_results,
         "maxMinutesPerSource": settings.SCRAPER_MAX_MINUTES_PER_SOURCE,
@@ -74,6 +79,8 @@ def build_input(sources, posted_within_days=None, max_results=None, mode="new-on
         actor_input["companies"] = boards
     if posted_within_days is not None:
         actor_input["postedWithinDays"] = posted_within_days
+    if wttj_professions:
+        actor_input["wttjProfessions"] = list(wttj_professions)
     return actor_input
 
 
@@ -130,19 +137,49 @@ def run(actor_input, timeout_s=None, clock=time.monotonic):
     # The failure is raised after its except block, so no exception stays chained to it.
     with open(log_path, "wb") as log:
         try:
-            code = subprocess.run([settings.SCRAPER_PYTHON, "-m", "src"], cwd=settings.SCRAPER_DIR,
-                                  env=environment(), stdin=subprocess.DEVNULL, stdout=log, stderr=subprocess.STDOUT,
-                                  timeout=timeout_s).returncode
-            run = Run("SUCCEEDED" if code == 0 else "FAILED", code, clock() - started)
-        except subprocess.TimeoutExpired:  # subprocess.run has killed it
-            run = Run("TIMED-OUT", None, clock() - started)
+            process = subprocess.Popen([settings.SCRAPER_PYTHON, "-m", "src"], cwd=settings.SCRAPER_DIR,
+                                       env=environment(), stdin=subprocess.DEVNULL, stdout=log,
+                                       stderr=subprocess.STDOUT)
         except OSError as error:  # interpreter or folder missing
             failure = (f"Actor impossible à lancer ({error.__class__.__name__}) : voir SCRAPER_PYTHON et SCRAPER_DIR, "
                        "puis scripts/fetch_actor.sh.")
+        else:
+            code, timed_out, peak_mb = _wait(process, timeout_s)
+            if timed_out:
+                run = Run("TIMED-OUT", None, clock() - started, peak_mb)
+            else:
+                run = Run("SUCCEEDED" if code == 0 else "FAILED", code, clock() - started, peak_mb)
     _cut_log(log_path)
     if failure:
         raise ScraperError(failure)
     return run
+
+
+def _wait(process, timeout_s):
+    """(exit code, timed out, peak memory in MB) of the actor, killed at timeout_s or if the wait is interrupted.
+    os.wait4 rather than Popen.wait: it gives this child's own peak memory (RUSAGE_CHILDREN would mix in the other
+    children of the night, the WTTJ run included)."""
+    deadline = time.monotonic() + timeout_s
+    timed_out = False
+    try:
+        while True:
+            pid, status, usage = os.wait4(process.pid, os.WNOHANG)
+            if pid:
+                break
+            if time.monotonic() >= deadline:
+                process.kill()
+                timed_out = True
+                _, status, usage = os.wait4(process.pid, 0)
+                break
+            time.sleep(0.2)
+    except BaseException:  # Ctrl-C or SIGTERM in the parent: the actor must not keep running alone
+        process.kill()
+        process.wait()
+        raise
+    process.returncode = os.waitstatus_to_exitcode(status)  # reaped here: Popen must not wait for it again
+    # ru_maxrss is in kB on Linux, in bytes on macOS.
+    peak_mb = usage.ru_maxrss // (1024 * 1024 if sys.platform == "darwin" else 1024)
+    return process.returncode, timed_out, peak_mb
 
 
 def _cut_log(path):

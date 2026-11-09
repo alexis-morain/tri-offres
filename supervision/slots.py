@@ -21,6 +21,7 @@ class Step:
 NIGHT = [
     # Skipped in a dry run: `collecte --dry-run` still runs the actor, which marks the offers as seen.
     Step("collecte", business_only=True, dry_run="skip"),
+    Step("collecte_wttj", business_only=True, dry_run="skip"),  # WTTJ by job category (plan of 06/11)
     Step("notation", business_only=True),
     Step("purge_offres"),
     Step("purge_login_codes"),

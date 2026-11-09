@@ -27,6 +27,11 @@ class NormalizeTests(SimpleTestCase):
     def test_full_criteria_round_trip(self):
         self.assertEqual(criteria.normalize(GROWTH_FULL), GROWTH_FULL)
 
+    def test_countries_abroad_and_english_round_trip(self):
+        data = {"version": 1, "location": {"cities": [], "distance": "30", "remote": "full_remote", "strict": True,
+                                           "countries": ["BE", "GB"], "english": True}}
+        self.assertEqual(criteria.normalize(data), data)
+
     def test_no_floor_is_null(self):
         data = {"version": 1, "pay": {"floor": None, "unit": "year", "strict": True}}
         self.assertEqual(criteria.normalize(data), data)
@@ -59,6 +64,16 @@ class NormalizeTests(SimpleTestCase):
             {"version": 1, "keywords": {"include": [], "exclude": ["12", " "], "strict": True}},
             {"version": 1, "keywords": {"include": ["Régie", "regie"], "exclude": [], "strict": True}},
             ["location"],
+            {"version": 1, "location": {"cities": [], "distance": "30", "remote": "any", "strict": True,
+                                        "countries": ["US"]}},
+            {"version": 1, "location": {"cities": [], "distance": "30", "remote": "any", "strict": True,
+                                        "countries": "BE"}},
+            {"version": 1, "location": {"cities": [], "distance": "30", "remote": "any", "strict": True,
+                                        "countries": [["BE"]]}},
+            {"version": 1, "location": {"cities": [], "distance": "30", "remote": "any", "strict": True,
+                                        "countries": ["BE", "BE"]}},
+            {"version": 1, "location": {"cities": [], "distance": "30", "remote": "any", "strict": True,
+                                        "english": "yes"}},
             {"version": 1, "location": "Lyon"},
             {"version": 1, "offer_kind": ["job"]},
             {"version": 1, "contracts": {"values": [["cdi"]], "strict": True}},
@@ -156,6 +171,16 @@ class DescribeTests(SimpleTestCase):
         data = {"version": 1, "location": {"cities": [{"name": "Lyon"}], "distance": "city", "remote": "any",
                                            "strict": True}}
         self.assertEqual(self.rows(data)["location"][1], "Lyon, la ville seule, télétravail : peu importe")
+
+    def test_abroad_and_english_follow_the_place(self):
+        data = {"version": 1, "location": {"cities": [{"name": "Lyon"}], "distance": "city", "remote": "any",
+                                           "strict": False, "countries": ["BE", "GB"], "english": True}}
+        self.assertEqual(self.rows(data)["location"][1],
+                         "Lyon, la ville seule, télétravail : peu importe (préférence) ; à l’étranger : Belgique, "
+                         "Royaume-Uni ; offres en anglais acceptées")
+        data["location"].update(countries=[], english=False)
+        self.assertEqual(self.rows(data)["location"][1],
+                         "Lyon, la ville seule, télétravail : peu importe (préférence)")
 
     def test_full_remote_without_city(self):
         data = {"version": 1, "location": {"cities": [], "distance": "30", "remote": "full_remote", "strict": True}}

@@ -50,7 +50,7 @@ ENV_FILE="${ENV_FILE:-.env}"
 COMPOSE_OUT="${COMPOSE_OUT:-/tmp/tri-offres-compose.yaml}"
 # Resource limits of the compose file. The scheduler runs the actor and the notation: measure on the hôte (docs).
 WEB_MEM="1g"; WEB_PIDS=256
-SCHEDULER_MEM="2g"; SCHEDULER_PIDS=512
+SCHEDULER_MEM="3g"; SCHEDULER_PIDS=512
 LITESTREAM_MEM="256m"; LITESTREAM_PIDS=100
 
 die() { printf 'ERREUR : %s\n' "$*" >&2; exit 1; }

@@ -4,29 +4,44 @@
 <div class="question">
   <h1 class="question__title">Connecter OpenRouter pas à pas</h1>
   <p class="question__why">Cinq étapes, environ cinq minutes. Gardez cette page ouverte dans un onglet.</p>
+  <div class="prose">
+    <p>Il vous faut une adresse mail, une carte bancaire et {{ advised_credit }} (environ 5&nbsp;€). Aucune
+      connaissance technique : vous n’aurez rien à copier ni à installer.</p>
+    <p>Le site d’OpenRouter est en anglais. Les mots à repérer sur leurs pages sont écrits ici entre guillemets,
+      tels quels.</p>
+  </div>
   <ol class="prose tutorial">
     <li>
       <h2 class="education__heading">Créer un compte OpenRouter</h2>
       <p>Allez sur <a href="https://openrouter.ai" rel="noopener noreferrer">openrouter.ai</a>, puis «&nbsp;Sign
-        in&nbsp;» et «&nbsp;Sign up&nbsp;». Une adresse mail et un mot de passe suffisent, ou votre compte Google.</p>
+        in&nbsp;» en haut à droite et «&nbsp;Sign up&nbsp;». Une adresse mail et un mot de passe suffisent, ou votre
+        compte Google. Si OpenRouter vous envoie un mail de confirmation, ouvrez-le (regardez aussi dans les
+        indésirables).</p>
     </li>
     <li>
       <h2 class="education__heading">Ajouter du crédit</h2>
-      <p>Ouvrez <a href="https://openrouter.ai/credits" rel="noopener noreferrer">la page des crédits</a>, choisissez
-        un montant ({{ advised_credit }} suffisent) et validez avec vos coordonnées bancaires. Laissez la recharge
-        automatique désactivée.</p>
+      <p>Le crédit, c’est une petite somme payée d’avance, comme une carte de cantine : l’IA puise dedans à chaque
+        offre notée. Ouvrez <a href="https://openrouter.ai/credits" rel="noopener noreferrer">la page des crédits</a>,
+        cliquez sur «&nbsp;Add Credits&nbsp;», saisissez {{ advised_credit }} et payez par carte. Les montants sont en
+        dollars, et OpenRouter ajoute quelques centimes de frais. Votre banque peut vous demander de valider le
+        paiement sur votre téléphone.</p>
+      <p>Laissez la recharge automatique («&nbsp;Auto Top-Up&nbsp;») désactivée : ainsi, rien ne peut être prélevé
+        sans vous.</p>
     </li>
     <li>
       <h2 class="education__heading">Revenir ici et cliquer</h2>
       <p>Revenez sur <a href="{% url 'accounts:openrouter_connect' %}">la page de connexion</a> et cliquez sur
-        «&nbsp;Connecter OpenRouter&nbsp;». OpenRouter vous demande d’autoriser The Good Job : acceptez, vous revenez
-        ici tout seul.</p>
+        «&nbsp;Connecter OpenRouter&nbsp;». OpenRouter vous demande d’autoriser The Good Job («&nbsp;Authorize&nbsp;»
+        ou «&nbsp;Allow&nbsp;») : acceptez, vous revenez ici tout seul. Si OpenRouter vous demande d’abord de vous
+        connecter, utilisez le compte créé à l’étape 1.</p>
+      <p>Pas de clé à créer ni à recopier : le bouton s’en charge.</p>
     </li>
     <li>
       <h2 class="education__heading">Poser une limite</h2>
       <p>Une fois connecté, ouvrez le lien «&nbsp;page de votre clé&nbsp;». Dans «&nbsp;Credit limit&nbsp;», saisissez
-        le plafond que vous voulez ({{ advised_credit }} par exemple) et enregistrez. La notation s’arrête quand il
-        est atteint.</p>
+        le plafond que vous voulez ({{ advised_credit }} par exemple) et enregistrez («&nbsp;Save&nbsp;»). La notation
+        s’arrête quand il est atteint. Cette étape est conseillée, pas obligatoire : sans limite, la dépense s’arrête
+        de toute façon quand le crédit est vide.</p>
     </li>
     <li>
       <h2 class="education__heading">Voir votre dépense</h2>
@@ -35,6 +50,20 @@
         «&nbsp;<a href="{% url 'onboarding:my_data' %}">Mes données</a>&nbsp;» et révoquer la clé chez eux.</p>
     </li>
   </ol>
+  <ul class="prose tutorial"><li>
+    <h2 class="education__heading">Si ça coince</h2>
+    <ul>
+      <li><strong>Vous n’êtes pas revenu sur The Good Job.</strong> Rouvrez thegoodjob.fr dans le même navigateur,
+        puis <a href="{% url 'accounts:openrouter_connect' %}">la page de connexion</a>, et cliquez à nouveau sur le
+        bouton. Recommencer ne coûte rien.</li>
+      <li><strong>La page dit «&nbsp;Connexion annulée&nbsp;».</strong> Vous avez refusé l’autorisation ou fermé la page
+        d’OpenRouter : recommencez et acceptez.</li>
+      <li><strong>La carte est refusée.</strong> Vérifiez que les paiements en ligne et à l’étranger sont ouverts sur
+        votre carte (OpenRouter est une société américaine), ou essayez une autre carte.</li>
+      <li><strong>Une autre question.</strong> Répondez à n’importe quel mail de The Good Job : une personne vous
+        lit.</li>
+    </ul>
+  </li></ul>
   <div class="question__actions"><a class="button" href="{% url 'accounts:openrouter_connect' %}">Connecter OpenRouter</a></div>
 </div>
 {% endblock %}

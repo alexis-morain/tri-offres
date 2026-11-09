@@ -95,6 +95,17 @@ class BuildInputTests(SimpleTestCase):
         self.assertEqual(actor_input["mode"], "all")
         self.assertNotIn("postedWithinDays", scraper.build_input(["wttj"]))
 
+    def test_professions_of_the_targeted_run(self):
+        self.assertEqual(scraper.build_input(["wttj"], wttj_professions=["legal-zYjg3"])["wttjProfessions"],
+                         ["legal-zYjg3"])
+        self.assertNotIn("wttjProfessions", scraper.build_input(["wttj"]))
+
+    def test_countries_and_languages_of_the_targeted_run(self):
+        actor_input = scraper.build_input(["wttj"], countries=["FR", "BE"], languages=["fr", "en"])
+        self.assertEqual((actor_input["countries"], actor_input["languages"]), (["FR", "BE"], ["fr", "en"]))
+        actor_input = scraper.build_input(["wttj"])
+        self.assertEqual((actor_input["countries"], actor_input["languages"]), (["FR"], ["fr"]))
+
     def test_unknown_mode_refused(self):
         with self.assertRaises(ValueError):
             scraper.build_input(["wttj"], mode="everything")
@@ -154,6 +165,13 @@ class RunTests(FakeActorMixin, SimpleTestCase):
         run = scraper.run(self.INPUT)
         self.assertEqual((run.status, run.exit_code), ("FAILED", 1))
         self.assertEqual(len(list(scraper.iter_items())), 1)  # what it pushed before failing is read
+
+    def test_killed_run_keeps_the_signal_and_the_peak_memory(self):
+        self.behave(items=[{"source": "wttj", "id": "1"}], kill=True)
+        run = scraper.run(self.INPUT)
+        self.assertEqual((run.status, run.exit_code), ("FAILED", -9))
+        self.assertGreater(run.peak_mb, 1)  # a Python interpreter, in MB on Linux and macOS alike
+        self.assertLess(run.peak_mb, 1000)
 
     def test_timeout_kills_the_actor(self):
         self.behave(items=[{"source": "wttj", "id": "1"}], sleep=30)

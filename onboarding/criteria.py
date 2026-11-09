@@ -47,6 +47,9 @@ PAY_UNITS = {"year": "Brut par an", "month": "Brut par mois", "day": "Par jour (
 HOURS = {"full": "Temps plein", "part_ok": "Temps partiel accepté", "part_only": "Temps partiel seulement"}
 EXPERIENCE = {"lt1": "Moins d’un an", "1_2": "1 à 2 ans", "3_4": "3 à 4 ans", "5_9": "5 à 9 ans",
               "10_plus": "10 ans et plus"}
+# Countries a profile may tick on the place screen (plan of 06/11, decision 3): read by the targeted WTTJ run only.
+ABROAD = {"BE": "Belgique", "CH": "Suisse", "LU": "Luxembourg", "DE": "Allemagne", "GB": "Royaume-Uni",
+          "ES": "Espagne", "NL": "Pays-Bas", "IE": "Irlande"}
 MAX_CITIES = 3
 MAX_KEYWORDS = 10
 MAX_KEYWORD_LENGTH = 40
@@ -150,6 +153,15 @@ def normalize(data):
                               "distance": _one_of(location.get("distance"), DISTANCES, "distance"),
                               "remote": _one_of(location.get("remote"), REMOTE, "remote"),
                               "strict": _strict(location.get("strict"))}
+        # Always strict, whatever the place's switch; absent means France only, in French (plan of 06/11).
+        if "countries" in location:
+            _require(isinstance(location["countries"], list), "countries must be a list")
+            countries = [_one_of(code, ABROAD, "country") for code in location["countries"]]
+            _require(len(set(countries)) == len(countries), "countries: the same country twice")
+            result["location"]["countries"] = countries
+        if "english" in location:
+            _require(isinstance(location["english"], bool), "english must be a boolean")
+            result["location"]["english"] = location["english"]
     if "contracts" in data:
         values = data["contracts"].get("values")
         _require(isinstance(values, list) and values, "at least one contract")
@@ -202,6 +214,12 @@ def _location_text(location):
     return f"{join_names(names)}, {_lower_first(DISTANCES[location['distance']])}, {remote}"
 
 
+def _abroad_text(location):
+    countries = [ABROAD[code] for code in location.get("countries", [])]
+    text = f" ; à l’étranger : {', '.join(countries)}" if countries else ""
+    return text + (" ; offres en anglais acceptées" if location.get("english") else "")
+
+
 def _pay_text(pay):
     if pay["floor"] is None:
         return "Pas de plancher"
@@ -234,6 +252,8 @@ def describe(criteria):
         value = text(criteria[key])
         if criteria[key].get("strict") is False:
             value += PREFERENCE_SUFFIX
+        if key == "location":
+            value += _abroad_text(criteria[key])
         rows.append((key, label, value))
     return rows
 

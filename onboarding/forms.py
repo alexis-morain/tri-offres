@@ -269,6 +269,15 @@ class LocationForm(CriteriaForm):
     remote = choice("Télétravail", list(criteria.REMOTE.items()), "Choisissez une réponse pour le télétravail.",
                     initial="any")
     preference = preference("Le lieu n’écarte plus d’offres, il compte seulement dans la note.")
+    countries = forms.MultipleChoiceField(
+        label="Pays étrangers acceptés (facultatif)", required=False, widget=CheckOptionsWidget,
+        choices=list(criteria.ABROAD.items()),
+        help_text="Offres de Welcome to the Jungle seulement. Sans case cochée, la France seule.",
+        error_messages={"invalid_choice": "Cochez seulement des pays de la liste."})
+    english = forms.BooleanField(
+        label="J’accepte des offres en anglais", required=False, widget=SwitchWidget,
+        help_text="Si vous exigez des mots-clés du titre, tapez-en aussi un en anglais (par exemple "
+                  "« project manager ») : sans lui, les offres en anglais restent écartées.")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -286,7 +295,8 @@ class LocationForm(CriteriaForm):
         saved = self.saved.get("location")
         if saved is None:
             return {}
-        initial = {"distance": saved["distance"], "remote": saved["remote"], "preference": not saved["strict"]}
+        initial = {"distance": saved["distance"], "remote": saved["remote"], "preference": not saved["strict"],
+                   "countries": saved.get("countries", []), "english": saved.get("english", False)}
         for index, city in enumerate(saved["cities"], start=1):
             initial[f"city_{index}"] = city["name"]
             for code in CODE_PATTERNS:
@@ -318,9 +328,15 @@ class LocationForm(CriteriaForm):
         return data
 
     def apply(self, saved):
-        return {**saved, "location": {"cities": self.cities(), "distance": self.cleaned_data["distance"],
-                                      "remote": self.cleaned_data["remote"],
-                                      "strict": not self.cleaned_data["preference"]}}
+        location = {"cities": self.cities(), "distance": self.cleaned_data["distance"],
+                    "remote": self.cleaned_data["remote"], "strict": not self.cleaned_data["preference"]}
+        # Written only when ticked: the criteria of everyone else stay as they were.
+        countries = [code for code in criteria.ABROAD if code in self.cleaned_data["countries"]]
+        if countries:
+            location["countries"] = countries
+        if self.cleaned_data["english"]:
+            location["english"] = True
+        return {**saved, "location": location}
 
     def consequence(self, answers):
         location = answers.get("location")

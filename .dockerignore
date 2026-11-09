@@ -14,3 +14,5 @@ CLAUDE.md
 scripts/
 # Built on the workstation; the image makes its own (Dockerfile).
 vendor/actor-venv
+# Legacy daily digest, deployed separately: never in the image.
+veille-emploi/

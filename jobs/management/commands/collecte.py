@@ -19,6 +19,14 @@ class Command(BaseCommand):
         parser.add_argument("--all-jobs", action="store_true",
                             help="Mode « all » de l’actor au lieu de « new-only » (run de mesure).")
 
+    def plan(self, requested, posted_within_days, mode):
+        """(sources of this run, actor input), or None for no run. WTTJ has its own run: collecte_wttj."""
+        requested = [source for source in requested if source.actor_source != collect.WTTJ]
+        if not requested:
+            raise CommandError("Aucune source de l’actor active : rien à lui demander.")
+        return requested, scraper.build_input([source.actor_source for source in requested], posted_within_days,
+                                              mode=mode)
+
     def handle(self, *args, dry_run=False, posted_within_days=None, all_jobs=False, **options):
         if settings.SCRAPER_PROXY_REQUIRED and not settings.SCRAPER_PROXY_URL.strip():
             raise CommandError("SCRAPER_PROXY_URL est vide alors que SCRAPER_PROXY_REQUIRED est posé : la collecte "
@@ -30,10 +38,10 @@ class Command(BaseCommand):
         now = timezone.now()
         sources = collect.actor_sources()
         requested = collect.requested_sources(sources)
-        if not requested:
-            raise CommandError("Aucune source de l’actor active : rien à lui demander.")
-        actor_input = scraper.build_input([source.actor_source for source in requested], posted_within_days,
-                                          mode="all" if all_jobs else "new-only")
+        planned = self.plan(requested, posted_within_days, "all" if all_jobs else "new-only")
+        if planned is None:
+            return
+        requested, actor_input = planned
         self.stdout.write(f"Actor lancé sur {len(requested)} sources, attente de sa fin.")
         try:
             run = scraper.run(actor_input)

@@ -8,7 +8,7 @@
 set -eu
 
 root=$(cd "$(dirname "$0")/.." && pwd)
-repo=${ACTOR_REPO:-$root/../Francophone-Jobs-Scraper}
+repo=${ACTOR_REPO:-$root/../../Apify-Factory/actors/francophone-jobs-scraper}
 ref=${1:-$(cat "$root/ACTOR_REF")}
 commit=$(git -C "$repo" rev-parse --verify --quiet "$ref^{commit}") || {
     echo "Ref $ref inconnue dans $repo." >&2

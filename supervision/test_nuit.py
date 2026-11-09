@@ -59,8 +59,9 @@ class StepTableTests(NuitBase):
         return recorder.names
 
     def test_business_monday(self):
-        self.assertEqual(self.names("nuit", MONDAY), ["collecte", "notation", "purge_offres", "purge_login_codes",
-                                                      "purge_journal", "clearsessions", "purge_taskruns"])
+        self.assertEqual(self.names("nuit", MONDAY), ["collecte", "collecte_wttj", "notation", "purge_offres",
+                                                      "purge_login_codes", "purge_journal", "clearsessions",
+                                                      "purge_taskruns"])
 
     def test_saturday_adds_the_learned_summary_and_skips_collection(self):
         self.assertEqual(self.names("nuit", SATURDAY), ["purge_offres", "purge_login_codes", "purge_journal",
@@ -117,8 +118,8 @@ class JournalTests(NuitBase):
         self.assertEqual(states["collecte"]["status"], "failed")
         self.assertIn("n’est pas installé", states["collecte"]["error"])
         self.assertEqual([name for name, step in states.items() if step["status"] == "ok"],
-                         ["notation", "purge_offres", "purge_login_codes", "purge_journal", "clearsessions",
-                          "purge_taskruns"])
+                         ["collecte_wttj", "notation", "purge_offres", "purge_login_codes", "purge_journal",
+                          "clearsessions", "purge_taskruns"])
 
     def test_failure_does_not_stop_the_next_steps(self):
         recorder = Recorder(failing={"notation": CommandError("Notation incomplète (1 en échec)")})

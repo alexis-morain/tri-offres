@@ -316,11 +316,13 @@ class BetaWordingTests(TestCase):
 
 class NoPaymentWordsTests(SimpleTestCase):
     """No template talks about money (the French labour code forbids charging people who look for a job). Templates only:
-    the team's style page is left out, and neither « € » nor « euro » is refused (a salary is a legitimate figure)."""
+    the team's style page is left out, and neither « € » nor « euro » is refused (a salary is a legitimate figure).
+    The OpenRouter tutorial is left out too: it explains a payment to OpenRouter, never to The Good Job (Alexis,
+    09/11, to be confirmed by the lawyer)."""
 
     WORDS = re.compile(r"\b(prix|tarifs?|payants?|paiements?|payer|carte bancaire|stripe|abonnements?)\b",
                        re.IGNORECASE)
-    EXCLUDED = {Path("ui/templates/ui/style.html")}
+    EXCLUDED = {Path("ui/templates/ui/style.html"), Path("accounts/templates/accounts/openrouter_tutorial.html")}
 
     def templates(self):
         base = Path(settings.BASE_DIR)

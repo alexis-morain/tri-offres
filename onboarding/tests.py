@@ -472,6 +472,20 @@ class LocationScreenTests(QuestionnaireTestCase):
             {"name": "Villeurbanne", "insee": "", "department": "", "region": ""},
         ])
 
+    def test_countries_abroad_and_english(self):
+        self.post("lieu", {"city_1": "Lyon", "distance": "city", "remote": "any", "countries": ["GB", "BE"],
+                           "english": "on"})
+        location = self.profile.hard_criteria["location"]
+        self.assertEqual((location["countries"], location["english"]), (["BE", "GB"], True))
+        html = self.html("lieu")
+        self.assertIn("J’accepte des offres en anglais", html)
+        self.assertIn("tapez-en aussi un en anglais", html)
+        self.post("lieu", {"city_1": "Lyon", "distance": "city", "remote": "any"})
+        self.assertNotIn("countries", self.profile.hard_criteria["location"])
+        self.assertNotIn("english", self.profile.hard_criteria["location"])
+        self.assertIn("countries", self.errors("lieu", {"city_1": "Lyon", "distance": "city", "remote": "any",
+                                                        "countries": ["US"]}))
+
     def test_a_city_name_needs_a_letter(self):
         for name in ("%", "_", "--", "75"):
             with self.subTest(name=name):

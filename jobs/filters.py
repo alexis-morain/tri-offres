@@ -137,8 +137,11 @@ def _title_has(words):
 
 def _filters(criteria):
     """Every strict criterion, as named queries."""
-    filters = []
-    location = criteria.get("location")
+    location = criteria.get("location") or {}
+    # Abroad and English only when ticked, even when the place is a preference (plan of 06/11, decisions 3 and 4).
+    filters = [CounterFilter("le pays", Q(country__in=["FR", "", *location.get("countries", [])]))]
+    if not location.get("english"):
+        filters.append(CounterFilter("la langue", ~Q(language="en")))
     if location and location["strict"]:
         # Fully remote offers are worth anywhere: the place no longer filters.
         if location["remote"] == "full_remote":

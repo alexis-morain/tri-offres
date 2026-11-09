@@ -9,7 +9,7 @@ from unittest import mock
 from django.core.management import CommandError, call_command
 from django.test import TestCase, override_settings
 
-from jobs import scraper
+from jobs import collect, scraper
 from jobs.actor_sources import ACTOR_SOURCES
 from jobs.models import JobOffer, Source
 from jobs.test_scraper import FakeActorMixin, run_stats_record, stats_line
@@ -66,17 +66,19 @@ class CollecteCommandTests(FakeActorMixin, TestCase):
         output, actor_input, error = self.night()
         self.assertIsNone(error)
         self.assertEqual(JobOffer.objects.count(), 19)
-        self.assertEqual(actor_input["sources"], sorted(source.key for source in ACTOR_SOURCES))
+        self.assertEqual(actor_input["sources"], sorted(source.key for source in ACTOR_SOURCES if source.key != "wttj"))
         self.assertEqual((actor_input["mode"], actor_input["registryKey"]), ("new-only", "tri-offres"))
         self.assertNotIn("postedWithinDays", actor_input)
-        self.assertIn(f"Actor lancé sur {len(ACTOR_SOURCES)} sources, attente de sa fin.", output)
+        self.assertIn(f"Actor lancé sur {len(ACTOR_SOURCES) - 1} sources, attente de sa fin.", output)
 
     def test_sources_tracked_from_the_actor_lines(self):
         self.night()
         sources = self.sources()
-        self.assertTrue(all(source.last_run_at for source in sources.values()))
+        # wttj has its own run (collecte_wttj).
+        self.assertTrue(all(source.last_run_at for key, source in sources.items() if key != "wttj"))
+        self.assertIsNone(sources["wttj"].last_run_at)
         runs = {key: source.empty_runs for key, source in sources.items()}
-        self.assertEqual((runs["wttj"], runs["taleez"], runs["meteojob"], runs["codeur"]), (0, 0, 1, 1))
+        self.assertEqual((runs["taleez"], runs["meteojob"], runs["codeur"]), (0, 1, 1))
         self.assertEqual(sources["meteojob"].state, Source.State.ACTIVE)
 
     def test_second_empty_night_turns_failing_and_a_sound_night_brings_it_back(self):
@@ -92,7 +94,7 @@ class CollecteCommandTests(FakeActorMixin, TestCase):
         Source.objects.filter(actor_source="hellowork").update(state=Source.State.DISABLED, empty_runs=4)
         output, actor_input, _ = self.night()
         self.assertNotIn("hellowork", actor_input["sources"])
-        self.assertEqual(len(actor_input["sources"]), len(ACTOR_SOURCES) - 1)
+        self.assertEqual(len(actor_input["sources"]), len(ACTOR_SOURCES) - 2)  # and wttj
         self.assertFalse(JobOffer.objects.filter(source__actor_source="hellowork").exists())
         self.assertEqual(JobOffer.objects.count(), 14)
         hellowork = self.sources()["hellowork"]
@@ -137,8 +139,14 @@ class CollecteCommandTests(FakeActorMixin, TestCase):
         self.assertEqual(JobOffer.objects.count(), 19)
         self.assertUntouched()
         self.assertIn("Actor lancé en local : FAILED", output)
-        self.assertIn("code de sortie 1.", output)
+        self.assertRegex(output, r"code de sortie 1, pic mémoire \d+ Mo\.")
         self.assertIn("collecte : 19 lues", output)
+
+    def test_killed_run_names_the_memory(self):
+        output, _, error = self.night(kill=True)
+        self.assertIn("l’actor a été tué par le système (SIGKILL : mémoire du conteneur", str(error))
+        self.assertEqual(JobOffer.objects.count(), 19)
+        self.assertRegex(output, r"code de sortie -9, pic mémoire \d+ Mo\.")
 
     @override_settings(SCRAPER_TIMEOUT_S=1)
     def test_timed_out_run_imports_what_was_pushed_and_tracks_nothing(self):
@@ -146,7 +154,7 @@ class CollecteCommandTests(FakeActorMixin, TestCase):
         self.assertIn("l’actor a fini en TIMED-OUT", str(error))
         self.assertEqual(JobOffer.objects.count(), 19)
         self.assertUntouched()
-        self.assertIn("Actor lancé en local : TIMED-OUT, 1 s, tué à son délai.", output)
+        self.assertRegex(output, r"Actor lancé en local : TIMED-OUT, 1 s, tué à son délai, pic mémoire \d+ Mo\.")
 
     def test_actor_that_cannot_start(self):
         broken = self.storage / "not-executable"
@@ -194,14 +202,13 @@ class CollecteCommandTests(FakeActorMixin, TestCase):
         output, _, _ = self.night()
         for heading in ("1. Run", "2. Par source", "3. Codes ROME", "4. Doublons", "5. Sur 7 jours"):
             self.assertIn(f"\n{heading}", output)
-        self.assertRegex(output, r"  Actor lancé en local : SUCCEEDED, \d+ s, code de sortie 0\.")
+        self.assertRegex(output, r"  Actor lancé en local : SUCCEEDED, \d+ s, code de sortie 0, pic mémoire \d+ Mo\.")
         self.assertIn("20 éléments dans le dataset : 19 offres lues (19 nouvelles, 0 déjà connue), 1 écartée "
                       "(VIE ou VIA : 1).", output)
         self.assertIn("  Lignes de l’actor : enregistrement RUN_STATS du run.", output)
+        # Not asked for in this run: its items are imported, without a line of the actor.
         self.assertIn("wttj (Welcome to the Jungle) : 5 lues, 5 nouvelles, 0 déjà connue, 1 écartée "
-                      "(VIE ou VIA : 1)"
-                      " ; actor : 6 poussées, 0 filtrée, 0 doublon, 0 doublon entre sources, 0 déjà vue, "
-                      "0 invalide", output)
+                      "(VIE ou VIA : 1)\n", output)
         self.assertIn("meteojob (Meteojob) : 0 lue, 0 nouvelle, 0 déjà connue, 0 écartée ; actor : en panne : "
                       "HTTP 503", output)
         self.assertIn("taleez (Taleez) : 0 lue, 0 nouvelle, 0 déjà connue, 0 écartée ; actor : 0 poussée, "
@@ -244,7 +251,7 @@ class RunStatsCommandTests(FakeActorMixin, TestCase):
 
     def assertCountersUnchanged(self):
         sources = self.sources()
-        self.assertTrue(all(source.last_run_at for source in sources.values()))
+        self.assertTrue(all(source.last_run_at for key, source in sources.items() if key != "wttj"))
         self.assertEqual((sources["meteojob"].empty_runs, sources["codeur"].empty_runs), (1, 0))
 
     def test_record_gives_the_lines(self):
@@ -306,3 +313,66 @@ class RunStatsCommandTests(FakeActorMixin, TestCase):
         self.assertIn("FAILED", str(error))
         self.assertIn("Lignes de l’actor : enregistrement RUN_STATS du run.", output)
         self.assertFalse(Source.objects.filter(last_run_at__isnull=False).exists())
+
+
+class TargetedWttjTests(FakeActorMixin, TestCase):
+    """WTTJ leaves the general run and is read by `collecte_wttj` on the job categories of the profiles (plan of
+    06/11)."""
+
+    def run_command(self, name):
+        self.behave(items=[item for item in ITEMS if item["source"] == "wttj"],
+                    run_stats=run_stats_record(wttj=stats_line(pushed=6, filtered=0, dupes=0, cross_dupes=0,
+                                                               already_seen=0)))
+        out = StringIO()
+        call_command(name, stdout=out)
+        actor_input = self.seen_by_actor("input") if (self.storage / "fake-input.json").exists() else None
+        return out.getvalue(), actor_input
+
+    def test_general_run_leaves_wttj_out(self):
+        _, actor_input = self.run_command("collecte")
+        self.assertNotIn("wttj", actor_input["sources"])
+        self.assertNotIn("titleKeywords", actor_input)
+
+    def test_targeted_run_reads_wttj_on_the_categories_of_the_profiles(self):
+        from accounts.testing import make_profile
+        make_profile(domains=["E"])
+        output, actor_input = self.run_command("collecte_wttj")
+        self.assertEqual(actor_input["sources"], ["wttj"])
+        self.assertEqual(actor_input["wttjProfessions"], ["communication-marketing-advertising-wNDg5",
+                                                          "culture-arts-wOTc2"])
+        self.assertNotIn("titleKeywords", actor_input)
+        self.assertEqual(actor_input["registryKey"], "tri-offres")
+        self.assertIn("Catégories WTTJ (2) : communication-marketing-advertising-wNDg5, culture-arts-wOTc2.", output)
+        self.assertIsNotNone(Source.objects.get(actor_source="wttj").last_run_at)
+        self.assertEqual(JobOffer.objects.filter(source__actor_source="wttj").count(), 5)
+
+    def test_countries_and_english_of_the_profiles(self):
+        from accounts.testing import make_profile
+        location = {"cities": [], "distance": "30", "remote": "full_remote", "strict": True}
+        make_profile("a@example.fr", hard_criteria={"version": 1, "location": {**location, "countries": ["GB"]}})
+        make_profile("b@example.fr", hard_criteria={"version": 1, "location": {**location, "countries": ["BE", "GB"],
+                                                                                "english": True}})
+        output, actor_input = self.run_command("collecte_wttj")
+        self.assertEqual((actor_input["countries"], actor_input["languages"]), (["FR", "BE", "GB"], ["fr", "en"]))
+        self.assertIn("Pays : FR, BE, GB ; langues : fr, en.", output)
+
+    def test_france_and_french_without_a_ticked_box(self):
+        from accounts.testing import make_profile
+        make_profile()
+        _, actor_input = self.run_command("collecte_wttj")
+        self.assertEqual((actor_input["countries"], actor_input["languages"]), (["FR"], ["fr"]))
+
+    def test_no_active_profile_no_run(self):
+        from accounts.testing import make_profile
+        make_profile(onboarding_completed_at=None)
+        output, actor_input = self.run_command("collecte_wttj")
+        self.assertIsNone(actor_input)
+        self.assertIn("aucune catégorie", output)
+
+    def test_disabled_wttj_no_run(self):
+        from accounts.testing import make_profile
+        make_profile()
+        Source.objects.filter(actor_source="wttj").update(state=Source.State.DISABLED)
+        output, actor_input = self.run_command("collecte_wttj")
+        self.assertIsNone(actor_input)
+        self.assertIn("désactivée", output)

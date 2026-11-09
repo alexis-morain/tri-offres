@@ -76,7 +76,7 @@ class ParseItemTests(SourcesMixin, TestCase):
     def test_rejection_reasons(self):
         self.assertRejected("unknown_source", source="jeveuxaider")
         self.assertRejected("unknown_source", source=None)
-        self.assertRejected("country", location_country="BE")
+        self.assertRejected("country", location_country="US")
         self.assertRejected("contract", contract_type="VIE")
         self.assertRejected("contract", contract_type="VIA")
         self.assertRejected("url", url=None)
@@ -107,6 +107,12 @@ class ParseItemTests(SourcesMixin, TestCase):
         self.assertEqual(self.parse(apply_url="javascript:alert(1)").offer.apply_url, "")
         self.assertEqual(self.parse(apply_url="https://" + "a" * 1000).offer.apply_url, "")
         self.assertEqual(self.parse(apply_url=12).offer.apply_url, "")
+
+    def test_countries_a_profile_may_tick_pass_without_a_french_place(self):
+        offer = self.parse(location_country="be", location_city="Paris", location_postal_code="75001",
+                           location="Paris, Belgique").offer
+        self.assertEqual((offer.country, offer.insee, offer.department_code, offer.region_code, offer.zone_postal_code),
+                         ("BE", "", "", "", ""))
 
     def test_country_absent_or_france_passes(self):
         self.assertEqual(self.parse(location_country=None).offer.country, "")
@@ -538,3 +544,30 @@ class SourceTrackingTests(TestCase):
         self.assertEqual(collect.next_state(source, True), (2, Source.State.FAILING))
         self.assertEqual(collect.next_state(source, False), (0, Source.State.ACTIVE))
         self.assertEqual(collect.next_state(source, None), (1, Source.State.ACTIVE))
+
+
+
+class WttjProfessionsTests(TestCase):
+    """The job categories of the targeted WTTJ run (plan of 06/11, second revision): the union of the categories of
+    the domains of the profiles, in the order of the table."""
+
+    def test_every_domain_has_categories(self):
+        from onboarding.rome import DOMAINS
+        self.assertEqual(set(collect.WTTJ_PROFESSIONS), {code for code, _ in DOMAINS})
+        self.assertTrue(all(collect.WTTJ_PROFESSIONS.values()))
+
+    def test_union_of_the_domains_of_the_profiles(self):
+        from accounts.models import Profile
+        from accounts.testing import make_profile
+        make_profile("a@example.fr", domains=["E"])
+        make_profile("b@example.fr", domains=["E", "M17"])
+        self.assertEqual(collect.wttj_professions(Profile.objects.all()),
+                         ["communication-marketing-advertising-wNDg5", "culture-arts-wOTc2",
+                          "project-product-management-xYmEw"])
+
+    def test_damaged_or_empty_domains_give_nothing(self):
+        from accounts.models import Profile
+        from accounts.testing import make_profile
+        make_profile("a@example.fr", domains=["ZZ"])
+        make_profile("b@example.fr", domains=[])
+        self.assertEqual(collect.wttj_professions(Profile.objects.all()), [])

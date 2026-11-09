@@ -192,8 +192,9 @@ export TRI_DEPLOY_DIR=<dossier de l’app>
    (`tri-offres-web`, `tri-offres-scheduler`, `tri-offres-litestream`) sans erreur, et la sonde `/healthz` répond
    « OK ».
 
-Limites mémoire du compose (`web` 1 Go, planificateur 2 Go, Litestream 256 Mo) : ce sont des estimations. Les
-mesurer sur l’hôte après la première nuit (`sudo docker stats --no-stream`) et ajuster `WEB_MEM`, `SCHEDULER_MEM` et
+Limites mémoire du compose (`web` 1 Go, planificateur 3 Go depuis le 09/11 après deux OOM de l’actor à 2 Go,
+Litestream 256 Mo). Le pic de l’actor est dans le rapport de collecte (« pic mémoire N Mo ») ; un actor tué par le
+noyau sort en code -9, nommé dans l’alerte. Ajuster `WEB_MEM`, `SCHEDULER_MEM` et
 `LITESTREAM_MEM` en tête de `scripts/deploy.sh`. Le système de fichiers des conteneurs n’est pas en lecture seule :
 cela n’a pas été vérifié.
 

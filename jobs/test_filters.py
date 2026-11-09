@@ -530,3 +530,40 @@ class KeywordsTests(FilterTestCase):
         self.offer(title="Comptable")
         self.assertEqual(counter_text(keywords(include=["régie"]), self.now, ["E"]),
                          "Aucune offre d’hier ne passe. Le filtre le plus strict : vos mots-clés.")
+
+
+class AbroadTests(FilterTestCase):
+    """Offers abroad and in English (plan of 06/11, decisions 3 and 4): only for the profiles that ticked them,
+    whatever the place filter says."""
+
+    def setUp(self):
+        super().setUp()
+        self.france, self.unknown = self.offer(country="FR"), self.offer(country="")
+        self.belgium, self.london = self.offer(country="BE"), self.offer(country="GB")
+        self.english = self.offer(country="GB", language="en")
+
+    def abroad(self, countries=(), english=False, strict=True, cities=()):
+        data = where(*cities, distance="city", remote="full_remote" if not cities else "any", strict=strict)
+        data["location"].update(countries=list(countries), english=english)
+        return data
+
+    def test_france_and_french_by_default(self):
+        self.assertEqual(self.passing({"version": 1}), {self.france, self.unknown})
+        self.assertEqual(self.passing(self.abroad()), {self.france, self.unknown})
+
+    def test_ticked_countries_only(self):
+        self.assertEqual(self.passing(self.abroad(["BE"])), {self.france, self.unknown, self.belgium})
+
+    def test_english_offers_need_the_box(self):
+        self.assertEqual(self.passing(self.abroad(["GB"])), {self.france, self.unknown, self.london})
+        self.assertEqual(self.passing(self.abroad(["GB"], english=True)),
+                         {self.france, self.unknown, self.london, self.english})
+
+    def test_a_place_preference_still_keeps_other_countries_out(self):
+        self.assertEqual(self.passing(self.abroad(strict=False, cities=["Lyon"])), {self.france, self.unknown})
+
+    def test_offers_abroad_pass_the_place_of_a_french_city(self):
+        lyon = self.offer(country="FR", insee=LYON, department_code="69", region_code="84")
+        self.offer(country="FR", insee=NANTES, department_code="44", region_code="52")
+        self.assertEqual(self.passing(self.abroad(["BE"], cities=[("Lyon", LYON)])),
+                         {lyon, self.unknown, self.belgium, self.france})

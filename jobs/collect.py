@@ -24,6 +24,7 @@ from jobs.actor_stats import RUN_STATS_COUNTS
 from jobs.domains import offer_domains
 from jobs.models import JobOffer, Source
 from jobs.text import fold_title
+from onboarding import criteria, rome
 from onboarding.criteria import format_number
 from onboarding.rome import DOMAINS
 from supervision.redaction import redact_text
@@ -41,7 +42,7 @@ EXCLUDED_CONTRACTS = {"VIE", "VIA"}  # plan of step 4, decision 13
 REASONS = {
     "unknown_source": "source inconnue",
     "disabled_source": "source désactivée",
-    "country": "hors de France",
+    "country": "hors des pays servis",
     "contract": "VIE ou VIA",
     "url": "adresse absente ou invalide",
     "title": "titre vide",
@@ -153,6 +154,64 @@ def actor_sources():
             for source in Source.objects.filter(kind=Source.Kind.ACTOR).exclude(actor_source="")}
 
 
+# WTTJ is read in its own run, on the job categories of the domains of the active profiles (plan of 06/11, second
+# revision): read whole, it stopped at 1000 offers or 30 minutes, a third of a day. Categories of the facet
+# new_profession.category_reference, by volume a day in France on 06/11 (communication 65, project 203, tech 361...).
+WTTJ = "wttj"
+WTTJ_PROFESSIONS = {
+    "M": ["business-finance-1MjQ4"],
+    "B": ["culture-arts-wOTc2", "craftsmanship-and-manual-labor-yNGQw"],
+    "C": ["business-finance-1MjQ4"],
+    "F": ["construction-jNzEz"],
+    "D": ["sales-customer-service-5MzIw", "fashion-5MzY5"],
+    "E": ["communication-marketing-advertising-wNDg5", "culture-arts-wOTc2"],
+    "M14": ["consulting-strategy-iNDRl", "project-product-management-xYmEw"],
+    "M13": ["business-finance-1MjQ4", "consulting-strategy-iNDRl", "project-product-management-xYmEw"],
+    "A": ["agriculture-agri-food-4YmNh"],
+    "G": ["hospitality-4ZTdj"],
+    "C15": ["sales-customer-service-5MzIw", "business-finance-1MjQ4"],
+    "H": ["maintenance-repair-lZDUy", "craftsmanship-and-manual-labor-yNGQw", "research-development-0OGVm"],
+    "M18": ["tech-engineering-3NjUy"],
+    "I": ["maintenance-repair-lZDUy"],
+    "M17": ["communication-marketing-advertising-wNDg5", "project-product-management-xYmEw"],
+    "M15": ["hr-people-iZGMy"],
+    "J": ["healthcare-yMjNi"],
+    "M16": ["business-finance-1MjQ4", "project-product-management-xYmEw"],
+    "K": ["education-wNTkx", "legal-zYjg3", "security-defense-jMzJm"],
+    "L": ["culture-arts-wOTc2"],
+    "L14": ["education-wNTkx", "hospitality-4ZTdj"],
+    "N": ["transport-logistics-lMDVm"],
+}
+
+
+def wttj_professions(profiles):
+    """The WTTJ job categories of the domains of `profiles`, without duplicates, in the order of the table. Domains
+    that do not read give nothing."""
+    domains = set()
+    for profile in profiles:
+        try:
+            domains.update(rome.normalize_domains(profile.domains))
+        except ValueError:
+            pass
+    return list(dict.fromkeys(p for code, professions in WTTJ_PROFESSIONS.items() if code in domains
+                              for p in professions))
+
+
+def wttj_countries_and_languages(profiles):
+    """(countries, languages) of the targeted WTTJ run: France and the countries `profiles` ticked, in the order of
+    criteria.ABROAD; French, and English when one of them accepts it (plan of 06/11, decisions 3 and 4). Criteria
+    that do not read give France, in French."""
+    countries, english = set(), False
+    for profile in profiles:
+        try:
+            location = criteria.normalize(profile.hard_criteria).get("location") or {}
+        except (ValueError, KeyError, TypeError, AttributeError):
+            continue
+        countries.update(location.get("countries", []))
+        english = english or location.get("english", False)
+    return ["FR", *(code for code in criteria.ABROAD if code in countries)], ["fr", "en"] if english else ["fr"]
+
+
 def requested_sources(sources):
     """The sources asked to the actor: all but the disabled ones, by key."""
     return sorted((source for source in sources.values() if source.state != Source.State.DISABLED),
@@ -171,7 +230,7 @@ def parse_item(item, sources):
     if source.state == Source.State.DISABLED:
         return Parsed(source_key, None, "disabled_source")
     country = _text(item.get("location_country")).upper()
-    if country and country != "FR":
+    if country and country != "FR" and country not in criteria.ABROAD:
         return Parsed(source_key, None, "country")
     if _text(item.get("contract_type")) in EXCLUDED_CONTRACTS:
         return Parsed(source_key, None, "contract")
@@ -195,7 +254,9 @@ def parse_item(item, sources):
     department_code = _text(item.get("location_department_code"), _max_length("department_code"))
     location = _text(item.get("location"), _max_length("location"))
     region = _text(item.get("location_region"), _max_length("region"))
-    place = geo.place_for(location, city, postal_code, department_code, region)
+    # Abroad, a French place would be a false one (a « Paris » or a « 1000 » of Belgium): no place.
+    place = geo.place_for(location, city, postal_code, department_code, region) if country in ("", "FR") \
+        else geo.Place("", "", "", "")
     contract_type = _choice(item.get("contract_type"), JobOffer.Contract)
     part_time = item.get("part_time")
     offer = JobOffer(
@@ -481,7 +542,10 @@ def failures(result, run):
     errors = []
     if result.read_error:
         errors.append(f"lecture du dataset interrompue ({result.read_error})")
-    if run is not None and run.status != "SUCCEEDED":
+    if run is not None and run.exit_code == -9:
+        errors.append(f"l’actor a été tué par le système (SIGKILL : mémoire du conteneur, sans doute ; pic "
+                      f"{run.peak_mb} Mo)")
+    elif run is not None and run.status != "SUCCEEDED":
         errors.append(f"l’actor a fini en {run.status}")
     return errors
 
@@ -571,7 +635,8 @@ def format_report(report):
 
     lines += ["", "1. Run"]
     exit_code = "tué à son délai" if run.exit_code is None else f"code de sortie {run.exit_code}"
-    lines.append(f"  Actor lancé en local : {run.status}, {_duration(run.duration_s)}, {exit_code}.")
+    peak = "" if getattr(run, "peak_mb", None) is None else f", pic mémoire {run.peak_mb} Mo"
+    lines.append(f"  Actor lancé en local : {run.status}, {_duration(run.duration_s)}, {exit_code}{peak}.")
     if result.read_error:
         lines.append(f"  Lecture du dataset interrompue : {result.read_error}")
     rejected = result.rejected
